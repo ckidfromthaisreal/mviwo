@@ -1,10 +1,15 @@
-/* http://mongoosejs.com/
+/*
+metric model.
+*/
+
+/** http://mongoosejs.com/
   mongoose provides a straight-forward, schema-based solution to model your application data.
   it includes built-in type casting, validation, query building, business logic hooks and more,
   out of the box.
 */
 const mongoose = require('mongoose');
 
+/** number datatype parameters sub-schema. */
 const numberParamsSchema = new mongoose.Schema({
     _id: {auto: false},
     minValue: {type: Number},
@@ -15,6 +20,7 @@ const numberParamsSchema = new mongoose.Schema({
     postfix: {type: String}
 });
 
+/** string datatype parameters sub-schema. */
 const stringParamsSchema = new mongoose.Schema({
     _id: {auto: false},
     isEmail: {type: Boolean, required: true},
@@ -25,18 +31,21 @@ const stringParamsSchema = new mongoose.Schema({
     hint: {type: String}
 });
 
+/** enumeration datatype parameters sub-schema. */
 const enumParamsSchema = new mongoose.Schema({
     _id: {auto: false},
     isMultiple: {type: Boolean, required: true},
     values: {type: [String], required: true}
 });
 
+/** blob datatype parameters sub-schema. */
 const blobParamsSchema = new mongoose.Schema({
     _id: {auto: false},
     maxSize: {type: Number},
     extensions: [String]
 });
 
+/** date datatype parameters sub-schema. */
 const dateParamsSchema = new mongoose.Schema({
     _id: {auto: false},
     format: {type: String, default: 'yyyy-dd-mm'},
@@ -44,6 +53,7 @@ const dateParamsSchema = new mongoose.Schema({
     maxDate: {type: Date}
 });
 
+/** main metric schema. */
 const metricSchema = new mongoose.Schema({
     // _id: {type: Schema.Types.ObjectId},
     name: {type: String, required: true, index: true},
@@ -64,9 +74,9 @@ const metricSchema = new mongoose.Schema({
 });
 
 /* virtual for metric's URL */
-metricSchema.virtual('url').get(() => {
-    return '/metrics/' + this._id;
-});
+// metricSchema.virtual('url').get(() => {
+//     return `/metric/${this._id}`;
+// });
 
 /* export model. */
 module.exports = mongoose.model('Metric', metricSchema);

@@ -1,7 +1,11 @@
-/* metrics router. */
+/*
+metric router.
+*/
+
+/** metrics router. */
 const router = require('express').Router();
 
-/* metrics controller. */
+/** metrics controller. */
 const controller = require('./metric.controller');
 
 /* bind get '/' to getAll function */

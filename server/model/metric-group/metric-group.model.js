@@ -1,10 +1,15 @@
-/* http://mongoosejs.com/
+/*
+metric-group model.
+*/
+
+/** http://mongoosejs.com/
   mongoose provides a straight-forward, schema-based solution to model your application data.
   it includes built-in type casting, validation, query building, business logic hooks and more,
   out of the box.
 */
 const mongoose = require('mongoose');
 
+/** main metric-group schema. */
 const metricGroupSchema = new mongoose.Schema({
     // _id: Schema.Types.ObjectId,
     name: {type: String, required: true, unique: true},
@@ -16,7 +21,7 @@ const metricGroupSchema = new mongoose.Schema({
 
 /* virtual for metric's URL */
 metricGroupSchema.virtual('url').get(() => {
-    return '/metric-groups/' + this._id;
+    return `/metric-groups/${this._id}`;
 });
 
 /* export model. */
