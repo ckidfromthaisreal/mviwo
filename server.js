@@ -43,6 +43,9 @@ const app = express();
 /** port number for application, retrieved from environment. defaults to 8080. */
 const port = process.env.PORT || config.DEFAULT_APPLICATION_PORT;
 
+/** custom-made error handler. */
+const errorHandler = require('./server/util/error-handler');
+
 /* tells the application to use JSON. */
 app.use(bodyParser.json());
 
@@ -64,6 +67,20 @@ app.get('*', (req, res) => {
 
 /* set application's port. */
 app.set('port', port);
+
+/* set application's environment. */
+app.set('env', config.ENVIRONMENT);
+
+/* set view engine for errors. */
+if (config.USE_VIEW_ENGINE) {
+  app.set('view engine', path.join(__dirname, 'views'));
+  app.set('view engine', 'pug');
+}
+
+/* add errorHandler to application middleware functions. */
+if (config.CUSTOM_ERROR_HANDLER) {
+  app.use(errorHandler);
+}
 
 /** http server. */
 const server = http.createServer(app);

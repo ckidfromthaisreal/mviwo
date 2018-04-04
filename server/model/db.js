@@ -13,7 +13,7 @@ const logger = require('../util/logger');
   it includes built-in type casting, validation, query building, business logic hooks and more,
   out of the box.
 */
-const mongoose = require('mongoose');
+const mongoose = require('mongoose').set('debug', config.DEBUG_MONGOOSE);
 
 /** remote db username */
 const username = 'Admin';

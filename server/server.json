@@ -4,5 +4,8 @@
     "FALLBACK_TO_LOCAL": false,
     "DEFAULT_APPLICATION_PORT": "8080",
     "DEEP_PARSING": false,
-    "DEBUG_MONGOOSE": true
+    "DEBUG_MONGOOSE": true,
+    "CUSTOM_ERROR_HANDLER": true,
+    "ENVIRONMENT": "development",
+    "USE_VIEW_ENGINE": false
 }
