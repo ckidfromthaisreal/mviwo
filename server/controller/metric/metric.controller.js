@@ -22,7 +22,11 @@ const MetricGroup = require('../../model/metric-group/metric-group.model');
 const logger = require('../../util/logger');
 
 /**
- * fetches all metrics in db.
+ * fetches metrics from db.
+ * @param {*} req http request.
+ *
+ * req.headers.filter - filter object. if not provided, fetches all metrics in db.
+ *
  * req.headers.select - specifies which fields should be included in returned metric.
  *
  * req.headers.groupsPopulate = if true, populates metric's groups array with metric-group objects.
@@ -31,9 +35,9 @@ const logger = require('../../util/logger');
  * @param {*} res http response. expected to return the metric as JSON object.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
-exports.getAll = (req, res, next) => {
-    const query = Metric.find();
-    const operationName = 'metric.controller.js:getAll';
+exports.getMany = (req, res, next) => {
+    const query = Metric.find(req.headers.filter);
+    const operationName = 'metric.controller.js:getMany';
 
     if (req.headers) {
         if (req.headers.select) {
@@ -51,10 +55,10 @@ exports.getAll = (req, res, next) => {
 
     query.exec((err, results) => {
         if (err) {
-            logger.log(false, operationName, err);
+            logger.error('API', operationName, err);
             next(err);
         } else {
-            logger.log(true, operationName, `fetched ${results.length} metrics`);
+            logger.info('API', operationName, `fetched ${results.length} metrics`);
             res.status(200).json(results);
         }
     });
@@ -96,15 +100,15 @@ exports.getOne = (req, res, next) => {
 
     query.exec((err, result) => {
         if (err) {
-            logger.log(false, operationName, err);
+            logger.error('API', operationName, err);
             next(err);
         } else if (result == null) {
             const err = new Error(`metric ${req.params.id} not found`);
             err.status = 404;
-            logger.log(false, operationName, err);
+            logger.warn('API', operationName, err);
             next(err);
         } else {
-            logger.log(true, operationName, `metric ${req.params.id} fetched`);
+            logger.info('API', operationName, `metric ${req.params.id} fetched`);
             res.status(200).json(result);
         }
     });
@@ -121,17 +125,17 @@ exports.getOne = (req, res, next) => {
  * @param {*} res http response. expected to return successfully inserted metrics as
  * an array of JSON objects.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
- * @todo update metric-groups by adding inserted metrics to their metrics arrays.
+ * @todo bulkWrite all of this?? make updateMetricGroups return an ops array?
  */
-exports.insert = (req, res, next) => {
-    const operationName = 'metric.controller:insert';
+exports.insertMany = (req, res, next) => {
+    const operationName = 'metric.controller:insertMany';
 
     Metric.insertMany(req.body.resources, { ordered: false }, (err, docs) => {
         if (err) {
-            logger.log(false, operationName, err);
+            logger.error('API', operationName, err);
             next(err);
         } else {
-            logger.log(true, operationName, `inserted ${docs.length} metrics`);
+            logger.info('API', operationName, `inserted ${docs.length} metrics`);
             res.status(200).json(docs);
             addToMetricGroups(buildAddedMetricGroups(docs));
         }
@@ -139,20 +143,71 @@ exports.insert = (req, res, next) => {
 };
 
 /**
- * 
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * inserts a new metric to db.
+ * @param {*} req http request.
+ *
+ * req.body.resources = metric object for insertion.
+ *
+ * @param {*} res http response. expected to return successfully inserted metric as
+ * a JSON object.
+ * @param {*} next callback used to pass errors (or requests) to next handlers.
+ * @todo
+ */
+exports.insertOne = (req, res, next) => {
+    const operationName = 'metric.controller:insertOne';
+    const objectId = mongoose.Types.ObjectId();
+    // Metric.insertOne(req.body.resources, (err, doc) => {
+    //     if (err) {
+    //         logger.log(false, operationName, err);
+    //         next(err);
+    //     } else {
+    //         logger.log(true, operationName, `metric ${doc._id} inserted`);
+    //         res.status(200).json(doc);
+    //         addToMetricGroups(buildAddedMetricGroups([doc]));
+    //     }
+    // });
+};
+
+
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @todo
+ */
+exports.updateMany = (req, res, next) => {
+    // TODO
+}
+
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @todo
  */
 exports.updateOne = (req, res, next) => {
     // TODO
 };
 
 /**
- * 
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ *
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @todo
+ */
+exports.deleteMany = (req, res, next) => {
+    // TODO
+};
+
+/**
+ *
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ * @todo
  */
 exports.deleteOne = (req, res, next) => {
     // TODO
@@ -164,7 +219,7 @@ exports.deleteOne = (req, res, next) => {
  * @param {any} added array of { group: id, metrics: [mongoose.Types.ObjectId]} metric-groups to add to.
  */
 function addToMetricGroups(added) {
-    updateMetricGroups(added, null);
+    return updateMetricGroups(added, null);
 }
 
 /**
@@ -173,7 +228,7 @@ function addToMetricGroups(added) {
  * @param {any} removed array of { group: id, metrics: [mongoose.Types.ObjectId]} metric-groups to remove from.
  */
 function removeFromMetricGroups(removed) {
-    updateMetricGroups(null, removed);
+    return updateMetricGroups(null, removed);
 }
 
 /**
@@ -233,15 +288,16 @@ function updateMetricGroups(added, removed) {
                 // );
     }
 
-    if (ops.length) {
-        MetricGroup.bulkWrite(ops, (err, result) => {
-            if (err) {
-                logger.log(false, operationName, `${err} ${result}`);
-            } else {
-                logger.log(true, operationName, `${err} ${result}`);
-            }
-        });
-    }
+    // if (ops.length) {
+    //     MetricGroup.bulkWrite(ops, (err, result) => {
+    //         if (err) {
+    //             logger.log(false, operationName, `${err} ${result}`);
+    //         } else {
+    //             logger.log(true, operationName, `${err} ${result}`);
+    //         }
+    //     });
+    // }
+    return ops;
 }
 
 /**

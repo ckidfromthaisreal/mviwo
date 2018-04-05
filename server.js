@@ -28,7 +28,13 @@ const http = require('http');
 */
 const bodyParser = require('body-parser');
 
-/** custom-made logger module. use logger.log(...) */
+/** https://github.com/expressjs/compression
+ * node.js compression middleware. the following compression codings are supported:
+ * deflate, gzip.
+ */
+const compression = require('compression');
+
+/** custom-made logger module. */
 const logger = require('./server/util/logger');
 
 /** custom-made database connection module. */
@@ -56,6 +62,9 @@ app.use(bodyParser.urlencoded({extended: config.DEEP_PARSING}));
 
 /* point static path to build folder. */
 app.use(express.static(path.join(__dirname, 'public')));
+
+/* compress all responses. */
+app.use(compression());
 
 /* setup api's routes in application. */
 app.use('/api', router);
@@ -88,6 +97,6 @@ const server = http.createServer(app);
 /* listen on provided port, on all network interfaces.
     connect to database. */
 server.listen(port, () => {
-    logger.log(true, 'server.js:server.listen', `localhost:${port}`);
+    logger.info('HTTP-SERVER', 'server.js:server.listen', `server listening on localhost:${port}`);
     db.connect();
 });

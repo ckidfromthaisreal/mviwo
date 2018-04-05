@@ -47,7 +47,7 @@ let attempts = 0;
 
 /* on connection failed: by default, if failed on remote, try to connect to local. */
 connection.on('error', () => {
-    logger.log(false, 'db.js:mongoose.connect', currentDB);
+    logger.error('DB', 'db.js:mongoose.connect', `failed connecting to: ${currentDB}`);
 
     if (!config.CONNECT_TO_LOCAL) {
         if (atempts++ < config.MAXIMUM_ATTEMPTS) {
@@ -60,7 +60,7 @@ connection.on('error', () => {
 
 /* on successful connection, log a message. */
 connection.once('open', () => {
-    logger.log(true, 'db.js:mongoose.connect', currentDB);
+    logger.info('DB', 'db.js:mongoose.connect', `successfully connected to: ${currentDB}`);
 });
 
 /**
