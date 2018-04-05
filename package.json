@@ -6,14 +6,16 @@
   "scripts": {
     "ng": "ng",
     "start": "npm run build & concurrently --kill-others \"npm run serve-api\" \"npm run serve\"",
-    "serve": "ng serve --proxy-config proxy.conf.json",
-    "build": "ng build --prod --output-path=public",
+    "serve": "ng serve --aot --proxy-config proxy.conf.json",
+    "build": "ng build --prod --output-path=public --stats-json",
     "serve-api": "nodemon server",
     "test": "ng test",
+    "test-server": "node_modules/.bin/mocha",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "push": "git push & git push heroku master",
-    "sw": "sw-precache --root=public --config=sw-precache-config.js"
+    "sw": "sw-precache --root=public --config=sw-precache-config.js",
+    "bundle-report": "webpack-bundle-analyzer public/stats.json"
   },
   "private": true,
   "dependencies": {
@@ -24,7 +26,6 @@
     "@angular/core": "^5.2.0",
     "@angular/flex-layout": "^5.0.0-beta.14",
     "@angular/forms": "^5.2.0",
-    "@angular/http": "^5.2.9",
     "@angular/material": "^5.2.4",
     "@angular/platform-browser": "^5.2.0",
     "@angular/platform-browser-dynamic": "^5.2.0",
@@ -45,8 +46,11 @@
     "@types/jasmine": "~2.8.3",
     "@types/jasminewd2": "~2.0.2",
     "@types/node": "~6.0.60",
+    "axios": "^0.18.0",
+    "chai": "^4.1.2",
     "codelyzer": "^4.0.1",
     "concurrently": "^3.5.1",
+    "form-data": "^2.3.2",
     "jasmine-core": "~2.8.0",
     "jasmine-spec-reporter": "~4.2.1",
     "jshint": "^2.9.5",
@@ -55,11 +59,14 @@
     "karma-coverage-istanbul-reporter": "^1.2.1",
     "karma-jasmine": "~1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
+    "mocha": "^5.0.5",
+    "nock": "^9.2.3",
     "nodemon": "^1.17.3",
     "protractor": "~5.1.2",
     "ts-node": "~4.1.0",
     "tslint": "~5.9.1",
-    "typescript": "~2.5.3"
+    "typescript": "~2.5.3",
+    "webpack-bundle-analyzer": "^2.11.1"
   },
   "engines": {
     "node": "8.9.3"

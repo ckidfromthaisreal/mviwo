@@ -56,17 +56,22 @@ const dateParamsSchema = new mongoose.Schema({
     maxDate: {type: Date}
 });
 
+const metricGroupEmbeddedSchema = new mongoose.Schema({
+  _id: {type: mongoose.Schema.Types.ObjectId, ref: 'MetricGroup', auto: false, required: true, index: true},
+  name: {type: String, required: true},
+  description: {type: String}
+});
+
 /** main metric schema. */
 const metricSchema = new mongoose.Schema({
     // _id: {type: Schema.Types.ObjectId},
     name: {type: String, required: true, index: true},
     description: {type: String},
     isRequired: {type: Boolean, required: true},
-    dataType: {type: String, required: true, 
+    dataType: {type: String, required: true,
             enum: ['string', 'number', 'enum', 'boolean', 'blob', 'date']},
     groups: {
-        type: [{type: mongoose.Schema.Types.ObjectId,
-                ref: 'MetricGroup'}]
+        type: [{type: metricGroupEmbeddedSchema}]
     },
     numberParams: {type: numberParamsSchema},
     stringParams: {type: stringParamsSchema},

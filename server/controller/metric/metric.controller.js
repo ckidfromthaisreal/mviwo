@@ -36,32 +36,36 @@ const logger = require('../../util/logger');
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
 exports.getMany = (req, res, next) => {
-    const query = Metric.find(req.headers.filter);
-    const operationName = 'metric.controller.js:getMany';
+  const operationName = 'metric.controller.js:getMany';
+  logger.info('API', operationName, `req.headers${JSON.stringify(req.headers)}`);
 
-    if (req.headers) {
-        if (req.headers.select) {
-            query.select(req.headers.select);
-        }
+  let query;
+  if (req.headers.filter) {
+    query = Metric.find(JSON.parse(req.headers.filter));
+  } else {
+    query = Metric.find();
+  }
 
-        if (req.headers.groupsPopulate &&
-                (!req.headers.select || req.headers.select.includes('groups'))) {
-            query.populate({
-                path: 'groups',
-                select: req.headers.groupsSelect
-            });
-        }
+  if (req.headers.select) {
+    query.select(req.headers.select);
+  }
+  if (req.headers.groupspopulate === 'true' &&
+          (!req.headers.select || req.headers.select.includes('groups'))) {
+      query.populate({
+          path: 'groups._id',
+          select: `name description ${req.headers.groupsselect}` || 'name description'
+      });
+  }
+
+  query.exec((err, results) => {
+    if (err) {
+        logger.error('API', operationName, err);
+        next(err);
+    } else {
+        logger.info('API', operationName, `fetched ${results.length} metrics`);
+        res.status(200).json(results);
     }
-
-    query.exec((err, results) => {
-        if (err) {
-            logger.error('API', operationName, err);
-            next(err);
-        } else {
-            logger.info('API', operationName, `fetched ${results.length} metrics`);
-            res.status(200).json(results);
-        }
-    });
+  });
 };
 
 /**
@@ -80,22 +84,16 @@ exports.getOne = (req, res, next) => {
     const query = Metric.findById(req.params.id);
     const operationName = 'metric.controller.js:getOne';
 
-    if (req.headers && req.headers.select) {
+    if (req.headers.select) {
         query.select(req.headers.select);
     }
 
-    if (req.headers) {
-        if (req.headers.select) {
-            query.select(req.headers.select);
-        }
-
-        if (req.headers.groupsPopulate &&
-                (!req.headers.select || req.headers.select.includes('groups'))) {
-            query.populate({
-                path: 'groups',
-                select: req.headers.groupsSelect
-            });
-        }
+    if (req.headers.groupspopulate === 'true' &&
+            (!req.headers.select || req.headers.select.includes('groups'))) {
+        query.populate({
+            path: 'groups._id',
+            select: `name description ${req.headers.groupsselect}` || 'name description'
+        });
     }
 
     query.exec((err, result) => {
