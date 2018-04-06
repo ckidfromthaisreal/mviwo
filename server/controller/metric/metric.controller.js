@@ -134,13 +134,13 @@ exports.insertMany = (req, res, next) => {
             logger.error('API', operationName, err);
             next(err);
         } else {
-            addToMetricGroups(buildAddedMetricGroups(docs), (err, success) => {
+            addToMetricGroups(buildMetricGroupsModifysArray(docs), (err, success) => {
                 if (err) {
                     logger.error('API', operationName, `inserted ${docs.length} metrics with errors: ${err}`);
                     next(err);
                 } else {
                     logger.info('API', operationName, `inserted ${docs.length} metrics`);
-                    res.status(200).json(docs);
+                    res.status(200).json([docs, success]);
                 }
             });
         }
@@ -165,13 +165,13 @@ exports.insertOne = (req, res, next) => {
             logger.error('API', operationName, err);
             next(err);
         } else {
-            addToMetricGroups(buildAddedMetricGroups(doc), (err, success) => {
+            addToMetricGroups(buildMetricGroupsModifysArray(doc), (err, success) => {
                 if (err) {
                     logger.error('API', operationName, `metric ${doc._id} inserted with errors: ${err}`);
                     next(err);
                 } else {
                     logger.info('API', operationName, `metric ${doc._id} inserted`);
-                    res.status(200).json(doc);
+                    res.status(200).json([doc, success]);
                 }
             });
         }
@@ -208,18 +208,42 @@ exports.updateOne = (req, res, next) => {
  * @todo
  */
 exports.deleteMany = (req, res, next) => {
-    // TODO
+    const operationName = 'metric.controller:deleteOne';
 };
 
 /**
  *
- * @param {*} req
- * @param {*} res
- * @param {*} next
- * @todo
+ * @param {*} req http request.
+ *
+ * req.body.groups - array of metric-groups ids to remove metric from.
+ *
+ * @param {*} res http response. expected to return a result object.
+ * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
 exports.deleteOne = (req, res, next) => {
-    // TODO
+    const operationName = 'metric.controller:deleteOne';
+
+    Metric.deleteOne({
+        _id: req.params.id
+    }, (err, result) => {
+        if (err) {
+            logger.error('API', operationName, err);
+            next(err);
+        } else {
+            removeFromMetricGroups(buildMetricGroupsModifysArray({
+                _id: req.params.id,
+                groups: req.body.groups || []
+            }), (err, success) => {
+                if (err) {
+                    logger.error('API', operationName, `metric ${req.params.id} deleted with errors: ${err}`);
+                    next(err);
+                } else {
+                    logger.info('API', operationName, `metric ${req.params.id} deleted`);
+                    res.status(200).json([result, success]);
+                }
+            });
+        }
+    });
 };
 
 /**
@@ -249,7 +273,6 @@ function updateMetricGroups(added, removed, callback) {
     const operationName = 'metric.controller:updateMetricGroups';
     const ops = [];
 
-    logger.debug('UTIL', operationName, `added${added}`);
     if (added) {
         added.forEach(element => {
             ops.push({
@@ -271,27 +294,23 @@ function updateMetricGroups(added, removed, callback) {
     }
 
     if (removed) {
-        logger.debug('UTIL', operationName, `removed${JSON.stringify(removed)}`);
-
         removed.forEach(element => {
+            console.log(element);
             ops.push({
                 updateOne: {
                     filter: {
                         _id: element.group
                     },
                     update: {
-                        $pull: {
-                            metrics: {
-                                $each: element.metrics
-                            }
-                        }
+                        $pullAll: {
+                            metrics: element.metrics
+                        },
+                        'lastUpdate': new Date()
                     }
                 }
             });
         });
     }
-
-    logger.debug('UTIL', operationName, `ops${ops}`);
 
     if (ops.length > 0) {
         MetricGroup.bulkWrite(ops, (err, result) => {
@@ -312,19 +331,21 @@ function updateMetricGroups(added, removed, callback) {
  * @param {any} metrics metric/s to be added to metric-groups.
  * @returns array of { group: mongoose.Types.ObjectId, metrics: [mongoose.Types.ObjectId]}
  */
-function buildAddedMetricGroups(metrics) {
+function buildMetricGroupsModifysArray(metrics) {
     const added = [];
 
     metrics = Array.isArray(metrics) ? metrics : [metrics];
+
+    // console.log('metrics', metrics);
 
     metrics.map(metric => {
             return {
                 _id: mongoose.Types.ObjectId(metric._id),
                 groups: metric.groups
-            }
+            };
         })
         .forEach(metric => {
-            metric.groups.map(group => mongoose.Types.ObjectId(group._id)).forEach(groupId => {
+            metric.groups.map(group => mongoose.Types.ObjectId(group._id || group)).forEach(groupId => {
                 const indexOf = added.findIndex(e => e.group.equals(groupId));
                 if (indexOf === -1) {
                     added.push({
@@ -336,6 +357,8 @@ function buildAddedMetricGroups(metrics) {
                 }
             });
         });
+
+    // console.log('added', added);
 
     return added;
 }

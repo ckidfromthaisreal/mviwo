@@ -1,3 +1,7 @@
+import {
+    deleteMany
+} from '../server/controller/metric/metric.controller';
+
 /*
 testing module for metric.controller.js
 */
@@ -70,81 +74,164 @@ function insertOne(data) {
         .catch(error => console.log(error));
 }
 
+/**
+ * sends a http delete request to api to perform deleteOne.
+ * @param {any} id metric id to be deleted.
+ * @returns promise.
+ */
+function deleteOne(id, data) {
+    return axios.delete(`http://localhost:4200/api/metric/${id}`, data)
+        .then(res => res.data)
+        .catch(error => console.log(error));
+}
+
 describe('metric.controller.js', () => {
+    const metrics = [];
     // beforeEach(() => {
     //   nock('http://localhost:8080').get('/metric').reply(200, response);
     // });
 
-    // it('getMany populate', () => {
-    //     return getMany({ headers: { 'groupspopulate': true, 'groupsselect': 'name'}}).then(response => {
-    //       expect(typeof response).to.equal('object');
-    //       expect(response.length > 0);
-    //       expect(typeof response[0]).to.equal('object');
-    //     });
-    // });
+    it('getMany populate', () => {
+        return getMany({
+            headers: {
+                'groupspopulate': true,
+                'groupsselect': 'isMandatory'
+            }
+        }).then(response => {
+            expect(response).to.be.an('object');
+            expect(response).to.have.lengthOf.at.least(1);
+            response.forEach(metric => {
+                expect(metric).to.be.an('object');
+                expect(metric).to.haveOwnProperty('groups');
+                metric.groups.forEach(group => {
+                    expect(group).to.be.an('object');
+                    expect(group).to.haveOwnProperty('isMandatory');
+                });
+            });
+        });
+    });
 
-    // it('getMany dont-populate', () => {
-    //   return getMany({ headers: { 'groupspopulate': false}}).then(response => {
-    //     expect(typeof response).to.equal('object');
-    //     expect(response.length > 0);
-    //     expect(typeof response[0]).to.equal('object');
-    //   });
-    // });
+    it('getMany', () => {
+        return getMany().then(response => {
+            expect(response).to.be.an('object');
+            expect(response).to.have.lengthOf.at.least(1);
+            response.forEach(metric => {
+                expect(metric).to.be.an('object');
+                expect(metric).to.haveOwnProperty('groups');
+                metric.groups.forEach(group => {
+                    expect(group).to.be.an('object');
+                    expect(group).to.not.haveOwnProperty('isMandatory');
+                });
+            });
+        });
+    });
 
-    // it('getMany filtered', () => {
-    //   return getMany({
-    //     headers: {
-    //       'groupspopulate': true,
-    //       'groupsselect': 'isMandatory',
-    //       'filter': '{ "_id": "5ac635872647e02fa41c3bde"}'
-    //     }
-    //   }).then(response => {
-    //     expect(typeof response).to.equal('object');
-    //     expect(response.length > 0);
-    //     expect(typeof response[0]).to.equal('object');
-    //     // console.log(JSON.stringify(response[0]));
-    //   });
-    // });
+    it('getMany filtered', () => {
+        const id = '5ac635872647e02fa41c3bde';
+        return getMany({
+            headers: {
+                'filter': `{ "_id": "${id}"}`
+            }
+        }).then(response => {
+            expect(response).to.be.an('object');
+            expect(response).to.have.lengthOf(1);
+            expect(response[0]).to.be.an('object');
+            expect(response[0]).to.haveOwnProperty('_id');
+            expect(response[0]._id).to.be.equal(id);
+        });
+    });
 
-    // it('getOne populate', () => {
-    //   return getOne('5ac635872647e02fa41c3bde', {
-    //     headers: {
-    //       'groupspopulate': true,
-    //       'groupsselect': 'isMandatory'
-    //     }
-    //   }).then(response => {
-    //     expect(typeof response).to.equals('object');
-    //     // console.log(JSON.stringify(response));
-    //   });
-    // });
+    it('getOne populate', () => {
+        const id = '5ac635872647e02fa41c3bde';
+        return getOne(id, {
+            headers: {
+                'groupspopulate': true,
+                'groupsselect': 'isMandatory'
+            }
+        }).then(response => {
+            expect(response).to.be.an('object');
+            expect(response).to.haveOwnProperty('_id');
+            expect(response._id).to.be.equal(id);
+            expect(response).to.haveOwnProperty('groups');
+            response.groups.forEach(group => {
+                expect(group).to.be.an('object');
+                expect(group).to.haveOwnProperty('isMandatory');
+            });
+        });
+    });
 
-    // it('getOne dont-populate', () => {
-    //   return getOne('5ac635872647e02fa41c3bde', {
-    //     headers: {
-    //       'groupspopulate': false
-    //     }
-    //   }).then(response => {
-    //     expect(typeof response).to.equals('object');
-    //     // console.log(JSON.stringify(response));
-    //   });
-    // });
+    it('getOne', () => {
+        const id = '5ac635872647e02fa41c3bde';
+        return getOne(id).then(response => {
+            expect(response).to.be.an('object');
+            expect(response).to.haveOwnProperty('_id');
+            expect(response._id).to.be.equal(id);
+            expect(response).to.haveOwnProperty('groups');
+            response.groups.forEach(group => {
+                expect(group).to.be.an('object');
+                expect(group).to.not.haveOwnProperty('isMandatory');
+            });
+        });
+    });
 
-    // it('insertMany', function() {
-    //   const num = 5;
-    //   this.timeout(Number.POSITIVE_INFINITY);
-    //   return insertMany({
-    //     resources: generateMetrics(num)
-    //   }).then(response => {
-    //     expect(typeof response).to.equals('object');
-    //     expect(response.length === num);
-    //   });
-    // });
+    it('insertMany', () => {
+        const num = 5;
+        return insertMany({
+            resources: generateMetrics(num)
+        }).then(response => {
+            expect(response).to.be.an('array');
+            expect(response).to.have.lengthOf(2);
+            expect(response[0]).to.be.an('object');
+            expect(resonse[0]).to.have.lengthOf(num);
+            expect(response[1]).to.be.an('object');
+            expect(response[1]).to.haveOwnProperty('nModified');
+            expect(response[1].nModified).to.be.equal(uniqueGroups(response[0]));
+            metrics.push(response[0]);
+        });
+    });
+
+    it('deleteMany', () => {
+        return deleteMany(metrics).then(response => {
+            expect(response).to.be.an('array');
+            expect(response).to.have.lengthOf(2);
+            expect(response[0]).to.be.an('object');
+            expect(response[0]).to.haveOwnProperty('n');
+            expect(response[0].n).to.be.equal(metrics.length);
+            expect(response[1]).to.be.an('object');
+            expect(response[1]).to.haveOwnProperty('nModified');
+            expect(response[1].nModified).to.be.equal(uniqueGroups(metrics));
+            metrics.splice(0, metrics.length);
+        });
+    });
 
     it('insertOne', () => {
         return insertOne({
             resources: generateMetrics(1)[0]
         }).then(response => {
-            expect(response).to.be.an('object');
+            expect(response).to.be.an('array');
+            expect(response).to.have.lenghtOf(2);
+            expect(response[0]).to.be.an('object');
+            expect(response[0]).to.haveOwnProperty('groups');
+            expect(response[0].groups).to.be.an('array');
+            expect(response[1]).to.be.an('object');
+            expect(response[1].nModified).to.be.equal(response[0].groups.length);
+            metrics.push(response);
+        });
+    });
+
+    it('deleteOne', () => {
+        return deleteOne(metrics[0]._id, {
+            data: {
+                groups: metrics[0].groups.map(group => group._id)
+            }
+        }).then(response => {
+            expect(response).to.be.an('array');
+            expect(response).to.have.lengthOf(2);
+            expect(response[0]).to.be.an('object');
+            expect(response[1]).to.be.an('object');
+            expect(response[1]).to.haveOwnProperty('nModified');
+            expect(response[1].nModified).to.be.equal(metrics[0].groups.length);
+            metrics.pop();
         });
     });
 });
@@ -176,4 +263,16 @@ function generateMetrics(num) {
     }
 
     return metrics;
+}
+
+function uniqueGroups(metrics) {
+    let uniques = {};
+    metrics.map(metric => metric.groups.map(group => group._id))
+        .forEach(idSet => {
+            idSet.forEach(id => {
+                uniques[id] = true;
+            });
+        });
+
+    return Object.keys(uniques).length;
 }
