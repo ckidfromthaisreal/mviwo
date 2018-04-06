@@ -36,36 +36,36 @@ const logger = require('../../util/logger');
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
 exports.getMany = (req, res, next) => {
-  const operationName = 'metric.controller.js:getMany';
-  logger.info('API', operationName, `req.headers${JSON.stringify(req.headers)}`);
+    const operationName = 'metric.controller.js:getMany';
+    logger.info('API', operationName, `req.headers${JSON.stringify(req.headers)}`);
 
-  let query;
-  if (req.headers.filter) {
-    query = Metric.find(JSON.parse(req.headers.filter));
-  } else {
-    query = Metric.find();
-  }
-
-  if (req.headers.select) {
-    query.select(req.headers.select);
-  }
-  if (req.headers.groupspopulate === 'true' &&
-          (!req.headers.select || req.headers.select.includes('groups'))) {
-      query.populate({
-          path: 'groups._id',
-          select: `name description ${req.headers.groupsselect}` || 'name description'
-      });
-  }
-
-  query.exec((err, results) => {
-    if (err) {
-        logger.error('API', operationName, err);
-        next(err);
+    let query;
+    if (req.headers.filter) {
+        query = Metric.find(JSON.parse(req.headers.filter));
     } else {
-        logger.info('API', operationName, `fetched ${results.length} metrics`);
-        res.status(200).json(results);
+        query = Metric.find();
     }
-  });
+
+    if (req.headers.select) {
+        query.select(req.headers.select);
+    }
+    if (req.headers.groupspopulate === 'true' &&
+        (!req.headers.select || req.headers.select.includes('groups'))) {
+        query.populate({
+            path: 'groups._id',
+            select: `name description ${req.headers.groupsselect}` || 'name description'
+        });
+    }
+
+    query.exec((err, results) => {
+        if (err) {
+            logger.error('API', operationName, err);
+            next(err);
+        } else {
+            logger.info('API', operationName, `fetched ${results.length} metrics`);
+            res.status(200).json(results);
+        }
+    });
 };
 
 /**
@@ -89,7 +89,7 @@ exports.getOne = (req, res, next) => {
     }
 
     if (req.headers.groupspopulate === 'true' &&
-            (!req.headers.select || req.headers.select.includes('groups'))) {
+        (!req.headers.select || req.headers.select.includes('groups'))) {
         query.populate({
             path: 'groups._id',
             select: `name description ${req.headers.groupsselect}` || 'name description'
@@ -127,21 +127,21 @@ exports.getOne = (req, res, next) => {
 exports.insertMany = (req, res, next) => {
     const operationName = 'metric.controller:insertMany';
 
-    Metric.insertMany(req.body.resources, { ordered: false }, (err, docs) => {
+    Metric.insertMany(req.body.resources, {
+        ordered: true
+    }, (err, docs) => {
         if (err) {
             logger.error('API', operationName, err);
             next(err);
         } else {
-            // logger.debug('API', operationName, docs);
-
             addToMetricGroups(buildAddedMetricGroups(docs), (err, success) => {
-              if (err) {
-                logger.error('API', operationName, err);
-                next(err);
-              } else {
-                logger.info('API', operationName, `inserted ${docs.length} metrics`);
-                res.status(200).json(docs);
-              }
+                if (err) {
+                    logger.error('API', operationName, `inserted ${docs.length} metrics with errors: ${err}`);
+                    next(err);
+                } else {
+                    logger.info('API', operationName, `inserted ${docs.length} metrics`);
+                    res.status(200).json(docs);
+                }
             });
         }
     });
@@ -156,23 +156,27 @@ exports.insertMany = (req, res, next) => {
  * @param {*} res http response. expected to return successfully inserted metric as
  * a JSON object.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
- * @todo
  */
 exports.insertOne = (req, res, next) => {
     const operationName = 'metric.controller:insertOne';
-    const objectId = mongoose.Types.ObjectId();
-    // Metric.insertOne(req.body.resources, (err, doc) => {
-    //     if (err) {
-    //         logger.log(false, operationName, err);
-    //         next(err);
-    //     } else {
-    //         logger.log(true, operationName, `metric ${doc._id} inserted`);
-    //         res.status(200).json(doc);
-    //         addToMetricGroups(buildAddedMetricGroups([doc]));
-    //     }
-    // });
-};
 
+    Metric.create(req.body.resources, (err, doc) => {
+        if (err) {
+            logger.error('API', operationName, err);
+            next(err);
+        } else {
+            addToMetricGroups(buildAddedMetricGroups(doc), (err, success) => {
+                if (err) {
+                    logger.error('API', operationName, `metric ${doc._id} inserted with errors: ${err}`);
+                    next(err);
+                } else {
+                    logger.info('API', operationName, `metric ${doc._id} inserted`);
+                    res.status(200).json(doc);
+                }
+            });
+        }
+    });
+};
 
 /**
  *
@@ -248,32 +252,42 @@ function updateMetricGroups(added, removed, callback) {
     logger.debug('UTIL', operationName, `added${added}`);
     if (added) {
         added.forEach(element => {
-            ops.push(
-                {
-                    updateOne: {
-                        filter: {_id: element.group},
-                        update: {
-                          $addToSet: { metrics: { $each: element.metrics } },
-                          'lastUpdate': new Date()
-                        }
+            ops.push({
+                updateOne: {
+                    filter: {
+                        _id: element.group
+                    },
+                    update: {
+                        $addToSet: {
+                            metrics: {
+                                $each: element.metrics
+                            }
+                        },
+                        'lastUpdate': new Date()
                     }
                 }
-            );
+            });
         });
     }
 
     if (removed) {
-      logger.debug('UTIL', operationName, `removed${JSON.stringify(removed)}`);
+        logger.debug('UTIL', operationName, `removed${JSON.stringify(removed)}`);
 
         removed.forEach(element => {
-            ops.push(
-                {
-                    updateOne: {
-                        filter: {_id: element.group},
-                        update: {$pull: {metrics: {$each: element.metrics}}}
+            ops.push({
+                updateOne: {
+                    filter: {
+                        _id: element.group
+                    },
+                    update: {
+                        $pull: {
+                            metrics: {
+                                $each: element.metrics
+                            }
+                        }
                     }
                 }
-            );
+            });
         });
     }
 
@@ -288,35 +302,40 @@ function updateMetricGroups(added, removed, callback) {
             }
         });
     } else {
-      callback(null, {});
+        callback(null, {});
     }
 }
 
 /**
  * builds added metric-groups array for use in addToMetricGroups / updateMetricGroups.
  * assuming all groups of given metrics are added.
- * @param {any} metrics metrics to be added to metric-groups.
- * @returns array of { group: id, metrics: [mongoose.Types.ObjectId]}
+ * @param {any} metrics metric/s to be added to metric-groups.
+ * @returns array of { group: mongoose.Types.ObjectId, metrics: [mongoose.Types.ObjectId]}
  */
 function buildAddedMetricGroups(metrics) {
-    added = [];
+    const added = [];
 
-    metrics.map(metric => { return {_id: mongoose.Types.ObjectId(metric._id), groups: metric.groups}})
-      .forEach(metric => {
-        metric.groups.map(group => mongoose.Types.ObjectId(group._id)).forEach(groupId => {
-            const indexOf = added.findIndex(e => e.group.equals(groupId));
-            if (indexOf === -1) {
-              added.push({
-                  group: mongoose.Types.ObjectId(groupId),
-                  metrics: [metric._id]
-                });
-            } else {
-                added[indexOf].metrics.push(metric._id);
+    metrics = Array.isArray(metrics) ? metrics : [metrics];
+
+    metrics.map(metric => {
+            return {
+                _id: mongoose.Types.ObjectId(metric._id),
+                groups: metric.groups
             }
+        })
+        .forEach(metric => {
+            metric.groups.map(group => mongoose.Types.ObjectId(group._id)).forEach(groupId => {
+                const indexOf = added.findIndex(e => e.group.equals(groupId));
+                if (indexOf === -1) {
+                    added.push({
+                        group: mongoose.Types.ObjectId(groupId),
+                        metrics: [metric._id]
+                    });
+                } else {
+                    added[indexOf].metrics.push(metric._id);
+                }
+            });
         });
-    });
-
-    // logger.debug('UTIL', 'metric.controller.js:buildAddedMetricGroups', `added${added}`);
 
     return added;
 }
