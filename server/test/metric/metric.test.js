@@ -33,7 +33,7 @@ const url = 'http://localhost:4200/api/metric';
 function getMany(options) {
     return axios.get(url, options)
         .then(res => res.data)
-        .catch(error => console.log(error.data));
+        .catch(error => console.log(error));
 }
 
 /**
@@ -45,7 +45,7 @@ function getMany(options) {
 function getOne(id, options) {
     return axios.get(`${url}/${id}`, options)
         .then(res => res.data)
-        .catch(error => console.log(error.data));
+        .catch(error => console.log(error));
 }
 
 /**
@@ -103,94 +103,104 @@ function updateOne(id, data) {
         .catch(error => console.log(error));
 }
 
+/**
+ * sends a http request to api to perform updateMany.
+ * @param {*} data changes made.
+ */
+function updateMany(data) {
+    return axios.patch(url, data)
+        .then(res => res.data)
+        .catch(error => console.log(error));
+}
+
 describe('metric.controller.js', () => {
     let metrics = [];
     // beforeEach(() => {
     //   nock('http://localhost:8080').get('/metric').reply(200, response);
     // });
 
-    it('getMany populate', () => {
-        return getMany({
-            headers: {
-                'groupspopulate': true,
-                'groupsselect': 'isMandatory'
-            }
-        }).then(response => {
-            expect(response).to.be.an('array');
-            expect(response).to.have.lengthOf.at.least(1);
-            response.forEach(metric => {
-                expect(metric).to.be.an('object');
-                expect(metric).to.haveOwnProperty('groups');
-                // metric.groups.forEach(group => {
-                //     expect(group).to.be.an('object');
-                //     expect(group).to.haveOwnProperty('isMandatory');
-                // });
-            });
-        });
-    });
+    // it('getMany populate', () => {
+    //     return getMany({
+    //         headers: {
+    //             'groupspopulate': true,
+    //             'groupsselect': 'isMandatory'
+    //         }
+    //     }).then(response => {
+    //         expect(response).to.be.an('array');
+    //         expect(response).to.have.lengthOf.at.least(1);
+    //         response.forEach(metric => {
+    //             expect(metric).to.be.an('object');
+    //             expect(metric).to.haveOwnProperty('groups');
+    //             // metric.groups.forEach(group => {
+    //             //     expect(group).to.be.an('object');
+    //             //     expect(group).to.haveOwnProperty('isMandatory');
+    //             // });
+    //         });
+    //     });
+    // });
 
-    it('getMany', () => {
-        return getMany().then(response => {
-            expect(response).to.be.an('array');
-            expect(response).to.have.lengthOf.at.least(1);
-            response.forEach(metric => {
-                expect(metric).to.be.an('object');
-                expect(metric).to.haveOwnProperty('groups');
-                // metric.groups.forEach(group => {
-                //     expect(group).to.be.an('object');
-                //     expect(group).to.not.haveOwnProperty('isMandatory');
-                // });
-            });
-        });
-    });
+    // it('getMany', () => {
+    //     return getMany().then(response => {
+    //         expect(response).to.be.an('array');
+    //         expect(response).to.have.lengthOf.at.least(1);
+    //         response.forEach(metric => {
+    //             expect(metric).to.be.an('object');
+    //             expect(metric).to.haveOwnProperty('groups');
+    //             // metric.groups.forEach(group => {
+    //             //     expect(group).to.be.an('object');
+    //             //     expect(group).to.not.haveOwnProperty('isMandatory');
+    //             // });
+    //         });
+    //     });
+    // });
 
-    it('getMany filtered', () => {
-        const id = '5aae7b7bee86ef0014fd2d62';
-        return getMany({
-            headers: {
-                'filter': `{ "_id": "${id}"}`
-            }
-        }).then(response => {
-            expect(response).to.be.an('array');
-            expect(response).to.have.lengthOf(1);
-            expect(response[0]).to.be.an('object');
-            expect(response[0]).to.haveOwnProperty('_id');
-            expect(response[0]._id).to.be.equal(id);
-        });
-    });
+    // it('getMany filtered', () => {
+    //     const id = '5aae7b7bee86ef0014fd2d62';
+    //     return getMany({
+    //         headers: {
+    //             'filter': `{ "_id": "${id}"}`
+    //         }
+    //     }).then(response => {
+    //         expect(response).to.be.an('array');
+    //         expect(response).to.have.lengthOf(1);
+    //         expect(response[0]).to.be.an('object');
+    //         expect(response[0]).to.haveOwnProperty('_id');
+    //         expect(response[0]._id).to.be.equal(id);
+    //     });
+    // });
 
-    it('getOne populate', () => {
-        const id = '5aae7b7bee86ef0014fd2d62';
-        return getOne(id, {
-            headers: {
-                'groupspopulate': true,
-                'groupsselect': 'isMandatory'
-            }
-        }).then(response => {
-            expect(response).to.be.an('object');
-            expect(response).to.haveOwnProperty('_id');
-            expect(response._id).to.be.equal(id);
-            expect(response).to.haveOwnProperty('groups');
-            // response.groups.forEach(group => {
-            //     expect(group).to.be.an('object');
-            //     expect(group).to.haveOwnProperty('isMandatory');
-            // });
-        });
-    });
+    // it('getOne populate', () => {
+    //     const id = '5aae7b7bee86ef0014fd2d62';
+    //     return getOne(id, {
+    //         headers: {
+    //             'groupspopulate': true,
+    //             'groupsselect': 'isMandatory'
+    //         }
+    //     }).then(response => {
+    //         expect(response).to.be.an('object');
+    //         expect(response).to.haveOwnProperty('_id');
+    //         expect(response._id).to.be.equal(id);
+    //         expect(response).to.haveOwnProperty('groups');
+    //         // response.groups.forEach(group => {
+    //         //     expect(group).to.be.an('object');
+    //         //     expect(group).to.haveOwnProperty('isMandatory');
+    //         // });
+    //     });
+    // });
 
-    it('getOne', () => {
-        const id = '5aae7b7bee86ef0014fd2d62';
-        return getOne(id).then(response => {
-            expect(response).to.be.an('object');
-            expect(response).to.haveOwnProperty('_id');
-            expect(response._id).to.be.equal(id);
-            expect(response).to.haveOwnProperty('groups');
-            // response.groups.forEach(group => {
-            //     expect(group).to.be.an('object');
-            //     expect(group).to.not.haveOwnProperty('isMandatory');
-            // });
-        });
-    });
+    // it('getOne', () => {
+    //     const id = '5aae7b7bee86ef0014fd2d62';
+    //     return getOne(id).then(response => {
+    //         expect(response).to.be.an('object');
+    //         expect(response).to.haveOwnProperty('_id');
+    //         expect(response._id).to.be.equal(id);
+    //         expect(response).to.haveOwnProperty('groups');
+    //         // response.groups.forEach(group => {
+    //         //     expect(group).to.be.an('object');
+    //         //     expect(group).to.not.haveOwnProperty('isMandatory');
+    //         // });
+    //     });
+    // });
 
     it('insertMany', () => {
         const num = 2;
@@ -205,6 +215,23 @@ describe('metric.controller.js', () => {
             expect(response[1]).to.haveOwnProperty('nModified');
             expect(response[1].nModified).to.be.equal(uniqueGroups(response[0]));
             metrics = metrics.concat(response[0]);
+        });
+    });
+
+    it('updateMany', () => {
+        const changes = updateMetrics(metrics, true);
+        return updateMany({
+            resources: changes
+        }).then(response => {
+            expect(response).to.be.an('array');
+            expect(response).to.have.lengthOf(2);
+            expect(response[0]).to.be.an('object');
+            expect(response[0]).to.haveOwnProperty('nModified');
+            expect(response[0].nModified).to.be.equal(metrics.length);
+            expect(response[1]).to.be.an('object');
+            expect(response[1]).to.haveOwnProperty('nModified');
+            expect(response[1].nModified).to.be.equal(uniqueGroups(changes,
+                changes.map(change => change.removedGroups)));
         });
     });
 
@@ -243,46 +270,32 @@ describe('metric.controller.js', () => {
     });
 
     it('updateOne', () => {
-        const nuDataType = 'boolean';
-        const nuName = 'test 000000';
-        const removedGroup = '5ac6a8e32647e02fa41c3be1';
-        const addedGroup = {
-            _id: '5ac8d04cd8cd663ecc7d0f16',
-            name: 'test1',
-            description: 'ignore me!'
-        };
-        const stringParams = {
-            minLength: 3
-        };
+        const changes = updateMetrics(metrics);
         return updateOne(metrics[0]._id, {
-                resources: {
-                    dataType: nuDataType,
-                    name: nuName,
-                    groups: [addedGroup],
-                    removedGroups: [removedGroup],
-                    stringParams: stringParams
-                }
+                resources: changes[0]
             })
             .then(response => {
                 expect(response).to.be.an('array');
                 expect(response).to.have.lengthOf(2);
                 expect(response[0]).to.be.an('object');
                 expect(response[0]).to.haveOwnProperty('dataType');
-                expect(response[0].dataType).to.be.equal(nuDataType);
+                expect(response[0].dataType).to.be.equal(changes[0].dataType);
                 expect(response[0]).to.haveOwnProperty('name');
-                expect(response[0].name).to.be.equal(nuName);
+                expect(response[0].name).to.be.equal(changes[0].name);
                 expect(response[0]).to.haveOwnProperty('groups');
                 expect(response[0].groups).to.be.an('array');
-                expect(response[0].groups).to.have.lengthOf(1);
-                expect(response[0].groups[0]).to.be.an('object');
-                Object.keys(addedGroup).forEach(key => {
-                    expect(response[0].groups[0]).to.haveOwnProperty(key);
-                    expect(response[0].groups[0][key]).to.be.equal(addedGroup[key]);
+                expect(response[0].groups).to.have.lengthOf(metrics[0].groups.length);
+                metrics[0].groups.forEach((group, i) => {
+                    expect(response[0].groups[i]).to.be.an('object');
+                    Object.keys(group).forEach(key => {
+                        expect(response[0].groups[i]).to.haveOwnProperty(key);
+                        expect(response[0].groups[i][key]).to.be.equal(group[key]);
+                    });
                 });
                 expect(response[1]).to.be.an('object');
                 expect(response[1]).to.haveOwnProperty('nModified');
-                expect(response[1].nModified).to.be.equal(2);
-                metrics[0].groups = [addedGroup];
+                expect(response[1].nModified).to.be.equal(uniqueGroups(metrics,
+                    changes.map(change => change.removedGroups)));
             });
     });
 
@@ -337,7 +350,7 @@ function generateMetrics(num) {
     return metrics;
 }
 
-function uniqueGroups(metrics) {
+function uniqueGroups(metrics, removedGroups) {
     let uniques = {};
     metrics.map(metric => metric.groups.map(group => group._id))
         .forEach(idSet => {
@@ -346,5 +359,48 @@ function uniqueGroups(metrics) {
             });
         });
 
+    if (removedGroups) {
+        removedGroups.forEach(idSet => {
+            idSet.forEach(id => {
+                uniques[id] = true;
+            });
+        });
+    }
+
     return Object.keys(uniques).length;
+}
+
+/**
+ * updates all metrics.
+ * @returns changes array.
+ */
+function updateMetrics(metrics, withIds) {
+    const changes = [];
+
+    metrics.forEach(metric => {
+        metric.dataType = 'boolean';
+        metric.name = metric.name + ' updated';
+        metric.groups = [{
+            _id: '5ac8d04cd8cd663ecc7d0f16',
+            name: 'test1',
+            description: 'ignore me!'
+        }];
+        metric.stringParams.minLength = 3;
+
+        changes.push({
+            dataType: metric.dataType,
+            name: metric.name,
+            removedGroups: ['5ac6a8e32647e02fa41c3be1'],
+            groups: metric.groups,
+            stringParams: {
+                minLength: metric.stringParams.minLength
+            }
+        });
+
+        if (withIds === true) {
+            changes[changes.length - 1]._id = metric._id;
+        }
+    });
+
+    return changes;
 }

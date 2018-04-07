@@ -37,7 +37,7 @@ const logger = require('../../util/logger');
  */
 exports.getMany = (req, res, next) => {
     const operationName = 'metric.controller.js:getMany';
-    logger.info('API', operationName, `req.headers${JSON.stringify(req.headers)}`);
+    logger.verbose('API', operationName, `req.headers${JSON.stringify(req.headers)}`);
 
     let query;
     if (req.headers.filter) {
@@ -202,15 +202,68 @@ exports.insertOne = (req, res, next) => {
 };
 
 /**
+ * updates metrics in db.
+ * @param {*} req http request.
  *
- * @param {*} req
- * @param {*} res
- * @param {*} next
- * @todo
+ * req.body.resources = object with key : nuValue pairs,
+ * also includes _id field for finding.
+ *
+ * @param {*} res http response. expected to return successfully inserted metric as
+ * a JSON object.
+ * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
 exports.updateMany = (req, res, next) => {
-    // TODO
-}
+    const operationName = 'metric.controller:updateMany';
+    let err = null;
+
+    if (!req.body.resources || typeof req.body.resources !== 'object' ||
+        !Array.isArray(req.body.resources) || !req.body.resources.length) {
+        err = new Error('invalid input: no resources');
+    }
+
+    if (err) {
+        logger.error('API', operationName, err);
+        next(err);
+        return;
+    }
+
+    const ops = [];
+
+    req.body.resources.forEach(item => {
+        ops.push({
+            updateOne: {
+                filter: {
+                    _id: item._id
+                },
+                update: buildUpdateObject(item)
+            }
+        });
+    });
+
+    Metric.bulkWrite(ops, (err, result1) => {
+        if (err) {
+            logger.error('API', operationName, err);
+            next(err);
+        } else {
+            updateMetricGroups(buildMetricGroupsModifysArray(req.body.resources),
+                buildMetricGroupsModifysArray(req.body.resources.map(elem => {
+                    return {
+                        _id: elem._id,
+                        groups: elem.removedGroups
+                    };
+                })), (err, result2) => {
+                    if (err) {
+                        logger.err('API', operationName, `updated ${result1.nModified} metrics with errors: ${err}`);
+                        next(err);
+                    } else {
+                        logger.info('API', operationName, `updated ${result1.nModified} metrics`);
+                        res.status(200).json([result1, result2]);
+                    }
+                }
+            );
+        }
+    });
+};
 
 /**
  * updates a metric in db.
@@ -462,24 +515,24 @@ function buildMetricGroupsModifysArray(metrics) {
 }
 
 /**
- * builds update object for update queries.
- * @param {*} updates object containing key : nuValue pairs
- * @return update object.
+ * builds update object arrays for update queries.
+ * @param {*} update object containing key : nuValue pairs
+ * @return update objects array.
  */
-function buildUpdateObject(updates) {
+function buildUpdateObject(update) {
     const updateObj = {
         lastUpdate: new Date()
     };
-
     const params = ['number', 'string', 'enum', 'blob', 'date'];
 
-    updates = JSON.parse(JSON.stringify(updates));
-    delete updates.removedGroups; // not an actual field!
+    update = JSON.parse(JSON.stringify(update)); //clone
+    delete update.removedGroups; // not an actual field.
+    delete update._id; // not an actual change.
 
-    Object.keys(updates).forEach(key => {
-        if (typeof updates[key] === 'object' && !Array.isArray(updates[key])) { // params
-            Object.keys(updates[key]).forEach(key2 => {
-                updateObj[`${key}.${key2}`] = updates[key][key2];
+    Object.keys(update).forEach(key => {
+        if (typeof update[key] === 'object' && !Array.isArray(update[key])) { // params
+            Object.keys(update[key]).forEach(key2 => {
+                updateObj[`${key}.${key2}`] = update[key][key2];
             });
 
             if (key.includes('Params')) { // up to 1 params per document!
@@ -494,7 +547,7 @@ function buildUpdateObject(updates) {
                 });
             }
         } else { // regular field
-            if (key === 'dataType' && updates.dataType === 'boolean') { // boolean has no params!
+            if (key === 'dataType' && update.dataType === 'boolean') { // boolean has no params!
                 if (!updateObj.$unset) {
                     updateObj.$unset = {};
                 }
@@ -504,7 +557,7 @@ function buildUpdateObject(updates) {
                 });
             }
 
-            updateObj[key] = updates[key];
+            updateObj[key] = update[key];
         }
     });
 
