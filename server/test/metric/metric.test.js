@@ -92,6 +92,17 @@ function deleteMany(data) {
         .catch(error => console.log(error));
 }
 
+/**
+ * sends a http request to api to perform updateOne.
+ * @param {*} id metric id.
+ * @param {*} data changes made.
+ */
+function updateOne(id, data) {
+    return axios.patch(`${url}/${id}`, data)
+        .then(res => res.data)
+        .catch(error => console.log(error));
+}
+
 describe('metric.controller.js', () => {
     let metrics = [];
     // beforeEach(() => {
@@ -199,7 +210,9 @@ describe('metric.controller.js', () => {
 
     it('deleteMany', () => {
         return deleteMany({
-            data: { resources: metrics }
+            data: {
+                resources: metrics
+            }
         }).then(response => {
             expect(response).to.be.an('array');
             expect(response).to.have.lengthOf(2);
@@ -223,9 +236,54 @@ describe('metric.controller.js', () => {
             expect(response[0]).to.haveOwnProperty('groups');
             expect(response[0].groups).to.be.an('array');
             expect(response[1]).to.be.an('object');
+            expect(response[1]).to.haveOwnProperty('nModified');
             expect(response[1].nModified).to.be.equal(response[0].groups.length);
             metrics.push(response[0]);
         });
+    });
+
+    it('updateOne', () => {
+        const nuDataType = 'boolean';
+        const nuName = 'test 000000';
+        const removedGroup = '5ac6a8e32647e02fa41c3be1';
+        const addedGroup = {
+            _id: '5ac8d04cd8cd663ecc7d0f16',
+            name: 'test1',
+            description: 'ignore me!'
+        };
+        const stringParams = {
+            minLength: 3
+        };
+        return updateOne(metrics[0]._id, {
+                resources: {
+                    dataType: nuDataType,
+                    name: nuName,
+                    groups: [addedGroup],
+                    removedGroups: [removedGroup],
+                    stringParams: stringParams
+                }
+            })
+            .then(response => {
+                expect(response).to.be.an('array');
+                expect(response).to.have.lengthOf(2);
+                expect(response[0]).to.be.an('object');
+                expect(response[0]).to.haveOwnProperty('dataType');
+                expect(response[0].dataType).to.be.equal(nuDataType);
+                expect(response[0]).to.haveOwnProperty('name');
+                expect(response[0].name).to.be.equal(nuName);
+                expect(response[0]).to.haveOwnProperty('groups');
+                expect(response[0].groups).to.be.an('array');
+                expect(response[0].groups).to.have.lengthOf(1);
+                expect(response[0].groups[0]).to.be.an('object');
+                Object.keys(addedGroup).forEach(key => {
+                    expect(response[0].groups[0]).to.haveOwnProperty(key);
+                    expect(response[0].groups[0][key]).to.be.equal(addedGroup[key]);
+                });
+                expect(response[1]).to.be.an('object');
+                expect(response[1]).to.haveOwnProperty('nModified');
+                expect(response[1].nModified).to.be.equal(2);
+                metrics[0].groups = [addedGroup];
+            });
     });
 
     it('deleteOne', () => {
@@ -265,9 +323,14 @@ function generateMetrics(num) {
             lastUpdate: Date.now,
             groups: [{
                 _id: '5ac6a8e32647e02fa41c3be1',
-                name: 'test',
+                name: 'test0',
                 description: 'ignore me!'
-            }]
+            }],
+            stringParams: {
+                isEmail: false,
+                lineBreaks: false,
+                hint: 'just write something ffs'
+            }
         });
     }
 

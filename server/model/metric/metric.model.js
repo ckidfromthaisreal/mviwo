@@ -56,6 +56,7 @@ const dateParamsSchema = new mongoose.Schema({
     maxDate: {type: Date}
 });
 
+/** embedded metric-group sub-schema with reference. */
 const metricGroupEmbeddedSchema = new mongoose.Schema({
   _id: {type: mongoose.Schema.Types.ObjectId, ref: 'MetricGroup', auto: false, required: true, index: true},
   name: {type: String, required: true},

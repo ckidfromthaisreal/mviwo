@@ -213,14 +213,62 @@ exports.updateMany = (req, res, next) => {
 }
 
 /**
+ * updates a metric in db.
+ * @param {*} req http request.
  *
- * @param {*} req
- * @param {*} res
- * @param {*} next
- * @todo
+ * req.body.resources = object with key : nuValue pairs,
+ * and also (optional) removedGroups property with group id's array.
+ *
+ * @param {*} res http response. expected to return successfully inserted metric as
+ * a JSON object.
+ * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
 exports.updateOne = (req, res, next) => {
-    // TODO
+    const operationName = 'metric.controller:updateOne';
+    let err = null;
+
+    if (!req.body.resources || typeof req.body.resources !== 'object' ||
+        !Object.keys(req.body.resources).length) {
+        err = new Error('invalid input: no resources');
+    }
+
+    if (err) {
+        logger.error('API', operationName, err);
+        next(err);
+        return;
+    }
+
+    Metric.findByIdAndUpdate(req.params.id, buildUpdateObject(req.body.resources), {
+        new: true
+    }, (err, doc) => {
+        if (err) {
+            logger.error('API', operationName, err);
+            next(err);
+        } else {
+            if (req.body.resources.groups || req.body.resources.removedGroups) {
+                updateMetricGroups(buildMetricGroupsModifysArray({
+                    _id: req.params.id,
+                    groups: req.body.resources.groups
+                }), buildMetricGroupsModifysArray({
+                    _id: req.params.id,
+                    groups: req.body.resources.removedGroups
+                }), (err, success) => {
+                    if (err) {
+                        logger.error('API', operationName, `metric ${req.params.id} updated with errors: ${err}`);
+                        next(err);
+                    } else {
+                        logger.info('API', operationName, `metric ${req.params.id} updated`);
+                        res.status(200).json([doc, success]);
+                    }
+                });
+            } else {
+                logger.info('API', operationName, `metric ${req.params.id} updated`);
+                res.status(200).json([doc, {
+                    nModified: 0
+                }]);
+            }
+        }
+    });
 };
 
 /**
@@ -411,4 +459,62 @@ function buildMetricGroupsModifysArray(metrics) {
         });
 
     return groups;
+}
+
+/**
+ * builds update object for update queries.
+ * @param {*} updates object containing key : nuValue pairs
+ * @return update object.
+ */
+function buildUpdateObject(updates) {
+    const updateObj = {
+        lastUpdate: new Date()
+    };
+
+    const params = ['number', 'string', 'enum', 'blob', 'date'];
+
+    updates = JSON.parse(JSON.stringify(updates));
+    delete updates.removedGroups; // not an actual field!
+
+    Object.keys(updates).forEach(key => {
+        if (typeof updates[key] === 'object' && !Array.isArray(updates[key])) { // params
+            Object.keys(updates[key]).forEach(key2 => {
+                updateObj[`${key}.${key2}`] = updates[key][key2];
+            });
+
+            if (key.includes('Params')) { // up to 1 params per document!
+                if (!updateObj.$unset) {
+                    updateObj.$unset = {};
+                }
+
+                params.forEach(param => {
+                    if (key.split('P')[0] !== param) {
+                        updateObj.$unset[`${param}Params`] = 1;
+                    }
+                });
+            }
+        } else { // regular field
+            if (key === 'dataType' && updates.dataType === 'boolean') { // boolean has no params!
+                if (!updateObj.$unset) {
+                    updateObj.$unset = {};
+                }
+
+                params.forEach(param => {
+                    updateObj.$unset[`${param}Params`] = 1;
+                });
+            }
+
+            updateObj[key] = updates[key];
+        }
+    });
+
+    if (updateObj.$unset) { // avoid same field conflicts.
+        Object.keys(updateObj).filter(key => key.includes('Params')).forEach(key => {
+            if (updateObj.$unset[key.split('.')[0]]) {
+                delete updateObj[key];
+            }
+        });
+    }
+
+    return updateObj;
 }
