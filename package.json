@@ -10,7 +10,7 @@
     "build": "ng build --prod --output-path=public --stats-json",
     "serve-api": "nodemon server",
     "test": "ng test",
-    "test-server": "node_modules/.bin/mocha",
+    "test-server": "node_modules/.bin/mocha server/test/ --recursive",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "push": "git push & git push heroku master",

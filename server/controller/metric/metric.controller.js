@@ -126,6 +126,17 @@ exports.getOne = (req, res, next) => {
  */
 exports.insertMany = (req, res, next) => {
     const operationName = 'metric.controller:insertMany';
+    let err;
+
+    if (!req.body.resources || !req.body.resources.length) {
+        err = new Error('invalid input: no resources');
+    }
+
+    if (err) {
+        logger.error('API', operationName, err);
+        next(err);
+        return;
+    }
 
     Metric.insertMany(req.body.resources, {
         ordered: true
@@ -159,6 +170,18 @@ exports.insertMany = (req, res, next) => {
  */
 exports.insertOne = (req, res, next) => {
     const operationName = 'metric.controller:insertOne';
+    let err;
+
+    if (!req.body.resources) {
+        err = new Error('invalid input: no resources');
+        err.status(403);
+    }
+
+    if (err) {
+        logger.error('API', operationName, err);
+        next(err);
+        return;
+    }
 
     Metric.create(req.body.resources, (err, doc) => {
         if (err) {
@@ -201,14 +224,48 @@ exports.updateOne = (req, res, next) => {
 };
 
 /**
+ * deletes metrics from db.
+ * @param {*} req http request.
  *
- * @param {*} req
- * @param {*} res
- * @param {*} next
- * @todo
+ * req.body.resources = array of objects: { _id: String, groups: [String] }
+ *
+ * @param {*} res http response.
+ * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
 exports.deleteMany = (req, res, next) => {
     const operationName = 'metric.controller:deleteOne';
+    let err = null;
+
+    if (!req.body.resources || !req.body.resources.length) {
+        err = new Error('invalid input: no resources');
+    }
+
+    if (err) {
+        logger.error('API', operationName, err);
+        next(err);
+        return;
+    }
+
+    Metric.deleteMany({
+        _id: {
+            $in: req.body.resources.map(elem => elem._id)
+        }
+    }, (err, result) => {
+        if (err) {
+            logger.error('API', operationName, err);
+            next(err);
+        } else {
+            removeFromMetricGroups(buildMetricGroupsModifysArray(req.body.resources), (err, success) => {
+                if (err) {
+                    logger.error('API', operationName, `deleted ${req.body.resources.length} metrics with errors: ${err}`);
+                    next(err);
+                } else {
+                    logger.info('API', operationName, `deleted ${req.body.resources.length} metrics`);
+                    res.status(200).json([result, success]);
+                }
+            });
+        }
+    });
 };
 
 /**
@@ -232,7 +289,7 @@ exports.deleteOne = (req, res, next) => {
         } else {
             removeFromMetricGroups(buildMetricGroupsModifysArray({
                 _id: req.params.id,
-                groups: req.body.groups || []
+                groups: req.body.groups
             }), (err, success) => {
                 if (err) {
                     logger.error('API', operationName, `metric ${req.params.id} deleted with errors: ${err}`);
@@ -273,7 +330,7 @@ function updateMetricGroups(added, removed, callback) {
     const operationName = 'metric.controller:updateMetricGroups';
     const ops = [];
 
-    if (added) {
+    if (added && added.length) {
         added.forEach(element => {
             ops.push({
                 updateOne: {
@@ -293,9 +350,8 @@ function updateMetricGroups(added, removed, callback) {
         });
     }
 
-    if (removed) {
+    if (removed && removed.length) {
         removed.forEach(element => {
-            console.log(element);
             ops.push({
                 updateOne: {
                     filter: {
@@ -326,39 +382,33 @@ function updateMetricGroups(added, removed, callback) {
 }
 
 /**
- * builds added metric-groups array for use in addToMetricGroups / updateMetricGroups.
- * assuming all groups of given metrics are added.
- * @param {any} metrics metric/s to be added to metric-groups.
+ * builds metric-groups array for use in addToMetricGroups / removeFromMetricsGroups / updateMetricGroups.
+ * @param {any} metrics
  * @returns array of { group: mongoose.Types.ObjectId, metrics: [mongoose.Types.ObjectId]}
  */
 function buildMetricGroupsModifysArray(metrics) {
-    const added = [];
-
+    const groups = [];
     metrics = Array.isArray(metrics) ? metrics : [metrics];
-
-    // console.log('metrics', metrics);
 
     metrics.map(metric => {
             return {
                 _id: mongoose.Types.ObjectId(metric._id),
-                groups: metric.groups
+                groups: metric.groups || []
             };
         })
         .forEach(metric => {
             metric.groups.map(group => mongoose.Types.ObjectId(group._id || group)).forEach(groupId => {
-                const indexOf = added.findIndex(e => e.group.equals(groupId));
+                const indexOf = groups.findIndex(e => e.group.equals(groupId));
                 if (indexOf === -1) {
-                    added.push({
+                    groups.push({
                         group: mongoose.Types.ObjectId(groupId),
                         metrics: [metric._id]
                     });
                 } else {
-                    added[indexOf].metrics.push(metric._id);
+                    groups[indexOf].metrics.push(metric._id);
                 }
             });
         });
 
-    // console.log('added', added);
-
-    return added;
+    return groups;
 }
