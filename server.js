@@ -58,7 +58,9 @@ app.use(bodyParser.json());
 /* tells the application to use simple algorithm for shallow parsing.
   set to 'extended: true' to enable complex algorithm for deep parsing
   that can deal with nested objects. */
-app.use(bodyParser.urlencoded({extended: config.DEEP_PARSING}));
+app.use(bodyParser.urlencoded({
+	extended: config.DEEP_PARSING
+}));
 
 /* point static path to build folder. */
 app.use(express.static(path.join(__dirname, 'public')));
@@ -71,7 +73,7 @@ app.use('/api', router);
 
 /* return index file when other routes are requested. */
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/index.html'));
+	res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 /* set application's port. */
@@ -82,13 +84,13 @@ app.set('env', config.ENVIRONMENT);
 
 /* set view engine for errors. */
 if (config.USE_VIEW_ENGINE) {
-  app.set('view engine', path.join(__dirname, 'views'));
-  app.set('view engine', 'pug');
+	app.set('view engine', path.join(__dirname, 'views'));
+	app.set('view engine', 'pug');
 }
 
 /* add errorHandler to application middleware functions. */
 if (config.CUSTOM_ERROR_HANDLER) {
-  app.use(errorHandler);
+	app.use(errorHandler);
 }
 
 /** http server. */
@@ -97,6 +99,6 @@ const server = http.createServer(app);
 /* listen on provided port, on all network interfaces.
     connect to database. */
 server.listen(port, () => {
-    logger.info('HTTP-SERVER', 'server.js:server.listen', `server listening on localhost:${port}`);
-    db.connect();
+	logger.info('HTTP-SERVER', 'server.js:server.listen', `server listening on localhost:${port}`);
+	db.connect();
 });

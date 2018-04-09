@@ -9,10 +9,8 @@ testing module for metric.controller.js
  */
 const expect = require('chai').expect;
 
-/** https://github.com/axios/axios
- * promise based HTTP client for the browser and node.js.
- */
-const axios = require('axios');
+/** general use module for running axios requests. */
+const axios = require('../axios-runner');
 
 /** https://github.com/node-nock/nock
  * nock is an HTTP mocking and expectations library for node.js.
@@ -25,102 +23,49 @@ const axios = require('axios');
 /** metric api url. */
 const url = 'http://localhost:4200/api/metric';
 
-/**
- * sends a http get request to api to perform getMany.
- * @param {any} options
- * @returns promise.
- */
-function getMany(options) {
-	return axios.get(url, options)
-		.then(res => res.data)
-		.catch(error => console.log(error));
-}
-
-/**
- * sends a http get request to api to perform getOne.
- * @param {any} id id of requested metric.
- * @param {any} options
- * @returns promise.
- */
-function getOne(id, options) {
-	return axios.get(`${url}/${id}`, options)
-		.then(res => res.data)
-		.catch(error => console.log(error));
-}
-
-/**
- * sends a http post request to api to perform insertMany.
- * @param {any} data data to be inserted.
- * @returns promise.
- */
-function insertMany(data) {
-	return axios.post(url, data)
-		.then(res => res.data)
-		.catch(error => console.log(error));
-}
-
-/**
- * sends a http post request to api to perform insertOne.
- * @param {any} data data to be inserted.
- * @returns promise.
- */
-function insertOne(data) {
-	return axios.post(`${url}/1`, data)
-		.then(res => res.data)
-		.catch(error => console.log(error));
-}
-
-/**
- * sends a http delete request to api to perform deleteOne.
- * @param {any} id metric id to be deleted.
- * @returns promise.
- */
-function deleteOne(id, data) {
-	return axios.delete(`${url}/${id}`, data)
-		.then(res => res.data)
-		.catch(error => console.log(error));
-}
-
-/**
- * sends a http delete request to api to perform deleteMany.
- * @param {any} data data to be deleted.
- * @returns promise.
- */
-function deleteMany(data) {
-	return axios.delete(url, data)
-		.then(res => res.data)
-		.catch(error => console.log(error));
-}
-
-/**
- * sends a http request to api to perform updateOne.
- * @param {*} id metric id.
- * @param {*} data changes made.
- */
-function updateOne(id, data) {
-	return axios.patch(`${url}/${id}`, data)
-		.then(res => res.data)
-		.catch(error => console.log(error));
-}
-
-/**
- * sends a http request to api to perform updateMany.
- * @param {*} data changes made.
- */
-function updateMany(data) {
-	return axios.patch(url, data)
-		.then(res => res.data)
-		.catch(error => console.log(error));
-}
-
 describe('metric.controller.js', () => {
 	let metrics = [];
 	// beforeEach(() => {
 	//   nock('http://localhost:8080').get('/metric').reply(200, response);
 	// });
 
+	it('getOne populate', () => {
+		const id = '5aae7b7bee86ef0014fd2d62';
+		return axios.getOne(url, id, {
+			headers: {
+				'groupspopulate': true,
+				'groupsselect': 'isMandatory'
+			}
+		}).then(response => {
+			expect(response).to.be.an('object');
+			expect(response).to.haveOwnProperty('_id');
+			expect(response._id).to.be.equal(id);
+			expect(response).to.haveOwnProperty('groups');
+			// response.groups.forEach(group => {
+			//     expect(group).to.be.an('object');
+			//     expect(group).to.haveOwnProperty('isMandatory');
+			// });
+		});
+	});
+
+	it('insertMany', () => {
+		const num = 2;
+		return axios.insertMany(url, {
+			resources: generateMetrics(num)
+		}).then(response => {
+			expect(response).to.be.an('array');
+			expect(response).to.have.lengthOf(2);
+			expect(response[0]).to.be.an('array');
+			expect(response[0]).to.have.lengthOf(num);
+			expect(response[1]).to.be.an('object');
+			expect(response[1]).to.haveOwnProperty('nModified');
+			expect(response[1].nModified).to.be.equal(uniqueGroups(response[0]));
+			metrics = metrics.concat(response[0]);
+		});
+	});
+
 	it('getMany populate', () => {
-		return getMany({
+		return axios.getMany(url, {
 			headers: {
 				'groupspopulate': true,
 				'groupsselect': 'isMandatory'
@@ -139,88 +84,9 @@ describe('metric.controller.js', () => {
 		});
 	});
 
-	// it('getMany', () => {
-	//     return getMany().then(response => {
-	//         expect(response).to.be.an('array');
-	//         expect(response).to.have.lengthOf.at.least(1);
-	//         response.forEach(metric => {
-	//             expect(metric).to.be.an('object');
-	//             expect(metric).to.haveOwnProperty('groups');
-	//             // metric.groups.forEach(group => {
-	//             //     expect(group).to.be.an('object');
-	//             //     expect(group).to.not.haveOwnProperty('isMandatory');
-	//             // });
-	//         });
-	//     });
-	// });
-
-	// it('getMany filtered', () => {
-	//     const id = '5aae7b7bee86ef0014fd2d62';
-	//     return getMany({
-	//         headers: {
-	//             'filter': `{ "_id": "${id}"}`
-	//         }
-	//     }).then(response => {
-	//         expect(response).to.be.an('array');
-	//         expect(response).to.have.lengthOf(1);
-	//         expect(response[0]).to.be.an('object');
-	//         expect(response[0]).to.haveOwnProperty('_id');
-	//         expect(response[0]._id).to.be.equal(id);
-	//     });
-	// });
-
-	it('getOne populate', () => {
-		const id = '5aae7b7bee86ef0014fd2d62';
-		return getOne(id, {
-			headers: {
-				'groupspopulate': true,
-				'groupsselect': 'isMandatory'
-			}
-		}).then(response => {
-			expect(response).to.be.an('object');
-			expect(response).to.haveOwnProperty('_id');
-			expect(response._id).to.be.equal(id);
-			expect(response).to.haveOwnProperty('groups');
-			// response.groups.forEach(group => {
-			//     expect(group).to.be.an('object');
-			//     expect(group).to.haveOwnProperty('isMandatory');
-			// });
-		});
-	});
-
-	// it('getOne', () => {
-	//     const id = '5aae7b7bee86ef0014fd2d62';
-	//     return getOne(id).then(response => {
-	//         expect(response).to.be.an('object');
-	//         expect(response).to.haveOwnProperty('_id');
-	//         expect(response._id).to.be.equal(id);
-	//         expect(response).to.haveOwnProperty('groups');
-	//         // response.groups.forEach(group => {
-	//         //     expect(group).to.be.an('object');
-	//         //     expect(group).to.not.haveOwnProperty('isMandatory');
-	//         // });
-	//     });
-	// });
-
-	it('insertMany', () => {
-		const num = 2;
-		return insertMany({
-			resources: generateMetrics(num)
-		}).then(response => {
-			expect(response).to.be.an('array');
-			expect(response).to.have.lengthOf(2);
-			expect(response[0]).to.be.an('array');
-			expect(response[0]).to.have.lengthOf(num);
-			expect(response[1]).to.be.an('object');
-			expect(response[1]).to.haveOwnProperty('nModified');
-			expect(response[1].nModified).to.be.equal(uniqueGroups(response[0]));
-			metrics = metrics.concat(response[0]);
-		});
-	});
-
 	it('updateMany', () => {
 		const changes = updateMetrics(metrics, true);
-		return updateMany({
+		return axios.updateMany(url, {
 			resources: changes
 		}).then(response => {
 			expect(response).to.be.an('array');
@@ -236,7 +102,7 @@ describe('metric.controller.js', () => {
 	});
 
 	it('deleteMany', () => {
-		return deleteMany({
+		return axios.deleteMany(url, {
 			data: {
 				resources: metrics
 			}
@@ -254,7 +120,7 @@ describe('metric.controller.js', () => {
 	});
 
 	it('insertOne', () => {
-		return insertOne({
+		return axios.insertOne(url, {
 			resources: generateMetrics(1)[0]
 		}).then(response => {
 			expect(response).to.be.an('array');
@@ -271,7 +137,7 @@ describe('metric.controller.js', () => {
 
 	it('updateOne', () => {
 		const changes = updateMetrics(metrics);
-		return updateOne(metrics[0]._id, {
+		return axios.updateOne(url, metrics[0]._id, {
 			resources: changes[0]
 		}).then(response => {
 			expect(response).to.be.an('array');
@@ -299,7 +165,7 @@ describe('metric.controller.js', () => {
 	});
 
 	it('deleteOne', () => {
-		return deleteOne(metrics[0]._id, {
+		return axios.deleteOne(url, metrics[0]._id, {
 			data: {
 				groups: metrics[0].groups.map(group => group._id)
 			}

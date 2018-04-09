@@ -190,8 +190,6 @@ exports.insertOne = async (req, res, next) => {
 		return next(err);
 	}
 
-	console.log(metric);
-
 	try {
 		result = await addToMetricGroups(metric);
 	} catch (err) {
