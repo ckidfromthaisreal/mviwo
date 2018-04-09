@@ -46,3 +46,6 @@ Thumbs.db
 
 #logs
 /server/logs/*.log
+
+#secrets
+/server/auth.json
