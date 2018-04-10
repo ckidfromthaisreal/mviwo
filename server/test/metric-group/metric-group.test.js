@@ -65,22 +65,22 @@ describe('metric-group.controller.js', () => {
 		});
 	});
 
-	// it('updateMany', () => {
-	// 	const changes = updateMetrics(metrics, true);
-	// 	return updateMany({
-	// 		resources: changes
-	// 	}).then(response => {
-	// 		expect(response).to.be.an('array');
-	// 		expect(response).to.have.lengthOf(2);
-	// 		expect(response[0]).to.be.an('object');
-	// 		expect(response[0]).to.haveOwnProperty('nModified');
-	// 		expect(response[0].nModified).to.be.equal(metrics.length);
-	// 		expect(response[1]).to.be.an('object');
-	// 		expect(response[1]).to.haveOwnProperty('nModified');
-	// 		expect(response[1].nModified).to.be.equal(uniqueGroups(changes,
-	// 			changes.map(change => change.removedGroups)));
-	// 	});
-	// });
+	it('updateMany', () => {
+		const changes = updateMetricGroups(groups, true);
+		return axios.updateMany(url, {
+			resources: changes
+		}).then(response => {
+			expect(response).to.be.an('array');
+			expect(response).to.have.lengthOf(2);
+			expect(response[0]).to.be.an('object');
+			expect(response[0]).to.haveOwnProperty('nModified');
+			expect(response[0].nModified).to.be.equal(groups.length);
+			expect(response[1]).to.be.an('object');
+			expect(response[1]).to.haveOwnProperty('nModified');
+			expect(response[1].nModified).to.be.equal(uniqueMetrics(changes,
+				changes.map(change => change.removedMetrics)));
+		});
+	});
 
 	it('deleteMany', () => {
 		return axios.deleteMany(url, {

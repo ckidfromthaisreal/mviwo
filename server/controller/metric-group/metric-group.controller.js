@@ -206,69 +206,69 @@ exports.insertOne = async (req, res, next) => {
 };
 
 /**
- * updates groups in db.
+ * updates metric-groups in db.
  * @param {*} req http request.
  *
  * req.body.resources = object with key : nuValue pairs,
  * also includes _id field for finding.
  *
- * @param {*} res http response. expected to return successfully inserted group as
+ * @param {*} res http response. expected to return successfully updated groups as
  * a JSON object.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
-// exports.updateMany = async (req, res, next) => {
-// 	const operationName = 'metric.controller:updateMany';
-// 	let err = null;
+exports.updateMany = async (req, res, next) => {
+	const operationName = 'metric-group.controller:updateMany';
+	let err = null;
 
-// 	if (!req.body.resources || typeof req.body.resources !== 'object' ||
-// 		!Array.isArray(req.body.resources) || !req.body.resources.length) {
-// 		err = new Error('invalid input: no resources');
-// 	}
+	if (!req.body.resources || typeof req.body.resources !== 'object' ||
+		!Array.isArray(req.body.resources) || !req.body.resources.length) {
+		err = new Error('invalid input: no resources');
+	}
 
-// 	if (err) {
-// 		logger.error('API', operationName, err);
-// 		return next(err);
-// 	}
+	if (err) {
+		logger.error('API', operationName, err);
+		return next(err);
+	}
 
-// 	const ops = [];
+	const ops = [];
 
-// 	req.body.resources.forEach(item => {
-// 		ops.push({
-// 			updateOne: {
-// 				filter: {
-// 					_id: item._id
-// 				},
-// 				update: buildUpdateObject(item)
-// 			}
-// 		});
-// 	});
+	req.body.resources.forEach(item => {
+		ops.push({
+			updateOne: {
+				filter: {
+					_id: item._id
+				},
+				update: buildUpdateObject(item)
+			}
+		});
+	});
 
-// 	let result1, result2;
+	let result1, result2;
 
-// 	try {
-// 		result1 = await Metric.bulkWrite(ops);
-// 	} catch (err) {
-// 		logger.error('API', operationName, err);
-// 		return next(err);
-// 	}
+	try {
+		result1 = await MetricGroup.bulkWrite(ops);
+	} catch (err) {
+		logger.error('API', operationName, err);
+		return next(err);
+	}
 
-// 	try {
-// 		result2 = await updateMetricGroups(
-// 			req.body.resources,
-// 			req.body.resources.map(elem => {
-// 				return {
-// 					_id: elem._id,
-// 					groups: elem.removedGroups
-// 				};
-// 			}));
-// 	} catch (err) {
-// 		logger.err('API', operationName, `updated ${result1.nModified} metrics with errors: ${err}`);
-// 		return next(err);
-// 	}
+	try {
+		result2 = await updateMetrics(
+			req.body.resources,
+			req.body.resources.map(elem => {
+				return {
+					_id: elem._id,
+					metrics: elem.removedMetrics
+				};
+			}));
+	} catch (err) {
+		logger.err('API', operationName, `updated ${result1.nModified} metric-groups with errors: ${err}`);
+		return next(err);
+	}
 
-// 	logger.info('API', operationName, `updated ${result1.nModified} metrics`);
-// 	res.status(200).json([result1, result2]);
-// };
+	logger.info('API', operationName, `updated ${result1.nModified} metric-groups`);
+	res.status(200).json([result1, result2]);
+};
 
 
 /**

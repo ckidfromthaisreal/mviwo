@@ -21,7 +21,7 @@ router.post('/', controller.insertMany);
 router.post('/1', controller.insertOne);
 
 /* bind patch '/' to updateMany function */
-// router.patch('/', controller.updateMany);
+router.patch('/', controller.updateMany);
 
 /* bind patch with parameter to updateOne function */
 router.patch('/:id', controller.updateOne);
