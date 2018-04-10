@@ -122,44 +122,44 @@ exports.getOne = async (req, res, next) => {
  * inserts new metrics to db.
  * @param {*} req http request.
  *
- * req.body.resources = array of metric objects for insertion.
+ * req.body.resources = array of metric-group objects for insertion.
  *
- * @param {*} res http response. expected to return successfully inserted metrics as
+ * @param {*} res http response. expected to return successfully inserted metric-groups as
  * an array of JSON objects.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
-// exports.insertMany = async (req, res, next) => {
-// 	const operationName = 'metric.controller:insertMany';
-// 	let err;
+exports.insertMany = async (req, res, next) => {
+	const operationName = 'metric-group.controller:insertMany';
+	let err;
 
-// 	if (!req.body.resources || !req.body.resources.length) {
-// 		err = new Error('invalid input: no resources');
-// 	}
+	if (!req.body.resources || !req.body.resources.length) {
+		err = new Error('invalid input: no resources');
+	}
 
-// 	if (err) {
-// 		logger.error('API', operationName, err);
-// 		return next(err);
-// 	}
+	if (err) {
+		logger.error('API', operationName, err);
+		return next(err);
+	}
 
-// 	let metrics, result;
+	let groups, result;
 
-// 	try {
-// 		metrics = await Metric.insertMany(req.body.resources);
-// 	} catch (err) {
-// 		logger.error('API', operationName, err);
-// 		return next(err);
-// 	}
+	try {
+		groups = await MetricGroup.insertMany(req.body.resources);
+	} catch (err) {
+		logger.error('API', operationName, err);
+		return next(err);
+	}
 
-// 	try {
-// 		result = await addToMetricGroups(metrics);
-// 	} catch (err) {
-// 		logger.error('API', operationName, `inserted ${metrics.length} metrics with errors: ${err}`);
-// 		return next(err);
-// 	}
+	try {
+		result = await addToMetrics(groups);
+	} catch (err) {
+		logger.error('API', operationName, `inserted ${groups.length} metric-groups with errors: ${err}`);
+		return next(err);
+	}
 
-// 	logger.info('API', operationName, `inserted ${metrics.length} metrics`);
-// 	res.status(200).json([metrics, result]);
-// };
+	logger.info('API', operationName, `inserted ${groups.length} metric-groups`);
+	res.status(200).json([groups, result]);
+};
 
 /**
  * inserts a new metric-group to db.
@@ -334,50 +334,50 @@ exports.updateOne = async (req, res, next) => {
 };
 
 /**
- * deletes metrics from db.
+ * deletes metric-groups from db.
  * @param {*} req http request.
  *
- * req.body.resources = array of objects: { _id: String, groups: [String] }
+ * req.body.resources = array of objects: { _id: String, metrics: [String] }
  *
  * @param {*} res http response.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
-// exports.deleteMany = async (req, res, next) => {
-// 	const operationName = 'metric.controller:deleteOne';
-// 	let err = null;
+exports.deleteMany = async (req, res, next) => {
+	const operationName = 'metric-group.controller:deleteOne';
+	let err = null;
 
-// 	if (!req.body.resources || !req.body.resources.length) {
-// 		err = new Error('invalid input: no resources');
-// 	}
+	if (!req.body.resources || !req.body.resources.length) {
+		err = new Error('invalid input: no resources');
+	}
 
-// 	if (err) {
-// 		logger.error('API', operationName, err);
-// 		return next(err);
-// 	}
+	if (err) {
+		logger.error('API', operationName, err);
+		return next(err);
+	}
 
-// 	let result1, result2;
+	let result1, result2;
 
-// 	try {
-// 		result1 = await Metric.deleteMany({
-// 			_id: {
-// 				$in: req.body.resources.map(elem => elem._id)
-// 			}
-// 		});
-// 	} catch (err) {
-// 		logger.error('API', operationName, err);
-// 		return next(err);
-// 	}
+	try {
+		result1 = await MetricGroup.deleteMany({
+			_id: {
+				$in: req.body.resources.map(elem => elem._id)
+			}
+		});
+	} catch (err) {
+		logger.error('API', operationName, err);
+		return next(err);
+	}
 
-// 	try {
-// 		result2 = await removeFromMetricGroups(req.body.resources);
-// 	} catch (err) {
-// 		logger.error('API', operationName, `deleted ${req.body.resources.length} metrics with errors: ${err}`);
-// 		return next(err);
-// 	}
+	try {
+		result2 = await removeFromMetrics(req.body.resources);
+	} catch (err) {
+		logger.error('API', operationName, `deleted ${req.body.resources.length} metric-groups with errors: ${err}`);
+		return next(err);
+	}
 
-// 	logger.info('API', operationName, `deleted ${req.body.resources.length} metrics`);
-// 	res.status(200).json([result1, result2]);
-// };
+	logger.info('API', operationName, `deleted ${req.body.resources.length} metric-groups`);
+	res.status(200).json([result1, result2]);
+};
 
 /**
  * deletes a metric-group from db.

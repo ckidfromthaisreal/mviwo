@@ -15,7 +15,7 @@ router.get('/', controller.getMany);
 router.get('/:id', controller.getOne);
 
 /* bind post '/' to insertMany function */
-// router.post('/', controller.insertMany);
+router.post('/', controller.insertMany);
 
 /* bind post '/1' to insertOne function */
 router.post('/1', controller.insertOne);
@@ -27,7 +27,7 @@ router.post('/1', controller.insertOne);
 router.patch('/:id', controller.updateOne);
 
 /* bind delete '/' to deleteMany function */
-// router.delete('/', controller.deleteMany);
+router.delete('/', controller.deleteMany);
 
 /* bind delete with parameter to deleteOne function */
 router.delete('/:id', controller.deleteOne);

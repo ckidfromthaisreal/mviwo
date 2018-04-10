@@ -29,21 +29,21 @@ describe('metric-group.controller.js', () => {
 	//   nock('http://localhost:8080').get('/metric').reply(200, response);
 	// });
 
-	// it('insertMany', () => {
-	// 	const num = 2;
-	// 	return insertMany({
-	// 		resources: generateMetrics(num)
-	// 	}).then(response => {
-	// 		expect(response).to.be.an('array');
-	// 		expect(response).to.have.lengthOf(2);
-	// 		expect(response[0]).to.be.an('array');
-	// 		expect(response[0]).to.have.lengthOf(num);
-	// 		expect(response[1]).to.be.an('object');
-	// 		expect(response[1]).to.haveOwnProperty('nModified');
-	// 		expect(response[1].nModified).to.be.equal(uniqueGroups(response[0]));
-	// 		metrics = metrics.concat(response[0]);
-	// 	});
-	// });
+	it('insertMany', () => {
+		const num = 2;
+		return axios.insertMany(url, {
+			resources: generateGroups(num)
+		}).then(response => {
+			expect(response).to.be.an('array');
+			expect(response).to.have.lengthOf(2);
+			expect(response[0]).to.be.an('array');
+			expect(response[0]).to.have.lengthOf(num);
+			expect(response[1]).to.be.an('object');
+			expect(response[1]).to.haveOwnProperty('nModified');
+			expect(response[1].nModified).to.be.equal(uniqueMetrics(response[0]));
+			groups = groups.concat(response[0]);
+		});
+	});
 
 	it('getMany populate', () => {
 		return axios.getMany(url, {
@@ -82,23 +82,23 @@ describe('metric-group.controller.js', () => {
 	// 	});
 	// });
 
-	// it('deleteMany', () => {
-	// 	return deleteMany({
-	// 		data: {
-	// 			resources: metrics
-	// 		}
-	// 	}).then(response => {
-	// 		expect(response).to.be.an('array');
-	// 		expect(response).to.have.lengthOf(2);
-	// 		expect(response[0]).to.be.an('object');
-	// 		expect(response[0]).to.haveOwnProperty('n');
-	// 		expect(response[0].n).to.be.equal(metrics.length);
-	// 		expect(response[1]).to.be.an('object');
-	// 		expect(response[1]).to.haveOwnProperty('nModified');
-	// 		expect(response[1].nModified).to.be.equal(uniqueGroups(metrics));
-	// 		metrics.splice(0, metrics.length);
-	// 	});
-	// });
+	it('deleteMany', () => {
+		return axios.deleteMany(url, {
+			data: {
+				resources: groups
+			}
+		}).then(response => {
+			expect(response).to.be.an('array');
+			expect(response).to.have.lengthOf(2);
+			expect(response[0]).to.be.an('object');
+			expect(response[0]).to.haveOwnProperty('n');
+			expect(response[0].n).to.be.equal(groups.length);
+			expect(response[1]).to.be.an('object');
+			expect(response[1]).to.haveOwnProperty('nModified');
+			expect(response[1].nModified).to.be.equal(uniqueMetrics(groups));
+			groups.splice(0, groups.length);
+		});
+	});
 
 	it('insertOne', () => {
 		return axios.insertOne(url, {
