@@ -24,28 +24,9 @@ const axios = require('../axios-runner');
 const url = 'http://localhost:4200/api/metric-group';
 
 describe('metric-group.controller.js', () => {
-	// let metrics = [];
+	let groups = [];
 	// beforeEach(() => {
 	//   nock('http://localhost:8080').get('/metric').reply(200, response);
-	// });
-
-	// it('getOne populate', () => {
-	// 	const id = '5aae7b7bee86ef0014fd2d62';
-	// 	return axios.getOne(url, id, {
-	// 		headers: {
-	// 			'groupspopulate': true,
-	// 			'groupsselect': 'isMandatory'
-	// 		}
-	// 	}).then(response => {
-	// 		expect(response).to.be.an('object');
-	// 		expect(response).to.haveOwnProperty('_id');
-	// 		expect(response._id).to.be.equal(id);
-	// 		expect(response).to.haveOwnProperty('groups');
-	// 		// response.groups.forEach(group => {
-	// 		//     expect(group).to.be.an('object');
-	// 		//     expect(group).to.haveOwnProperty('isMandatory');
-	// 		// });
-	// 	});
 	// });
 
 	// it('insertMany', () => {
@@ -119,21 +100,39 @@ describe('metric-group.controller.js', () => {
 	// 	});
 	// });
 
-	// it('insertOne', () => {
-	// 	return insertOne({
-	// 		resources: generateMetrics(1)[0]
-	// 	}).then(response => {
-	// 		expect(response).to.be.an('array');
-	// 		expect(response).to.have.lengthOf(2);
-	// 		expect(response[0]).to.be.an('object');
-	// 		expect(response[0]).to.haveOwnProperty('groups');
-	// 		expect(response[0].groups).to.be.an('array');
-	// 		expect(response[1]).to.be.an('object');
-	// 		expect(response[1]).to.haveOwnProperty('nModified');
-	// 		expect(response[1].nModified).to.be.equal(response[0].groups.length);
-	// 		metrics.push(response[0]);
-	// 	});
-	// });
+	it('insertOne', () => {
+		return axios.insertOne(url, {
+			resources: generateGroups(1)[0]
+		}).then(response => {
+			expect(response).to.be.an('array');
+			expect(response).to.have.lengthOf(2);
+			expect(response[0]).to.be.an('object');
+			expect(response[0]).to.haveOwnProperty('metrics');
+			expect(response[0].metrics).to.be.an('array');
+			expect(response[1]).to.be.an('object');
+			expect(response[1]).to.haveOwnProperty('nModified');
+			expect(response[1].nModified).to.be.equal(response[0].metrics.length);
+			groups.push(response[0]);
+		});
+	});
+
+	it('getOne populate', () => {
+		return axios.getOne(url, groups[0]._id, {
+			headers: {
+				'metricspopulate': true,
+				'metricsselect': 'name description'
+			}
+		}).then(response => {
+			expect(response).to.be.an('object');
+			expect(response).to.haveOwnProperty('_id');
+			expect(response._id).to.be.equal(groups[0]._id);
+			expect(response).to.haveOwnProperty('metrics');
+			// response.groups.forEach(group => {
+			//     expect(group).to.be.an('object');
+			//     expect(group).to.haveOwnProperty('isMandatory');
+			// });
+		});
+	});
 
 	// it('updateOne', () => {
 	// 	const changes = updateMetrics(metrics);
@@ -164,56 +163,46 @@ describe('metric-group.controller.js', () => {
 	// 	});
 	// });
 
-	// it('deleteOne', () => {
-	// 	return deleteOne(metrics[0]._id, {
-	// 		data: {
-	// 			groups: metrics[0].groups.map(group => group._id)
-	// 		}
-	// 	}).then(response => {
-	// 		expect(response).to.be.an('array');
-	// 		expect(response).to.have.lengthOf(2);
-	// 		expect(response[0]).to.be.an('object');
-	// 		expect(response[1]).to.be.an('object');
-	// 		expect(response[1]).to.haveOwnProperty('nModified');
-	// 		expect(response[1].nModified).to.be.equal(metrics[0].groups.length);
-	// 		metrics.pop();
-	// 	});
-	// });
+	it('deleteOne', () => {
+		return axios.deleteOne(url, groups[0]._id, {
+			data: {
+				metrics: groups[0].metrics
+			}
+		}).then(response => {
+			expect(response).to.be.an('array');
+			expect(response).to.have.lengthOf(2);
+			expect(response[0]).to.be.an('object');
+			expect(response[1]).to.be.an('object');
+			expect(response[1]).to.haveOwnProperty('nModified');
+			expect(response[1].nModified).to.be.equal(groups[0].metrics.length);
+			groups.pop();
+		});
+	});
 });
 
 /**
- * generates metrics stub for tests.
- * @param {*} num num of metrics to generate.
+ * generates metric-groups stub for tests.
+ * @param {*} num num of metric-groups to generate.
  */
-// function generateMetrics(num) {
-// 	if (num <= 0) {
-// 		throw new Error('num must be positive!');
-// 	}
+function generateGroups(num) {
+	if (num <= 0) {
+		throw new Error('num must be positive!');
+	}
 
-// 	const metrics = [];
+	const groups = [];
 
-// 	for (let i = 0; i < num; i++) {
-// 		metrics.push({
-// 			name: `test${i}`,
-// 			description: 'ignore me!',
-// 			isRequired: i % 2 === 0,
-// 			dataType: 'string',
-// 			lastUpdate: Date.now,
-// 			groups: [{
-// 				_id: '5ac6a8e32647e02fa41c3be1',
-// 				name: 'test0',
-// 				description: 'ignore me!'
-// 			}],
-// 			stringParams: {
-// 				isEmail: false,
-// 				lineBreaks: false,
-// 				hint: 'just write something ffs'
-// 			}
-// 		});
-// 	}
+	for (let i = 0; i < num; i++) {
+		groups.push({
+			name: `test${i}`,
+			description: 'ignore me!',
+			isMandatory: i % 2 === 0,
+			lastUpdate: Date.now,
+			metrics: ['5acc2ec2a673854f24c61151']
+		});
+	}
 
-// 	return metrics;
-// }
+	return groups;
+}
 
 // function uniqueGroups(metrics, removedGroups) {
 // 	let uniques = {};

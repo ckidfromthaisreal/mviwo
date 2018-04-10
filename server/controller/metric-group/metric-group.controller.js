@@ -3,20 +3,20 @@ metric-group controller.
 */
 
 /** server config file. */
-// const config = require('../../server.json');
+const config = require('../../server.json');
 
 /** http://mongoosejs.com/
   mongoose provides a straight-forward, schema-based solution to model your application data.
   it includes built-in type casting, validation, query building, business logic hooks and more,
   out of the box.
 */
-// const mongoose = require('mongoose').set('debug', config.DEBUG_MONGOOSE);
+const mongoose = require('mongoose').set('debug', config.DEBUG_MONGOOSE);
 
 /** metric-group model. */
 const MetricGroup = require('../../model/metric-group/metric-group.model');
 
 /** metric model. */
-// const Metric = require('../../model/metric/metric.model');
+const Metric = require('../../model/metric/metric.model');
 
 /** custom-made logger module. */
 const logger = require('../../util/logger');
@@ -29,9 +29,9 @@ const logger = require('../../util/logger');
  *
  * req.headers.select - specifies which fields should be included in returned metric.
  *
- * req.headers.metricsPopulate = if true, populates metric-group's metrics array with metric objects.
+ * req.headers.metricspopulate = if true, populates metric-group's metrics array with metric objects.
  *
- * req.headers.metricsSelect = specifies which fields should be included in returned metric objects.
+ * req.headers.metricsselect = specifies which fields should be included in returned metric objects.
  * @param {*} res http response. expected to return metric-groups as JSON object array.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
@@ -71,50 +71,52 @@ exports.getMany = async (req, res, next) => {
 };
 
 /**
- * fetches a metric from db.
+ * fetches a metric-group from db.
  * @param {*} req http request.
  *
  * req.headers.select - specifies which fields should be included in returned metric.
  *
- * req.headers.groupsPopulate = if true, populates metric's groups array with metric-group objects.
+ * req.headers.metricspopulate = if true, populates metric-group's metrics array with metric objects.
  *
- * req.headers.groupsSelect = specifies which fields should be included in returned metric-group objects.
- * @param {*} res http response. expected to return the metric as JSON object.
+ * req.headers.metricsselect = specifies which fields should be included in returned metric objects.
+ * @param {*} res http response. expected to return the metric-group as JSON object.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
-// exports.getOne = async (req, res, next) => {
-// 	const operationName = 'metric.controller.js:getOne';
-// 	const query = Metric.findById(req.params.id);
+exports.getOne = async (req, res, next) => {
+	const operationName = 'metric-group.controller.js:getOne';
+	const query = MetricGroup.findById(req.params.id);
 
-// 	if (req.headers.select) {
-// 		query.select(req.headers.select);
-// 	}
+	if (req.headers.select) {
+		query.select(req.headers.select);
+	}
 
-// 	if (req.headers.groupspopulate === 'true' &&
-// 		(!req.headers.select || req.headers.select.includes('groups'))) {
-// 		query.populate({
-// 			path: 'groups._id',
-// 			select: `name description ${req.headers.groupsselect}` || 'name description'
-// 		});
-// 	}
+	if (req.headers.metricspopulate === 'true' &&
+		(!req.headers.select || req.headers.select.includes('metrics'))) {
+		query.populate({
+			// path: 'metrics._id',
+			path: 'metrics',
+			// select: `name description ${req.headers.metricsselect}` || 'name description'
+			select: req.headers.metricsselect
+		});
+	}
 
-// 	try {
-// 		const metric = await query.exec();
+	try {
+		const group = await query.exec();
 
-// 		if (metric === null) {
-// 			const err = new Error(`metric ${req.params.id} not found`);
-// 			err.status = 404;
-// 			logger.error('API', operationName, err);
-// 			return next(err);
-// 		} else {
-// 			logger.info('API', operationName, `metric ${req.params.id} fetched`);
-// 			res.status(200).json(metric);
-// 		}
-// 	} catch (err) {
-// 		logger.error('API', operationName, err);
-// 		return next(err);
-// 	}
-// };
+		if (group === null) {
+			const err = new Error(`metric-group ${req.params.id} not found`);
+			err.status = 404;
+			logger.error('API', operationName, err);
+			return next(err);
+		}
+
+		logger.info('API', operationName, `metric-group ${req.params.id} fetched`);
+		res.status(200).json(group);
+	} catch (err) {
+		logger.error('API', operationName, err);
+		return next(err);
+	}
+};
 
 /**
  * inserts new metrics to db.
@@ -160,57 +162,57 @@ exports.getMany = async (req, res, next) => {
 // };
 
 /**
- * inserts a new metric to db.
+ * inserts a new metric-group to db.
  * @param {*} req http request.
  *
- * req.body.resources = metric object for insertion.
+ * req.body.resources = metric-group object for insertion.
  *
- * @param {*} res http response. expected to return successfully inserted metric as
+ * @param {*} res http response. expected to return successfully inserted metric-group as
  * a JSON object.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
-// exports.insertOne = async (req, res, next) => {
-// 	const operationName = 'metric.controller:insertOne';
-// 	let err;
+exports.insertOne = async (req, res, next) => {
+	const operationName = 'metric-group.controller:insertOne';
+	let err;
 
-// 	if (!req.body.resources) {
-// 		err = new Error('invalid input: no resources');
-// 		err.status(403);
-// 	}
+	if (!req.body.resources) {
+		err = new Error('invalid input: no resources');
+		err.status(403);
+	}
 
-// 	if (err) {
-// 		logger.error('API', operationName, err);
-// 		return next(err);
-// 	}
+	if (err) {
+		logger.error('API', operationName, err);
+		return next(err);
+	}
 
-// 	let metric, result;
+	let group, result;
 
-// 	try {
-// 		metric = await Metric.create(req.body.resources);
-// 	} catch (err) {
-// 		logger.error('API', operationName, err);
-// 		return next(err);
-// 	}
+	try {
+		group = await MetricGroup.create(req.body.resources);
+	} catch (err) {
+		logger.error('API', operationName, err);
+		return next(err);
+	}
 
-// 	try {
-// 		result = await addToMetricGroups(metric);
-// 	} catch (err) {
-// 		logger.error('API', operationName, `metric ${metric._id} inserted with errors: ${err}`);
-// 		return next(err);
-// 	}
+	try {
+		result = await addToMetrics(group);
+	} catch (err) {
+		logger.error('API', operationName, `metric-group ${group._id} inserted with errors: ${err}`);
+		return next(err);
+	}
 
-// 	logger.info('API', operationName, `metric ${metric._id} inserted`);
-// 	res.status(200).json([metric, result]);
-// };
+	logger.info('API', operationName, `metric-group ${group._id} inserted`);
+	res.status(200).json([group, result]);
+};
 
 /**
- * updates metrics in db.
+ * updates groups in db.
  * @param {*} req http request.
  *
  * req.body.resources = object with key : nuValue pairs,
  * also includes _id field for finding.
  *
- * @param {*} res http response. expected to return successfully inserted metric as
+ * @param {*} res http response. expected to return successfully inserted group as
  * a JSON object.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
@@ -376,168 +378,178 @@ exports.getMany = async (req, res, next) => {
 // };
 
 /**
- * deletes a metric from db.
+ * deletes a metric-group from db.
  * @param {*} req http request.
  *
- * req.body.groups - array of metric-groups ids to remove metric from.
+ * req.body.metrics - array of metrics ids to remove metric-group from.
  *
  * @param {*} res http response. expected to return a result object.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
-// exports.deleteOne = async (req, res, next) => {
-// 	const operationName = 'metric.controller:deleteOne';
+exports.deleteOne = async (req, res, next) => {
+	const operationName = 'metric-group.controller:deleteOne';
 
-// 	let result1, result2;
+	let result1, result2;
 
-// 	try {
-// 		result1 = await Metric.deleteOne({
-// 			_id: req.params.id
-// 		});
-// 	} catch (err) {
-// 		logger.error('API', operationName, err);
-// 		return next(err);
-// 	}
+	try {
+		result1 = await MetricGroup.deleteOne({
+			_id: req.params.id
+		});
+	} catch (err) {
+		logger.error('API', operationName, err);
+		return next(err);
+	}
 
-// 	try {
-// 		result2 = await removeFromMetricGroups({
-// 			_id: req.params.id,
-// 			groups: req.body.groups
-// 		});
-// 	} catch (err) {
-// 		logger.error('API', operationName, `metric ${req.params.id} deleted with errors: ${err}`);
-// 		return next(err);
-// 	}
+	console.log('metrics', req.body.metrics);
 
-// 	logger.info('API', operationName, `metric ${req.params.id} deleted`);
-// 	res.status(200).json([result1, result2]);
-// };
+	try {
+		result2 = await removeFromMetrics({
+			_id: req.params.id,
+			metrics: req.body.metrics
+		});
+	} catch (err) {
+		logger.error('API', operationName, `metric-group ${req.params.id} deleted with errors: ${err}`);
+		return next(err);
+	}
+
+	console.log('result2', result2);
+
+	logger.info('API', operationName, `metric-group ${req.params.id} deleted`);
+	res.status(200).json([result1, result2]);
+};
 
 /**
- * adds metric/s to metric-groups.
- * if performing both remove and add, use updateMetricGroups instead!
- * @param {any} addObj object or array of objects: { _id: string, groups: [string]}.
- * metric/s will be added to these groups.
+ * adds metric-group/s to metrics.
+ * if performing both remove and add, use updateMetrics instead!
+ * @param {any} addObj object or array of objects: { group: { _id, name, description }, metrics: [string]}.
+ * metric-groups will be added to these metrics.
  * @returns promise.
  */
-// function addToMetricGroups(addObj) {
-// 	return updateMetricGroups(addObj, null);
-// }
+function addToMetrics(addObj) {
+	return updateMetrics(addObj, null);
+}
 
 /**
- * removes metric/s from metric-groups.
- * if performing both remove and add, use updateMetricGroups instead!
- * @param {any} removeObj object or array of objects: { _id: string, groups: [string]}.
+ * removes metric-group/s from metrics.
+ * if performing both remove and add, use updateMetrics instead!
+ * @param {any} removeObj object or array of objects: { group: { _id, name, description }, metrics: [string]}.
  * metric/s will be removed from these groups.
  * @returns promise.
  */
-// function removeFromMetricGroups(removeObj) {
-// 	return updateMetricGroups(null, removeObj);
-// }
+function removeFromMetrics(removeObj) {
+	return updateMetrics(null, removeObj);
+}
 
 /**
- * updates metric-groups' metrics arrays.
- * @param {any} addObj object or array of objects: { _id: string, groups: [string]}.
- * metric/s will be added to these groups.
- * @param {any} removeObj object or array of objects: { _id: string, groups: [string]}.
- * metric/s will be removed from these groups.
+ * updates metrics' metric-groups arrays.
+ * @param {any} addObj object or array of objects: { group: { _id, name, description }, metrics: [string]}.
+ * metric-group/s will be added to these metrics.
+ * @param {any} removeObj object or array of objects: { group: { _id, name, description }, metrics: [string]}.
+ * metric-group/s will be removed from these metrics.
  * @returns promise.
  */
-// function updateMetricGroups(addObj, removeObj) {
-// 	// const operationName = 'metric.controller:updateMetricGroups';
+function updateMetrics(addObj, removeObj) {
+	// const operationName = 'metric.controller:updateMetricGroups';
 
-// 	/** used in bulkWrite. */
-// 	const ops = [];
+	/** used in bulkWrite. */
+	const ops = [];
 
-// 	if (addObj) {
-// 		addObj = pivotToGroups(addObj);
+	if (addObj) {
+		addObj = pivotToMetrics(addObj);
 
-// 		addObj.forEach(element => {
-// 			ops.push({
-// 				updateOne: {
-// 					filter: {
-// 						_id: element.group
-// 					},
-// 					update: {
-// 						$addToSet: {
-// 							metrics: {
-// 								$each: element.metrics
-// 							}
-// 						},
-// 						'lastUpdate': new Date()
-// 					}
-// 				}
-// 			});
-// 		});
-// 	}
+		addObj.forEach(element => {
+			ops.push({
+				updateOne: {
+					filter: {
+						_id: element.metric
+					},
+					update: {
+						$addToSet: {
+							groups: {
+								$each: element.groups
+							}
+						},
+						'lastUpdate': new Date()
+					}
+				}
+			});
+		});
+	}
 
-// 	if (removeObj) {
-// 		removeObj = pivotToGroups(removeObj);
+	if (removeObj) {
+		removeObj = pivotToMetrics(removeObj);
 
-// 		removeObj.forEach(element => {
-// 			ops.push({
-// 				updateOne: {
-// 					filter: {
-// 						_id: element.group
-// 					},
-// 					update: {
-// 						$pullAll: {
-// 							metrics: element.metrics
-// 						},
-// 						'lastUpdate': new Date()
-// 					}
-// 				}
-// 			});
-// 		});
-// 	}
+		removeObj.forEach(element => {
+			ops.push({
+				updateOne: {
+					filter: {
+						_id: element.metric
+					},
+					update: {
+						// $pullAll: {
+						$pull: {
+							// groups: element.groups // can't match up right now.
+							groups: { '_id': { $in: element.groups.map(group => group._id) }}
+						},
+						'lastUpdate': new Date()
+					}
+				}
+			});
+		});
+	}
 
-// 	return new Promise((resolve, reject) => {
-// 		if (ops.length > 0) {
-// 			MetricGroup.bulkWrite(ops, (err, result) => {
-// 				if (err) {
-// 					reject(err);
-// 				} else {
-// 					resolve(result);
-// 				}
-// 			});
-// 		} else {
-// 			resolve({
-// 				nModified: 0
-// 			});
-// 		}
-// 	});
-// }
+	return new Promise((resolve, reject) => {
+		if (ops.length > 0) {
+			Metric.bulkWrite(ops, (err, result) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(result);
+				}
+			});
+		} else {
+			resolve({
+				nModified: 0
+			});
+		}
+	});
+}
 
 /**
- * utility function used in updateMetricGroups(...).
- * turns a metric centered object or object array to group centered array.
- * @param {any} metricsObj metric centered object or object array.
- * @returns group centered object array.
+ * utility function used in updateMetrics(...).
+ * turns a group centered object or object array to metric centered array.
+ * @param {any} groupsObj group centered object or object array.
+ * @returns metric centered object array.
  */
-// function pivotToGroups(metricsObj) {
-// 	const groups = [];
-// 	metricsObj = Array.isArray(metricsObj) ? metricsObj : [metricsObj];
+function pivotToMetrics(groupsObj) {
+	const metrics = [];
+	groupsObj = Array.isArray(groupsObj) ? groupsObj : [groupsObj];
 
-// 	metricsObj.map(metric => {
-// 		return {
-// 			_id: mongoose.Types.ObjectId(metric._id),
-// 			groups: metric.groups || []
-// 		};
-// 	}).forEach(metric => {
-// 		metric.groups.map(group => mongoose.Types.ObjectId(group._id || group)).forEach(groupId => {
-// 			const indexOf = groups.findIndex(e => e.group.equals(groupId));
-// 			if (indexOf === -1) {
-// 				groups.push({
-// 					group: mongoose.Types.ObjectId(groupId),
-// 					metrics: [metric._id]
-// 				});
-// 			} else {
-// 				groups[indexOf].metrics.push(metric._id);
-// 			}
-// 		});
-// 	});
+	groupsObj.map(group => {
+		return {
+			group: {
+				_id: mongoose.Types.ObjectId(group._id),
+				name: group.name,
+				description: group.description,
+			},
+			metrics: group.metrics || []
+		};
+	}).forEach(grouping => {
+		grouping.metrics.map(metric => mongoose.Types.ObjectId(metric._id || metric)).forEach(metricId => {
+			const indexOf = metrics.findIndex(e => e.metric.equals(metricId));
+			if (indexOf === -1) {
+				metrics.push({
+					metric: mongoose.Types.ObjectId(metricId),
+					groups: [grouping.group]
+				});
+			} else {
+				metrics[indexOf].groups.push(grouping.group);
+			}
+		});
+	});
 
-// 	return groups;
-// }
+	return metrics;
+}
 
 /**
  * builds update object arrays for update queries.

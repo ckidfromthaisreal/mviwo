@@ -12,13 +12,13 @@ const controller = require('./metric-group.controller');
 router.get('/', controller.getMany);
 
 /* bind get with parameter to getOne function */
-// router.get('/:id', controller.getOne);
+router.get('/:id', controller.getOne);
 
 /* bind post '/' to insertMany function */
 // router.post('/', controller.insertMany);
 
 /* bind post '/1' to insertOne function */
-// router.post('/1', controller.insertOne);
+router.post('/1', controller.insertOne);
 
 /* bind patch '/' to updateMany function */
 // router.patch('/', controller.updateMany);
@@ -30,7 +30,7 @@ router.get('/', controller.getMany);
 // router.delete('/', controller.deleteMany);
 
 /* bind delete with parameter to deleteOne function */
-// router.delete('/:id', controller.deleteOne);
+router.delete('/:id', controller.deleteOne);
 
 /* export router */
 module.exports = router;
