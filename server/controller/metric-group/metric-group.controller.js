@@ -272,64 +272,66 @@ exports.insertOne = async (req, res, next) => {
 
 
 /**
- * updates a metric in db.
+ * updates a metric-group in db.
  * @param {*} req http request.
  *
  * req.body.resources = object with key : nuValue pairs,
- * and also (optional) removedGroups property with group id's array.
+ * and also (optional) removedMetrics property with metrics id's array.
  *
- * @param {*} res http response. expected to return successfully inserted metric as
+ * @param {*} res http response. expected to return successfully updated metric-group as
  * a JSON object.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
-// exports.updateOne = async (req, res, next) => {
-// 	const operationName = 'metric.controller:updateOne';
-// 	let err = null;
+exports.updateOne = async (req, res, next) => {
+	const operationName = 'metric.controller:updateOne';
+	let err = null;
 
-// 	if (!req.body.resources || typeof req.body.resources !== 'object' ||
-// 		!Object.keys(req.body.resources).length) {
-// 		err = new Error('invalid input: no resources');
-// 	}
+	if (!req.body.resources || typeof req.body.resources !== 'object' ||
+		!Object.keys(req.body.resources).length) {
+		err = new Error('invalid input: no resources');
+	}
 
-// 	if (err) {
-// 		logger.error('API', operationName, err);
-// 		return next(err);
-// 	}
+	if (err) {
+		logger.error('API', operationName, err);
+		return next(err);
+	}
 
-// 	let metric, result = {
-// 		nModified: 0
-// 	};
+	let group, result = {
+		nModified: 0
+	};
 
-// 	try {
-// 		metric = await Metric.findByIdAndUpdate(
-// 			req.params.id,
-// 			buildUpdateObject(req.body.resources), {
-// 				new: true
-// 			}
-// 		);
-// 	} catch (err) {
-// 		logger.error('API', operationName, err);
-// 		return next(err);
-// 	}
+	try {
+		group = await MetricGroup.findByIdAndUpdate(
+			req.params.id,
+			buildUpdateObject(req.body.resources), {
+				new: true
+			}
+		);
+	} catch (err) {
+		logger.error('API', operationName, err);
+		return next(err);
+	}
 
-// 	if (req.body.resources.groups || req.body.resources.removedGroups) {
-// 		try {
-// 			result = await updateMetricGroups({
-// 				_id: req.params.id,
-// 				groups: req.body.resources.groups
-// 			}, {
-// 				_id: req.params.id,
-// 				groups: req.body.resources.removedGroups
-// 			});
-// 		} catch (err) {
-// 			logger.error('API', operationName, `metric ${req.params.id} updated with errors: ${err}`);
-// 			return next(err);
-// 		}
-// 	}
+	if (group.metrics.length || req.body.resources.removedMetrics) {
+		try {
+			result = await updateMetrics({
+				_id: req.params.id,
+				name: group.name,
+				description: group.description,
+				metrics: group.metrics
+			}, {
+				_id: req.params.id,
+				metrics: req.body.resources.removedMetrics
+			});
+		} catch (err) {
+			logger.error('API', operationName, `metric-group ${req.params.id} updated with errors: ${err}`);
+			return next(err);
+		}
+	}
 
-// 	logger.info('API', operationName, `metric ${req.params.id} updated`);
-// 	res.status(200).json([metric, result]);
-// };
+	logger.info('API', operationName, `metric-group ${req.params.id} updated`);
+	res.status(200).json([group, result]);
+};
 
 /**
  * deletes metrics from db.
@@ -400,8 +402,6 @@ exports.deleteOne = async (req, res, next) => {
 		return next(err);
 	}
 
-	console.log('metrics', req.body.metrics);
-
 	try {
 		result2 = await removeFromMetrics({
 			_id: req.params.id,
@@ -411,8 +411,6 @@ exports.deleteOne = async (req, res, next) => {
 		logger.error('API', operationName, `metric-group ${req.params.id} deleted with errors: ${err}`);
 		return next(err);
 	}
-
-	console.log('result2', result2);
 
 	logger.info('API', operationName, `metric-group ${req.params.id} deleted`);
 	res.status(200).json([result1, result2]);
@@ -464,11 +462,12 @@ function updateMetrics(addObj, removeObj) {
 						_id: element.metric
 					},
 					update: {
-						$addToSet: {
-							groups: {
-								$each: element.groups
-							}
-						},
+						// $addToSet: {
+						// 	groups: {
+						// 		$each: element.groups
+						// 	}
+						// },
+						groups: element.groups,
 						'lastUpdate': new Date()
 					}
 				}
@@ -488,8 +487,11 @@ function updateMetrics(addObj, removeObj) {
 					update: {
 						// $pullAll: {
 						$pull: {
-							// groups: element.groups // can't match up right now.
-							groups: { '_id': { $in: element.groups.map(group => group._id) }}
+							groups: {
+								'_id': {
+									$in: element.groups.map(group => group._id)
+								}
+							}
 						},
 						'lastUpdate': new Date()
 					}
@@ -554,58 +556,19 @@ function pivotToMetrics(groupsObj) {
 /**
  * builds update object arrays for update queries.
  * @param {*} update object containing key : nuValue pairs.
- * tolerant to _id and removedGroups fields presence.
+ * tolerant to _id and removedMetrics fields presence.
  * @return update objects array.
  */
-// function buildUpdateObject(update) {
-// 	const updateObj = {
-// 		lastUpdate: new Date()
-// 	};
-// 	const params = ['number', 'string', 'enum', 'blob', 'date'];
+function buildUpdateObject(update) {
+	const updateObj = {
+		lastUpdate: new Date()
+	};
 
-// 	update = JSON.parse(JSON.stringify(update)); //clone
-// 	delete update.removedGroups; // not an actual field.
-// 	delete update._id; // not an actual change.
+	update = JSON.parse(JSON.stringify(update)); //clone
+	delete update.removedMetrics; // not an actual field.
+	delete update._id; // not an actual change.
 
-// 	Object.keys(update).forEach(key => {
-// 		if (typeof update[key] === 'object' && !Array.isArray(update[key])) { // params
-// 			Object.keys(update[key]).forEach(key2 => {
-// 				updateObj[`${key}.${key2}`] = update[key][key2];
-// 			});
+	Object.keys(update).forEach(key => updateObj[key] = update[key]);
 
-// 			if (key.includes('Params')) { // up to 1 params per document!
-// 				if (!updateObj.$unset) {
-// 					updateObj.$unset = {};
-// 				}
-
-// 				params.forEach(param => {
-// 					if (key.split('P')[0] !== param) {
-// 						updateObj.$unset[`${param}Params`] = 1;
-// 					}
-// 				});
-// 			}
-// 		} else { // regular field
-// 			if (key === 'dataType' && update.dataType === 'boolean') { // boolean has no params!
-// 				if (!updateObj.$unset) {
-// 					updateObj.$unset = {};
-// 				}
-
-// 				params.forEach(param => {
-// 					updateObj.$unset[`${param}Params`] = 1;
-// 				});
-// 			}
-
-// 			updateObj[key] = update[key];
-// 		}
-// 	});
-
-// 	if (updateObj.$unset) { // avoid same field conflicts.
-// 		Object.keys(updateObj).filter(key => key.includes('Params')).forEach(key => {
-// 			if (updateObj.$unset[key.split('.')[0]]) {
-// 				delete updateObj[key];
-// 			}
-// 		});
-// 	}
-
-// 	return updateObj;
-// }
+	return updateObj;
+}

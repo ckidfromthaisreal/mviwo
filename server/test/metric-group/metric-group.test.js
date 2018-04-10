@@ -134,34 +134,36 @@ describe('metric-group.controller.js', () => {
 		});
 	});
 
-	// it('updateOne', () => {
-	// 	const changes = updateMetrics(metrics);
-	// 	return updateOne(metrics[0]._id, {
-	// 		resources: changes[0]
-	// 	}).then(response => {
-	// 		expect(response).to.be.an('array');
-	// 		expect(response).to.have.lengthOf(2);
-	// 		expect(response[0]).to.be.an('object');
-	// 		expect(response[0]).to.haveOwnProperty('dataType');
-	// 		expect(response[0].dataType).to.be.equal(changes[0].dataType);
-	// 		expect(response[0]).to.haveOwnProperty('name');
-	// 		expect(response[0].name).to.be.equal(changes[0].name);
-	// 		expect(response[0]).to.haveOwnProperty('groups');
-	// 		expect(response[0].groups).to.be.an('array');
-	// 		expect(response[0].groups).to.have.lengthOf(metrics[0].groups.length);
-	// 		metrics[0].groups.forEach((group, i) => {
-	// 			expect(response[0].groups[i]).to.be.an('object');
-	// 			Object.keys(group).forEach(key => {
-	// 				expect(response[0].groups[i]).to.haveOwnProperty(key);
-	// 				expect(response[0].groups[i][key]).to.be.equal(group[key]);
-	// 			});
-	// 		});
-	// 		expect(response[1]).to.be.an('object');
-	// 		expect(response[1]).to.haveOwnProperty('nModified');
-	// 		expect(response[1].nModified).to.be.equal(uniqueGroups(metrics,
-	// 			changes.map(change => change.removedGroups)));
-	// 	});
-	// });
+	it('updateOne', () => {
+		const changes = updateMetricGroups(groups);
+
+		return axios.updateOne(url, groups[0]._id, {
+			resources: changes[0]
+		}).then(response => {
+			expect(response).to.be.an('array');
+			expect(response).to.have.lengthOf(2);
+			expect(response[0]).to.be.an('object');
+			expect(response[0]).to.haveOwnProperty('name');
+			expect(response[0].name).to.be.equal(changes[0].name);
+			expect(response[0]).to.haveOwnProperty('metrics');
+			expect(response[0].metrics).to.be.an('array');
+			expect(response[0].metrics).to.have.lengthOf(groups[0].metrics.length);
+			response[0].metrics.forEach((metric, i) => {
+				expect(metric).to.be.equal(changes[0].metrics[i]);
+			});
+			// groups[0].metrics.forEach((metric, i) => {
+			// 	expect(response[0].metrics[i]).to.be.an('object');
+			// 	Object.keys(metric).forEach(key => {
+			// 		expect(response[0].metrics[i]).to.haveOwnProperty(key);
+			// 		expect(response[0].metrics[i][key]).to.be.equal(metric[key]);
+			// 	});
+			// });
+			expect(response[1]).to.be.an('object');
+			expect(response[1]).to.haveOwnProperty('nModified');
+			expect(response[1].nModified).to.be.equal(uniqueMetrics(groups,
+				changes.map(change => change.removedMetrics)));
+		});
+	});
 
 	it('deleteOne', () => {
 		return axios.deleteOne(url, groups[0]._id, {
@@ -204,57 +206,51 @@ function generateGroups(num) {
 	return groups;
 }
 
-// function uniqueGroups(metrics, removedGroups) {
-// 	let uniques = {};
-// 	metrics.map(metric => metric.groups.map(group => group._id))
-// 		.forEach(idSet => {
-// 			idSet.forEach(id => {
-// 				uniques[id] = true;
-// 			});
-// 		});
+function uniqueMetrics(groups, removedMetrics) {
+	let uniques = {};
 
-// 	if (removedGroups) {
-// 		removedGroups.forEach(idSet => {
-// 			idSet.forEach(id => {
-// 				uniques[id] = true;
-// 			});
-// 		});
-// 	}
+	groups.map(group => group.metrics).forEach(idSet => {
+		idSet.forEach(id => {
+			uniques[id] = true;
+		});
+	});
 
-// 	return Object.keys(uniques).length;
-// }
+	if (removedMetrics) {
+		removedMetrics.forEach(elem => {
+			if (Array.isArray(elem)) {
+				elem.forEach(id => {
+					uniques[id] = true;
+				});
+			} else {
+				uniques[elem] = true;
+			}
+		});
+	}
+
+	return Object.keys(uniques).length;
+}
 
 /**
  * updates all metrics.
  * @returns changes array.
  */
-// function updateMetrics(metrics, withIds) {
-// 	const changes = [];
+function updateMetricGroups(groups, withIds) {
+	const changes = [];
 
-// 	metrics.forEach(metric => {
-// 		metric.dataType = 'boolean';
-// 		metric.name = metric.name + ' updated';
-// 		metric.groups = [{
-// 			_id: '5ac8d04cd8cd663ecc7d0f16',
-// 			name: 'test1',
-// 			description: 'ignore me!'
-// 		}];
-// 		metric.stringParams.minLength = 3;
+	groups.forEach(group => {
+		group.name = group.name + ' updated';
+		group.metrics = ['5acca96ca673854f24c61153', '5acca8c2a673854f24c61152'];
 
-// 		changes.push({
-// 			dataType: metric.dataType,
-// 			name: metric.name,
-// 			removedGroups: ['5ac6a8e32647e02fa41c3be1'],
-// 			groups: metric.groups,
-// 			stringParams: {
-// 				minLength: metric.stringParams.minLength
-// 			}
-// 		});
+		changes.push({
+			name: group.name,
+			removedMetrics: ['5acc2ec2a673854f24c61151'],
+			metrics: group.metrics
+		});
 
-// 		if (withIds === true) {
-// 			changes[changes.length - 1]._id = metric._id;
-// 		}
-// 	});
+		if (withIds === true) {
+			changes[changes.length - 1]._id = group._id;
+		}
+	});
 
-// 	return changes;
-// }
+	return changes;
+}
