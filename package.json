@@ -10,13 +10,13 @@
     "build": "ng build --prod --output-path=public --stats-json",
     "serve-api": "nodemon server",
     "test": "ng test",
-    "test-server": "node_modules/.bin/mocha server/test/metric-group --recursive",
+    "test-server": "node_modules/.bin/mocha server/test/metric --recursive",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "push": "git push & git push heroku master",
     "sw": "sw-precache --root=public --config=sw-precache-config.js",
-	"bundle-report": "webpack-bundle-analyzer public/stats.json",
-	"start-mongo": "md mongo-db & \"C:/Program Files/MongoDB/Server/3.6/bin/mongod.exe\" --dbpath mongo-db"
+    "bundle-report": "webpack-bundle-analyzer public/stats.json",
+    "start-mongo": "md mongo-db & \"C:/Program Files/MongoDB/Server/3.6/bin/mongod.exe\" --dbpath mongo-db"
   },
   "private": true,
   "dependencies": {
@@ -37,6 +37,8 @@
     "connect-mongo": "^2.0.1",
     "core-js": "^2.4.1",
     "express": "^4.16.3",
+    "express-jwt": "^5.3.1",
+    "express-jwt-permissions": "^1.1.0",
     "express-session": "^1.15.6",
     "jsonwebtoken": "^8.2.1",
     "mongoose": "^5.0.12",

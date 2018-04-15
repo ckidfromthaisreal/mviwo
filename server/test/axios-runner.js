@@ -5,11 +5,11 @@ const axios = require('axios');
 
 /**
  * sends a http get request to api to perform getMany.
- * @param {any} options
+ * @param {any} config
  * @returns promise.
  */
-module.exports.getMany = (url, options) => {
-	return axios.get(url, options)
+module.exports.getMany = (url, config) => {
+	return axios.get(url, config)
 		.then(res => res.data)
 		.catch(error => console.log(error));
 };
@@ -20,8 +20,8 @@ module.exports.getMany = (url, options) => {
  * @param {any} options
  * @returns promise.
  */
-module.exports.getOne = (url, id, options) => {
-	return axios.get(`${url}/${id}`, options)
+module.exports.getOne = (url, id, config) => {
+	return axios.get(`${url}/${id}`, config)
 		.then(res => res.data)
 		.catch(error => console.log(error));
 };
@@ -31,8 +31,8 @@ module.exports.getOne = (url, id, options) => {
  * @param {any} data data to be inserted.
  * @returns promise.
  */
-module.exports.insertMany = (url, data) => {
-	return axios.post(url, data)
+module.exports.insertMany = (url, data, config) => {
+	return axios.post(url, data, config)
 		.then(res => res.data)
 		.catch(error => console.log(error));
 };
@@ -42,8 +42,8 @@ module.exports.insertMany = (url, data) => {
  * @param {any} data data to be inserted.
  * @returns promise.
  */
-module.exports.insertOne = (url, data) => {
-	return axios.post(`${url}/1`, data)
+module.exports.insertOne = (url, data, config) => {
+	return axios.post(`${url}/1`, data, config)
 		.then(res => res.data)
 		.catch(error => console.log(error));
 };
@@ -53,8 +53,8 @@ module.exports.insertOne = (url, data) => {
  * @param {any} id metric id to be deleted.
  * @returns promise.
  */
-module.exports.deleteOne = (url, id, data) => {
-	return axios.delete(`${url}/${id}`, data)
+module.exports.deleteOne = (url, id, config) => {
+	return axios.delete(`${url}/${id}`, config)
 		.then(res => res.data)
 		.catch(error => console.log(error));
 };
@@ -64,8 +64,8 @@ module.exports.deleteOne = (url, id, data) => {
  * @param {any} data data to be deleted.
  * @returns promise.
  */
-module.exports.deleteMany = (url, data) => {
-	return axios.delete(url, data)
+module.exports.deleteMany = (url, config) => {
+	return axios.delete(url, config)
 		.then(res => res.data)
 		.catch(error => console.log(error));
 };
@@ -75,8 +75,8 @@ module.exports.deleteMany = (url, data) => {
  * @param {*} id metric id.
  * @param {*} data changes made.
  */
-module.exports.updateOne = (url, id, data) => {
-	return axios.patch(`${url}/${id}`, data)
+module.exports.updateOne = (url, id, data, config) => {
+	return axios.patch(`${url}/${id}`, data, config)
 		.then(res => res.data)
 		.catch(error => console.log(error));
 };
@@ -85,8 +85,8 @@ module.exports.updateOne = (url, id, data) => {
  * sends a http request to api to perform updateMany.
  * @param {*} data changes made.
  */
-module.exports.updateMany = (url, data) => {
-	return axios.patch(url, data)
+module.exports.updateMany = (url, data, config) => {
+	return axios.patch(url, data, config)
 		.then(res => res.data)
 		.catch(error => console.log(error));
 };

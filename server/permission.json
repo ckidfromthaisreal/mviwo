@@ -1,0 +1,75 @@
+{
+	"0": {
+		"alias": "guest",
+		"allowed": [
+			"metric:getMany",
+			"metric:getOne",
+			"metric-group:getMany",
+			"metric-group:getOne",
+			"examination:getMany",
+			"examination:getOne"
+		]
+	},
+	"200": {
+		"alias": "student",
+		"allowed": [
+			"metric:getMany",
+			"metric:getOne",
+			"metric-group:getMany",
+			"metric-group:getOne",
+			"examination:getMany",
+			"examination:getOne",
+			"measure:insertOne"
+		]
+	},
+	"800": {
+		"alias": "operator",
+		"allowed": [
+			"metric:getMany",
+			"metric:getOne",
+			"metric:updateOne",
+			"metric:updateMany",
+			"metric:insertOne",
+			"metric:insertMany",
+			"metric:deleteOne",
+			"metric:deleteMany",
+			"metric-group:getMany",
+			"metric-group:getOne",
+			"metric-group:insertMany",
+			"metric-group:insertOne",
+			"metric-group:updateMany",
+			"metric-group:updateOne",
+			"metric-group:deleteMany",
+			"metric-group:deleteOne",
+			"examination:getMany",
+			"examination:getOne",
+			"measure:insertOne"
+		]
+	},
+	"999": {
+		"alias": "power user",
+		"allowed": [
+			"metric:getMany",
+			"metric:getOne",
+			"metric:updateOne",
+			"metric:updateMany",
+			"metric:insertOne",
+			"metric:insertMany",
+			"metric:deleteOne",
+			"metric:deleteMany",
+			"metric-group:getMany",
+			"metric-group:getOne",
+			"metric-group:insertMany",
+			"metric-group:insertOne",
+			"metric-group:updateMany",
+			"metric-group:updateOne",
+			"metric-group:deleteMany",
+			"metric-group:deleteOne",
+			"examination:getMany",
+			"examination:getOne",
+			"measure:insertOne",
+			"user:delete",
+			"user:register"
+		]
+	}
+}

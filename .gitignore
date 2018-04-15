@@ -48,4 +48,7 @@ Thumbs.db
 /server/logs/*.log
 
 #secrets
-/server/auth.json
+/server/secret.js
+
+#db
+/mongo-db

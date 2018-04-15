@@ -25,6 +25,8 @@ const logger = require('../../util/logger');
  * fetches metrics from db.
  * @param {*} req http request.
  *
+ * req.user - object including user credentials.
+ *
  * req.headers.filter - filter object. if not provided, fetches all metrics in db.
  *
  * req.headers.select - specifies which fields should be included in returned metric.
@@ -36,8 +38,7 @@ const logger = require('../../util/logger');
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
 exports.getMany = async (req, res, next) => {
-	const operationName = 'metric.controller.js:getMany';
-	logger.verbose('API', operationName, `req.headers${JSON.stringify(req.headers)}`);
+	const operationName = 'metric.controller:getMany';
 
 	let query;
 	if (req.headers.filter) {
@@ -54,16 +55,16 @@ exports.getMany = async (req, res, next) => {
 		(!req.headers.select || req.headers.select.includes('groups'))) {
 		query.populate({
 			path: 'groups._id',
-			select: `name description ${req.headers.groupsselect}` || 'name description'
+			select: req.headers.groupsselect
 		});
 	}
 
 	try {
 		const metrics = await query.exec();
-		logger.info('API', operationName, `fetched ${metrics.length} metrics`);
+		logger.info('API', operationName, `${metrics.length} metrics fetched`, req.user);
 		res.status(200).json(metrics);
 	} catch (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 };
@@ -72,16 +73,18 @@ exports.getMany = async (req, res, next) => {
  * fetches a metric from db.
  * @param {*} req http request.
  *
+ * req.user - object including user credentials.
+ *
  * req.headers.select - specifies which fields should be included in returned metric.
  *
- * req.headers.groupsPopulate = if true, populates metric's groups array with metric-group objects.
+ * req.headers.groupspopulate = if true, populates metric's groups array with metric-group objects.
  *
- * req.headers.groupsSelect = specifies which fields should be included in returned metric-group objects.
+ * req.headers.groupsselect = specifies which fields should be included in returned metric-group objects.
  * @param {*} res http response. expected to return the metric as JSON object.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
 exports.getOne = async (req, res, next) => {
-	const operationName = 'metric.controller.js:getOne';
+	const operationName = 'metric.controller:getOne';
 	const query = Metric.findById(req.params.id);
 
 	if (req.headers.select) {
@@ -92,24 +95,23 @@ exports.getOne = async (req, res, next) => {
 		(!req.headers.select || req.headers.select.includes('groups'))) {
 		query.populate({
 			path: 'groups._id',
-			select: `name description ${req.headers.groupsselect}` || 'name description'
+			select: req.headers.groupsselect
 		});
 	}
 
 	try {
 		const metric = await query.exec();
 
-		if (metric === null) {
-			const err = new Error(`metric ${req.params.id} not found`);
-			err.status = 404;
-			logger.error('API', operationName, err);
-			return next(err);
+		if (!metric) {
+			const err = `metric ${req.params.id} not found`;
+			logger.warn('API', operationName, err, req.user);
+			res.status(404).send(err);
 		} else {
-			logger.info('API', operationName, `metric ${req.params.id} fetched`);
+			logger.info('API', operationName, `metric ${req.params.id} fetched`, req.user);
 			res.status(200).json(metric);
 		}
 	} catch (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 };
@@ -117,6 +119,8 @@ exports.getOne = async (req, res, next) => {
 /**
  * inserts new metrics to db.
  * @param {*} req http request.
+ *
+ * req.user - object including user credentials.
  *
  * req.body.resources = array of metric objects for insertion.
  *
@@ -133,7 +137,7 @@ exports.insertMany = async (req, res, next) => {
 	}
 
 	if (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 
@@ -142,24 +146,26 @@ exports.insertMany = async (req, res, next) => {
 	try {
 		metrics = await Metric.insertMany(req.body.resources);
 	} catch (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 
 	try {
 		result = await addToMetricGroups(metrics);
 	} catch (err) {
-		logger.error('API', operationName, `inserted ${metrics.length} metrics with errors: ${err}`);
+		logger.error('API', operationName, `${metrics.length} metrics inserted with errors: ${err},`, req.user);
 		return next(err);
 	}
 
-	logger.info('API', operationName, `inserted ${metrics.length} metrics`);
+	logger.info('API', operationName, `${metrics.length} metrics inserted`, req.user);
 	res.status(200).json([metrics, result]);
 };
 
 /**
  * inserts a new metric to db.
  * @param {*} req http request.
+ *
+ * req.user - object including user credentials.
  *
  * req.body.resources = metric object for insertion.
  *
@@ -177,7 +183,7 @@ exports.insertOne = async (req, res, next) => {
 	}
 
 	if (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 
@@ -186,24 +192,26 @@ exports.insertOne = async (req, res, next) => {
 	try {
 		metric = await Metric.create(req.body.resources);
 	} catch (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 
 	try {
 		result = await addToMetricGroups(metric);
 	} catch (err) {
-		logger.error('API', operationName, `metric ${metric._id} inserted with errors: ${err}`);
+		logger.error('API', operationName, `metric ${metric._id} inserted with errors: ${err},`, req.user);
 		return next(err);
 	}
 
-	logger.info('API', operationName, `metric ${metric._id} inserted`);
+	logger.info('API', operationName, `metric ${metric._id} inserted`, req.user);
 	res.status(200).json([metric, result]);
 };
 
 /**
  * updates metrics in db.
  * @param {*} req http request.
+ *
+ * req.user - object including user credentials.
  *
  * req.body.resources = object with key : nuValue pairs,
  * also includes _id field for finding.
@@ -222,7 +230,7 @@ exports.updateMany = async (req, res, next) => {
 	}
 
 	if (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 
@@ -244,7 +252,7 @@ exports.updateMany = async (req, res, next) => {
 	try {
 		result1 = await Metric.bulkWrite(ops);
 	} catch (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 
@@ -258,11 +266,11 @@ exports.updateMany = async (req, res, next) => {
 				};
 			}));
 	} catch (err) {
-		logger.err('API', operationName, `updated ${result1.nModified} metrics with errors: ${err}`);
+		logger.err('API', operationName, `${result1.nModified} metrics updated with errors: ${err},`, req.user);
 		return next(err);
 	}
 
-	logger.info('API', operationName, `updated ${result1.nModified} metrics`);
+	logger.info('API', operationName, `${result1.nModified} metrics updated`, req.user);
 	res.status(200).json([result1, result2]);
 };
 
@@ -270,6 +278,8 @@ exports.updateMany = async (req, res, next) => {
 /**
  * updates a metric in db.
  * @param {*} req http request.
+ *
+ * req.user - object including user credentials.
  *
  * req.body.resources = object with key : nuValue pairs,
  * and also (optional) removedGroups property with group id's array.
@@ -288,7 +298,7 @@ exports.updateOne = async (req, res, next) => {
 	}
 
 	if (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 
@@ -304,7 +314,7 @@ exports.updateOne = async (req, res, next) => {
 			}
 		);
 	} catch (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 
@@ -318,18 +328,20 @@ exports.updateOne = async (req, res, next) => {
 				groups: req.body.resources.removedGroups
 			});
 		} catch (err) {
-			logger.error('API', operationName, `metric ${req.params.id} updated with errors: ${err}`);
+			logger.error('API', operationName, `metric ${req.params.id} updated with errors: ${err},`, req.user);
 			return next(err);
 		}
 	}
 
-	logger.info('API', operationName, `metric ${req.params.id} updated`);
+	logger.info('API', operationName, `metric ${req.params.id} updated`, req.user);
 	res.status(200).json([metric, result]);
 };
 
 /**
  * deletes metrics from db.
  * @param {*} req http request.
+ *
+ * req.user - object including user credentials.
  *
  * req.body.resources = array of objects: { _id: String, groups: [String] }
  *
@@ -345,7 +357,7 @@ exports.deleteMany = async (req, res, next) => {
 	}
 
 	if (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 
@@ -358,24 +370,26 @@ exports.deleteMany = async (req, res, next) => {
 			}
 		});
 	} catch (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 
 	try {
 		result2 = await removeFromMetricGroups(req.body.resources);
 	} catch (err) {
-		logger.error('API', operationName, `deleted ${req.body.resources.length} metrics with errors: ${err}`);
+		logger.error('API', operationName, `${req.body.resources.length} metrics deleted with errors: ${err},`, req.user);
 		return next(err);
 	}
 
-	logger.info('API', operationName, `deleted ${req.body.resources.length} metrics`);
+	logger.info('API', operationName, `${req.body.resources.length} metrics deleted`, req.user);
 	res.status(200).json([result1, result2]);
 };
 
 /**
  * deletes a metric from db.
  * @param {*} req http request.
+ *
+ * req.user - object including user credentials.
  *
  * req.body.groups - array of metric-groups ids to remove metric from.
  *
@@ -392,7 +406,7 @@ exports.deleteOne = async (req, res, next) => {
 			_id: req.params.id
 		});
 	} catch (err) {
-		logger.error('API', operationName, err);
+		logger.error('API', operationName, err, req.user);
 		return next(err);
 	}
 
@@ -402,11 +416,11 @@ exports.deleteOne = async (req, res, next) => {
 			groups: req.body.groups
 		});
 	} catch (err) {
-		logger.error('API', operationName, `metric ${req.params.id} deleted with errors: ${err}`);
+		logger.error('API', operationName, `metric ${req.params.id} deleted with errors: ${err},`, req.user);
 		return next(err);
 	}
 
-	logger.info('API', operationName, `metric ${req.params.id} deleted`);
+	logger.info('API', operationName, `metric ${req.params.id} deleted`, req.user);
 	res.status(200).json([result1, result2]);
 };
 
