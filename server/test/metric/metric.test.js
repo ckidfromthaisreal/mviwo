@@ -228,7 +228,6 @@ function generateMetrics(num) {
 			description: 'ignore me!',
 			isRequired: i % 2 === 0,
 			dataType: 'string',
-			lastUpdate: Date.now,
 			groups: [{
 				_id: '5ac6a8e32647e02fa41c3be1',
 				name: 'test000',
@@ -238,7 +237,8 @@ function generateMetrics(num) {
 				isEmail: false,
 				lineBreaks: false,
 				hint: 'just write something ffs'
-			}
+			},
+			editMode: 'restricted'
 		});
 	}
 
