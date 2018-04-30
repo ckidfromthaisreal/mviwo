@@ -18,10 +18,10 @@ const User = require('../../model/user/user.model');
 /** custom-made logger module. */
 const logger = require('../../util/logger');
 
-/** https://github.com/kelektiv/node.bcrypt.js
+/**
  * lib to help you hash password.
  */
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 /**
  * register user to application.

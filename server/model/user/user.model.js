@@ -8,10 +8,10 @@ const auth = require('../../auth');
 */
 const mongoose = require('mongoose');
 
-/** https://github.com/kelektiv/node.bcrypt.js
- * lib to help you hash password.
+/** https://github.com/dcodeIO/bcrypt.js
+ * Optimized bcrypt in plain JavaScript with zero dependencies.
  */
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 /** https://github.com/auth0/node-jsonwebtoken
  * An implementation of JSON web tokens. this was developed against
@@ -73,14 +73,25 @@ const userSchema = new mongoose.Schema({
 	profile: {
 		type: profileSchema
 	},
-	created: {
+	createdAt: {
 		type: Number,
 		required: true,
 		default: new Date().getTime(),
 		max: new Date().getTime()
 	},
-	lastUpdated: {
-		type: Date
+	createdBy: {
+		_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+		username: { type: String }
+	},
+	updatedAt: {
+		type: Number,
+		required: true,
+		default: new Date().getTime(),
+		max: new Date().getTime()
+	},
+	updatedBy: {
+		_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+		username: { type: String }
 	}
 });
 

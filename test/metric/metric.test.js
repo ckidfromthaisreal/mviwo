@@ -23,22 +23,54 @@ const axios = require('../axios-runner');
 /** metric api url. */
 const url = 'http://localhost:4200/api/metric';
 
+let groups = [];
+
 describe('metric.controller.js', () => {
 	let metrics = [];
+
 	let tokenObj;
 
 	before(async () => {
 		tokenObj = await axios.insertMany('http://localhost:4200/api/user/login', {
-			login: 'igalklebanov@gmail.com',
-			password: 'comeatme',
+			login: 'superuser',
+			password: require('../../server/secret').superpassword
+		});
+
+		for (let i = 0; i < 2; i++) {
+			let group = {
+				name: `test00${i}`,
+				description: 'ignore me!',
+				isMandatory: false
+			};
+
+			const res = await axios.insertOne('http://localhost:4200/api/metric-group', group, {
+				headers: {
+					Authorization: `Bearer ${tokenObj.token}`
+				}
+			});
+			group._id = res[0]._id;
+
+			groups.push(group);
+		}
+	});
+
+	after(async () => {
+		await axios.deleteMany('http://localhost:4200/api/metric-group', {
+			headers: {
+				Authorization: `Bearer ${tokenObj.token}`
+			},
+			data: groups.map(grp => {
+				return {
+					_id: grp._id,
+					metrics: []
+				};
+			})
 		});
 	});
 
 	it('insertMany', () => {
 		const num = 2;
-		return axios.insertMany(url, {
-			resources: generateMetrics(num)
-		}, {
+		return axios.insertMany(url, generateMetrics(num), {
 			headers: {
 				Authorization: `Bearer ${tokenObj.token}`
 			}
@@ -77,9 +109,7 @@ describe('metric.controller.js', () => {
 
 	it('updateMany', () => {
 		const changes = updateMetrics(metrics, true);
-		return axios.updateMany(url, {
-			resources: changes
-		}, {
+		return axios.updateMany(url, changes, {
 			headers: {
 				Authorization: `Bearer ${tokenObj.token}`
 			}
@@ -98,9 +128,7 @@ describe('metric.controller.js', () => {
 
 	it('deleteMany', () => {
 		return axios.deleteMany(url, {
-			data: {
-				resources: metrics
-			},
+			data: metrics,
 			headers: {
 				Authorization: `Bearer ${tokenObj.token}`
 			}
@@ -118,9 +146,7 @@ describe('metric.controller.js', () => {
 	});
 
 	it('insertOne', () => {
-		return axios.insertOne(url, {
-			resources: generateMetrics(1)[0]
-		}, {
+		return axios.insertOne(url, generateMetrics(1)[0], {
 			headers: {
 				Authorization: `Bearer ${tokenObj.token}`
 			}
@@ -160,9 +186,7 @@ describe('metric.controller.js', () => {
 
 	it('updateOne', () => {
 		const changes = updateMetrics(metrics);
-		return axios.updateOne(url, metrics[0]._id, {
-			resources: changes[0]
-		}, {
+		return axios.updateOne(url, metrics[0]._id, changes[0], {
 			headers: {
 				Authorization: `Bearer ${tokenObj.token}`
 			}
@@ -229,9 +253,9 @@ function generateMetrics(num) {
 			isRequired: i % 2 === 0,
 			dataType: 'string',
 			groups: [{
-				_id: '5ac6a8e32647e02fa41c3be1',
-				name: 'test000',
-				description: 'ignore me!'
+				_id: groups[0]._id,
+				name: groups[0].name,
+				description: groups[0].description
 			}],
 			stringParams: {
 				isEmail: false,
@@ -281,16 +305,16 @@ function updateMetrics(metrics, withIds) {
 		metric.dataType = 'boolean';
 		metric.name = metric.name + ' updated';
 		metric.groups = [{
-			_id: '5ac8d04cd8cd663ecc7d0f16',
-			name: 'test001',
-			description: 'ignore me!'
+			_id: groups[1]._id,
+			name: groups[1].name,
+			description: groups[1].description
 		}];
 		metric.stringParams.minLength = 3;
 
 		changes.push({
 			dataType: metric.dataType,
 			name: metric.name,
-			removedGroups: ['5ac6a8e32647e02fa41c3be1'],
+			removedGroups: [groups[0]._id],
 			groups: metric.groups,
 			stringParams: {
 				minLength: metric.stringParams.minLength

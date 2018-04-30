@@ -175,9 +175,9 @@ exports.insertOne = async (req, res, next) => {
 	const operationName = 'metric-group.controller:insertOne';
 	let err;
 
-	if (!req.body.resources) {
+	if (!req.body) {
 		err = new Error('invalid input: no resources');
-		err.status(403);
+		// err.status(403);
 	}
 
 	if (err) {
@@ -188,7 +188,7 @@ exports.insertOne = async (req, res, next) => {
 	let group, result;
 
 	try {
-		group = await MetricGroup.create(req.body.resources);
+		group = await MetricGroup.create(req.body);
 	} catch (err) {
 		logger.error('API', operationName, err);
 		return next(err);
@@ -337,7 +337,7 @@ exports.updateOne = async (req, res, next) => {
  * deletes metric-groups from db.
  * @param {*} req http request.
  *
- * req.body.resources = array of objects: { _id: String, metrics: [String] }
+ * req.body = array of objects: { _id: String, metrics: [String] }
  *
  * @param {*} res http response.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
@@ -346,7 +346,7 @@ exports.deleteMany = async (req, res, next) => {
 	const operationName = 'metric-group.controller:deleteOne';
 	let err = null;
 
-	if (!req.body.resources || !req.body.resources.length) {
+	if (!req.body || !req.body.length) {
 		err = new Error('invalid input: no resources');
 	}
 
@@ -360,7 +360,7 @@ exports.deleteMany = async (req, res, next) => {
 	try {
 		result1 = await MetricGroup.deleteMany({
 			_id: {
-				$in: req.body.resources.map(elem => elem._id)
+				$in: req.body.map(elem => elem._id)
 			}
 		});
 	} catch (err) {
@@ -369,13 +369,13 @@ exports.deleteMany = async (req, res, next) => {
 	}
 
 	try {
-		result2 = await removeFromMetrics(req.body.resources);
+		result2 = await removeFromMetrics(req.body);
 	} catch (err) {
-		logger.error('API', operationName, `deleted ${req.body.resources.length} metric-groups with errors: ${err}`);
+		logger.error('API', operationName, `deleted ${req.body.length} metric-groups with errors: ${err}`);
 		return next(err);
 	}
 
-	logger.info('API', operationName, `deleted ${req.body.resources.length} metric-groups`);
+	logger.info('API', operationName, `deleted ${req.body.length} metric-groups`);
 	res.status(200).json([result1, result2]);
 };
 

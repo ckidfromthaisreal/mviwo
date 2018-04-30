@@ -2,7 +2,7 @@
 const jwt = require('express-jwt');
 
 /** secret. */
-const SECRET = require('./secret');
+const SECRET = require('./secret').secret;
 
 /** auth config object */
 exports.config = {

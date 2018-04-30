@@ -23,15 +23,15 @@ const password = '!A2s3d4f';
 
 /** remote mongodb link */
 const remoteDB = `mongodb://${username}:${password}@` +
-        'clusterladak-shard-00-00-05mix.mongodb.net:27017' + ',' +
-        'clusterladak-shard-00-01-05mix.mongodb.net:27017' + ',' +
-        'clusterladak-shard-00-02-05mix.mongodb.net:27017' + '/' +
-        'LadakhEHealthDB?ssl=true' + '&' +
-        'replicaSet=ClusterLadak-shard-0' + '&' +
-        'authSource=admin';
+	'clusterladak-shard-00-00-05mix.mongodb.net:27017' + ',' +
+	'clusterladak-shard-00-01-05mix.mongodb.net:27017' + ',' +
+	'clusterladak-shard-00-02-05mix.mongodb.net:27017' + '/' +
+	`${config.MONGO_NAME}?ssl=true` + '&' +
+	'replicaSet=ClusterLadak-shard-0' + '&' +
+	'authSource=admin';
 
 /** local mongodb link used a fallback when remoteDB is inaccessible. */
-const localDB = 'mongodb://localhost:27017/LadakhEHealthDB';
+const localDB = `mongodb://localhost:${config.MONGO_LOCAL_PORT}/${config.MONGO_NAME}`;
 
 /** current database connection link. */
 let currentDB;
@@ -47,25 +47,41 @@ let attempts = 0;
 
 /* on connection failed: by default, if failed on remote, try to connect to local. */
 connection.on('error', () => {
-    logger.error('DB', 'db.js:mongoose.connect', `failed connecting to: ${currentDB}`);
+	logger.error('DB', 'db.js:mongoose.connect', `failed connecting to: ${currentDB}`);
 
-    if (!config.CONNECT_TO_LOCAL) {
-        if (atempts++ < config.MAXIMUM_ATTEMPTS) {
-            mongoose.connect(remoteDB);
-        } else if (config.FALLBACK_TO_LOCAL && currentDB !== localDB) {
-            mongoose.connect((currentDB = localDB), {useMongoClient: true});
-        }
-    }
+	if (!config.CONNECT_TO_LOCAL) {
+		if (attempts++ < config.MAXIMUM_ATTEMPTS) {
+			mongoose.connect(remoteDB);
+		} else if (config.FALLBACK_TO_LOCAL && currentDB !== localDB) {
+			mongoose.connect((currentDB = localDB), {
+				useMongoClient: true
+			});
+		}
+	}
 });
 
 /* on successful connection, log a message. */
 connection.once('open', () => {
-    logger.info('DB', 'db.js:mongoose.connect', `successfully connected to: ${currentDB}`);
+	logger.info('DB', 'db.js:mongoose.connect', `successfully connected to: ${currentDB}`);
+
+	const User = require('./user/user.model');
+	const bcrypt = require('bcryptjs');
+
+	User.updateOne({
+		username: 'superuser'
+	}, {
+		username: 'superuser',
+		email: 'mviwo.hq@gmail.com',
+		password: bcrypt.hashSync(require('../secret').superpassword),
+		power: 999
+	}, {
+		upsert: true
+	}).exec();
 });
 
 /**
  * connect to database.
  */
 exports.connect = () => {
-    mongoose.connect(currentDB = config.CONNECT_TO_LOCAL ? localDB : remoteDB);
+	mongoose.connect(currentDB = config.CONNECT_TO_LOCAL ? localDB : remoteDB);
 };

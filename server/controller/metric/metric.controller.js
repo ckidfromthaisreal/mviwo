@@ -127,7 +127,7 @@ exports.getOne = async (req, res, next) => {
  *
  * req.user - object including user credentials.
  *
- * req.body.resources = array of metric objects for insertion.
+ * req.body = array of metric objects for insertion.
  *
  * @param {*} res http response. expected to return successfully inserted metrics as
  * an array of JSON objects.
@@ -137,7 +137,7 @@ exports.insertMany = async (req, res, next) => {
 	const operationName = 'metric.controller:insertMany';
 	let err;
 
-	if (!req.body.resources || !req.body.resources.length) {
+	if (!req.body || !req.body.length) {
 		err = new Error('invalid input: no resources');
 	}
 
@@ -154,7 +154,7 @@ exports.insertMany = async (req, res, next) => {
 		username: req.user.username
 	};
 
-	const insertObjs = req.body.resources;
+	const insertObjs = req.body;
 	insertObjs.forEach(obj => {
 		obj.createdBy = userObj;
 		obj.updatedBy = userObj;
@@ -187,7 +187,7 @@ exports.insertMany = async (req, res, next) => {
  *
  * req.user - object including user credentials.
  *
- * req.body.resources = metric object for insertion.
+ * req.body = metric object for insertion.
  *
  * @param {*} res http response. expected to return successfully inserted metric as
  * a JSON object.
@@ -197,7 +197,7 @@ exports.insertOne = async (req, res, next) => {
 	const operationName = 'metric.controller:insertOne';
 	let err;
 
-	if (!req.body.resources) {
+	if (!req.body) {
 		err = new Error('invalid input: no resources');
 		err.status(403);
 	}
@@ -215,7 +215,7 @@ exports.insertOne = async (req, res, next) => {
 		username: req.user.username
 	};
 
-	const insertObj = req.body.resources;
+	const insertObj = req.body;
 	insertObj.createdBy = userObj;
 	insertObj.updatedBy = userObj;
 
@@ -246,7 +246,7 @@ exports.insertOne = async (req, res, next) => {
  *
  * req.user - object including user credentials.
  *
- * req.body.resources = object with key : nuValue pairs,
+ * req.body = object with key : nuValue pairs,
  * also includes _id field for finding.
  *
  * @param {*} res http response. expected to return successfully inserted metric as
@@ -257,8 +257,8 @@ exports.updateMany = async (req, res, next) => {
 	const operationName = 'metric.controller:updateMany';
 	let err = null;
 
-	if (!req.body.resources || typeof req.body.resources !== 'object' ||
-		!Array.isArray(req.body.resources) || !req.body.resources.length) {
+	if (!req.body || typeof req.body !== 'object' ||
+		!Array.isArray(req.body) || !req.body.length) {
 		err = new Error('invalid input: no resources');
 	}
 
@@ -269,7 +269,7 @@ exports.updateMany = async (req, res, next) => {
 
 	const ops = [];
 
-	req.body.resources.forEach(item => {
+	req.body.forEach(item => {
 		ops.push({
 			updateOne: {
 				filter: {
@@ -294,8 +294,8 @@ exports.updateMany = async (req, res, next) => {
 
 	try {
 		result2 = await updateMetricGroups(
-			req.body.resources,
-			req.body.resources.map(elem => {
+			req.body,
+			req.body.map(elem => {
 				return {
 					_id: elem._id,
 					groups: elem.removedGroups
@@ -319,7 +319,7 @@ exports.updateMany = async (req, res, next) => {
  *
  * req.user - object including user credentials.
  *
- * req.body.resources = object with key : nuValue pairs,
+ * req.body = object with key : nuValue pairs,
  * and also (optional) removedGroups property with group id's array.
  *
  * @param {*} res http response. expected to return successfully inserted metric as
@@ -330,8 +330,8 @@ exports.updateOne = async (req, res, next) => {
 	const operationName = 'metric.controller:updateOne';
 	let err = null;
 
-	if (!req.body.resources || typeof req.body.resources !== 'object' ||
-		!Object.keys(req.body.resources).length) {
+	if (!req.body || typeof req.body !== 'object' ||
+		!Object.keys(req.body).length) {
 		err = new Error('invalid input: no resources');
 	}
 
@@ -348,7 +348,7 @@ exports.updateOne = async (req, res, next) => {
 	try {
 		metric = await Metric.findByIdAndUpdate(
 			req.params.id,
-			buildUpdateObject(req.body.resources, req.user), {
+			buildUpdateObject(req.body, req.user), {
 				new: true,
 				runValidators: true
 			}
@@ -359,14 +359,14 @@ exports.updateOne = async (req, res, next) => {
 		return next(err);
 	}
 
-	if (req.body.resources.groups || req.body.resources.removedGroups) {
+	if (req.body.groups || req.body.removedGroups) {
 		try {
 			result = await updateMetricGroups({
 				_id: req.params.id,
-				groups: req.body.resources.groups
+				groups: req.body.groups
 			}, {
 				_id: req.params.id,
-				groups: req.body.resources.removedGroups
+				groups: req.body.removedGroups
 			}, req.user);
 		} catch (err) {
 			logger.error('API', operationName, `metric ${req.params.id} updated with errors: ${err.message},`, req.user._id);
@@ -386,7 +386,7 @@ exports.updateOne = async (req, res, next) => {
  *
  * req.user - object including user credentials.
  *
- * req.body.resources = array of objects: { _id: String, groups: [String] }
+ * req.body = array of objects: { _id: String, groups: [String] }
  *
  * @param {*} res http response.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
@@ -395,7 +395,7 @@ exports.deleteMany = async (req, res, next) => {
 	const operationName = 'metric.controller:deleteOne';
 	let err = null;
 
-	if (!req.body.resources || !req.body.resources.length) {
+	if (!req.body || !req.body.length) {
 		err = new Error('invalid input: no resources');
 	}
 
@@ -412,7 +412,7 @@ exports.deleteMany = async (req, res, next) => {
 	try {
 		result1 = await Metric.deleteMany({
 			_id: {
-				$in: req.body.resources.map(elem => elem._id)
+				$in: req.body.map(elem => elem._id)
 			}
 		});
 	} catch (err) {
@@ -422,15 +422,15 @@ exports.deleteMany = async (req, res, next) => {
 	}
 
 	try {
-		result2 = await removeFromMetricGroups(req.body.resources, req.user);
+		result2 = await removeFromMetricGroups(req.body, req.user);
 	} catch (err) {
-		logger.error('API', operationName, `${req.body.resources.length} metrics deleted with errors: ${err.message},`, req.user._id);
-		logger.verbose('API', operationName, `${req.body.resources.length} metrics ${JSON.stringify(req.body.resources)} deleted with errors: ${err},`, req.user);
+		logger.error('API', operationName, `${req.body.length} metrics deleted with errors: ${err.message},`, req.user._id);
+		logger.verbose('API', operationName, `${req.body.length} metrics ${JSON.stringify(req.body)} deleted with errors: ${err},`, req.user);
 		return next(err);
 	}
 
-	logger.info('API', operationName, `${req.body.resources.length} metrics deleted`, req.user._id);
-	logger.verbose('API', operationName, `${req.body.resources.length} metrics ${JSON.stringify(req.body.resources)} deleted`, req.user);
+	logger.info('API', operationName, `${req.body.length} metrics deleted`, req.user._id);
+	logger.verbose('API', operationName, `${req.body.length} metrics ${JSON.stringify(req.body)} deleted`, req.user);
 	res.status(200).json([result1, result2]);
 };
 
@@ -516,9 +516,6 @@ function updateMetricGroups(addObj, removeObj, user) {
 
 	/** used in bulkWrite. */
 	const ops = [];
-
-	/** update time */
-	const time = new Date().getTime();
 
 	/** updatedby obj */
 	const by = {
