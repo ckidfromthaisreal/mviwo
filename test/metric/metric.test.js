@@ -23,7 +23,7 @@ const axios = require('../axios-runner');
 /** metric api url. */
 const url = 'http://localhost:4200/api/metric';
 
-let groups = [];
+const groups = [];
 
 describe('metric.controller.js', () => {
 	let metrics = [];

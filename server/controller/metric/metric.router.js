@@ -2,14 +2,14 @@
 metric router.
 */
 
+/** metrics controller. */
+const controller = require('./metric.controller');
+
 /** server auth config. */
 const jwt = require('../../auth').jwt;
 
 /** metrics router. */
 const router = require('express').Router();
-
-/** metrics controller. */
-const controller = require('./metric.controller');
 
 /** route permissions. */
 const guard = require('express-jwt-permissions')({

@@ -122,7 +122,7 @@ exports.getOne = async (req, res, next) => {
  * inserts new metrics to db.
  * @param {*} req http request.
  *
- * req.body.resources = array of metric-group objects for insertion.
+ * req.body = array of metric-group objects for insertion.
  *
  * @param {*} res http response. expected to return successfully inserted metric-groups as
  * an array of JSON objects.
@@ -132,7 +132,7 @@ exports.insertMany = async (req, res, next) => {
 	const operationName = 'metric-group.controller:insertMany';
 	let err;
 
-	if (!req.body.resources || !req.body.resources.length) {
+	if (!req.body || !req.body.length) {
 		err = new Error('invalid input: no resources');
 	}
 
@@ -144,7 +144,7 @@ exports.insertMany = async (req, res, next) => {
 	let groups, result;
 
 	try {
-		groups = await MetricGroup.insertMany(req.body.resources);
+		groups = await MetricGroup.insertMany(req.body);
 	} catch (err) {
 		logger.error('API', operationName, err);
 		return next(err);
@@ -165,7 +165,7 @@ exports.insertMany = async (req, res, next) => {
  * inserts a new metric-group to db.
  * @param {*} req http request.
  *
- * req.body.resources = metric-group object for insertion.
+ * req.body = metric-group object for insertion.
  *
  * @param {*} res http response. expected to return successfully inserted metric-group as
  * a JSON object.
@@ -209,7 +209,7 @@ exports.insertOne = async (req, res, next) => {
  * updates metric-groups in db.
  * @param {*} req http request.
  *
- * req.body.resources = object with key : nuValue pairs,
+ * req.body = object with key : nuValue pairs,
  * also includes _id field for finding.
  *
  * @param {*} res http response. expected to return successfully updated groups as
@@ -220,8 +220,8 @@ exports.updateMany = async (req, res, next) => {
 	const operationName = 'metric-group.controller:updateMany';
 	let err = null;
 
-	if (!req.body.resources || typeof req.body.resources !== 'object' ||
-		!Array.isArray(req.body.resources) || !req.body.resources.length) {
+	if (!req.body || typeof req.body !== 'object' ||
+		!Array.isArray(req.body) || !req.body.length) {
 		err = new Error('invalid input: no resources');
 	}
 
@@ -232,7 +232,7 @@ exports.updateMany = async (req, res, next) => {
 
 	const ops = [];
 
-	req.body.resources.forEach(item => {
+	req.body.forEach(item => {
 		ops.push({
 			updateOne: {
 				filter: {
@@ -254,8 +254,8 @@ exports.updateMany = async (req, res, next) => {
 
 	try {
 		result2 = await updateMetrics(
-			req.body.resources,
-			req.body.resources.map(elem => {
+			req.body,
+			req.body.map(elem => {
 				return {
 					_id: elem._id,
 					metrics: elem.removedMetrics
@@ -275,7 +275,7 @@ exports.updateMany = async (req, res, next) => {
  * updates a metric-group in db.
  * @param {*} req http request.
  *
- * req.body.resources = object with key : nuValue pairs,
+ * req.body = object with key : nuValue pairs,
  * and also (optional) removedMetrics property with metrics id's array.
  *
  * @param {*} res http response. expected to return successfully updated metric-group as
@@ -286,8 +286,8 @@ exports.updateOne = async (req, res, next) => {
 	const operationName = 'metric.controller:updateOne';
 	let err = null;
 
-	if (!req.body.resources || typeof req.body.resources !== 'object' ||
-		!Object.keys(req.body.resources).length) {
+	if (!req.body || typeof req.body !== 'object' ||
+		!Object.keys(req.body).length) {
 		err = new Error('invalid input: no resources');
 	}
 
@@ -303,7 +303,7 @@ exports.updateOne = async (req, res, next) => {
 	try {
 		group = await MetricGroup.findByIdAndUpdate(
 			req.params.id,
-			buildUpdateObject(req.body.resources), {
+			buildUpdateObject(req.body), {
 				new: true
 			}
 		);
@@ -312,7 +312,7 @@ exports.updateOne = async (req, res, next) => {
 		return next(err);
 	}
 
-	if (group.metrics.length || req.body.resources.removedMetrics) {
+	if (group.metrics.length || req.body.removedMetrics) {
 		try {
 			result = await updateMetrics({
 				_id: req.params.id,
@@ -321,7 +321,7 @@ exports.updateOne = async (req, res, next) => {
 				metrics: group.metrics
 			}, {
 				_id: req.params.id,
-				metrics: req.body.resources.removedMetrics
+				metrics: req.body.removedMetrics
 			});
 		} catch (err) {
 			logger.error('API', operationName, `metric-group ${req.params.id} updated with errors: ${err}`);
@@ -383,7 +383,7 @@ exports.deleteMany = async (req, res, next) => {
  * deletes a metric-group from db.
  * @param {*} req http request.
  *
- * req.body.metrics - array of metrics ids to remove metric-group from.
+ * req.body - array of metrics ids to remove metric-group from.
  *
  * @param {*} res http response. expected to return a result object.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
@@ -405,7 +405,7 @@ exports.deleteOne = async (req, res, next) => {
 	try {
 		result2 = await removeFromMetrics({
 			_id: req.params.id,
-			metrics: req.body.metrics
+			metrics: req.body
 		});
 	} catch (err) {
 		logger.error('API', operationName, `metric-group ${req.params.id} deleted with errors: ${err}`);

@@ -23,16 +23,58 @@ const axios = require('../axios-runner');
 /** metric-group api url. */
 const url = 'http://localhost:4200/api/metric-group';
 
+const metrics = [];
+
 describe('metric-group.controller.js', () => {
 	let groups = [];
-	// beforeEach(() => {
-	//   nock('http://localhost:8080').get('/metric').reply(200, response);
-	// });
+
+	let tokenObj;
+
+	before(async () => {
+		tokenObj = await axios.insertMany('http://localhost:4200/api/user/login', {
+			login: 'superuser',
+			password: require('../../server/secret').superpassword
+		});
+
+		for (let i = 0; i < 3; i++) {
+			let metric = {
+				name: `test00${i}`,
+				description: 'ignore me!',
+				isRequired: false,
+				dataType: 'boolean'
+			};
+
+			const res = await axios.insertOne('http://localhost:4200/api/metric', metric, {
+				headers: {
+					Authorization: `Bearer ${tokenObj.token}`
+				}
+			});
+			metric._id = res[0]._id;
+
+			metrics.push(metric);
+		}
+	});
+
+	after(() => {
+		axios.deleteMany('http://localhost:4200/api/metric', {
+			headers: {
+				Authorization: `Bearer ${tokenObj.token}`
+			},
+			data: metrics.map(metric => {
+				return {
+					_id: metric._id,
+					groups: []
+				};
+			})
+		});
+	});
 
 	it('insertMany', () => {
 		const num = 2;
-		return axios.insertMany(url, {
-			resources: generateGroups(num)
+		return axios.insertMany(url, generateGroups(num), {
+			headers: {
+				Authorization: `Bearer ${tokenObj.token}`
+			}
 		}).then(response => {
 			expect(response).to.be.an('array');
 			expect(response).to.have.lengthOf(2);
@@ -48,8 +90,9 @@ describe('metric-group.controller.js', () => {
 	it('getMany populate', () => {
 		return axios.getMany(url, {
 			headers: {
-				'metricspopulate': true,
-				// 'metricsselect': 'isMandatory'
+				Authorization: `Bearer ${tokenObj.token}`,
+				metricspopulate: true,
+				// metricsselect: 'isMandatory'
 			}
 		}).then(response => {
 			expect(response).to.be.an('array');
@@ -67,8 +110,10 @@ describe('metric-group.controller.js', () => {
 
 	it('updateMany', () => {
 		const changes = updateMetricGroups(groups, true);
-		return axios.updateMany(url, {
-			resources: changes
+		return axios.updateMany(url, changes, {
+			headers: {
+				Authorization: `Bearer ${tokenObj.token}`
+			}
 		}).then(response => {
 			expect(response).to.be.an('array');
 			expect(response).to.have.lengthOf(2);
@@ -84,8 +129,9 @@ describe('metric-group.controller.js', () => {
 
 	it('deleteMany', () => {
 		return axios.deleteMany(url, {
-			data: {
-				resources: groups
+			data: groups,
+			headers: {
+				Authorization: `Bearer ${tokenObj.token}`
 			}
 		}).then(response => {
 			expect(response).to.be.an('array');
@@ -101,8 +147,10 @@ describe('metric-group.controller.js', () => {
 	});
 
 	it('insertOne', () => {
-		return axios.insertOne(url, {
-			resources: generateGroups(1)[0]
+		return axios.insertOne(url, generateGroups(1)[0], {
+			headers: {
+				Authorization: `Bearer ${tokenObj.token}`
+			}
 		}).then(response => {
 			expect(response).to.be.an('array');
 			expect(response).to.have.lengthOf(2);
@@ -119,6 +167,7 @@ describe('metric-group.controller.js', () => {
 	it('getOne populate', () => {
 		return axios.getOne(url, groups[0]._id, {
 			headers: {
+				Authorization: `Bearer ${tokenObj.token}`,
 				'metricspopulate': true,
 				'metricsselect': 'name description'
 			}
@@ -137,8 +186,10 @@ describe('metric-group.controller.js', () => {
 	it('updateOne', () => {
 		const changes = updateMetricGroups(groups);
 
-		return axios.updateOne(url, groups[0]._id, {
-			resources: changes[0]
+		return axios.updateOne(url, groups[0]._id, changes[0], {
+			headers: {
+				Authorization: `Bearer ${tokenObj.token}`
+			}
 		}).then(response => {
 			expect(response).to.be.an('array');
 			expect(response).to.have.lengthOf(2);
@@ -167,8 +218,9 @@ describe('metric-group.controller.js', () => {
 
 	it('deleteOne', () => {
 		return axios.deleteOne(url, groups[0]._id, {
-			data: {
-				metrics: groups[0].metrics
+			data: groups[0].metrics,
+			headers: {
+				Authorization: `Bearer ${tokenObj.token}`
 			}
 		}).then(response => {
 			expect(response).to.be.an('array');
@@ -199,7 +251,7 @@ function generateGroups(num) {
 			description: 'ignore me!',
 			isMandatory: i % 2 === 0,
 			lastUpdate: Date.now,
-			metrics: ['5acc2ec2a673854f24c61151']
+			metrics: [metrics[0]._id]
 		});
 	}
 
@@ -239,11 +291,11 @@ function updateMetricGroups(groups, withIds) {
 
 	groups.forEach(group => {
 		group.name = group.name + ' updated';
-		group.metrics = ['5acca96ca673854f24c61153', '5acca8c2a673854f24c61152'];
+		group.metrics = [metrics[1]._id, metrics[2]._id];
 
 		changes.push({
 			name: group.name,
-			removedMetrics: ['5acc2ec2a673854f24c61151'],
+			removedMetrics: [metrics[0]._id],
 			metrics: group.metrics
 		});
 
