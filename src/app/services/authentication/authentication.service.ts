@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { UserDetails, TokenPayload, TokenResponse } from './authentication.interface';
+import { UserDetails, LoginPayload, RegistrationPayload, TokenResponse } from './authentication.interface';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
@@ -15,7 +15,9 @@ export class AuthenticationService {
 	readonly API_URL = 'http://localhost:4200/api/user';
 	private token: string;
 
-	constructor(private http: HttpClient, private router: Router) { }
+	constructor(private http: HttpClient, private router: Router) {
+		this.logout(); // <<--------------------- REMOVE
+	}
 
 	/**
 	 * stores token in memory & local storage.
@@ -75,11 +77,11 @@ export class AuthenticationService {
 		return false;
 	}
 
-	public login(user: TokenPayload): Observable<TokenResponse> {
+	public login(user: LoginPayload): Observable<TokenResponse> {
 		return this.request('post', 'login', user);
 	}
 
-	public register(user: TokenPayload): Observable<TokenResponse> {
+	public register(user: RegistrationPayload): Observable<TokenResponse> {
 		return this.request('post', 'register', user);
 	}
 
@@ -87,7 +89,7 @@ export class AuthenticationService {
 		return this.request('get', 'profile');
 	}
 
-	private request(method: 'post'|'get', type: 'login'|'register'|'profile', user?: TokenPayload): Observable<any> {
+	private request(method: 'post'|'get', type: 'login'|'register'|'profile', user?: LoginPayload|RegistrationPayload): Observable<any> {
 		let base;
 
 		if (method === 'post') {

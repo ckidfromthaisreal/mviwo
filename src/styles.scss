@@ -1,1 +1,13 @@
-/* You can add global styles to this file, and also import other style files */
+@import '~@angular/material/prebuilt-themes/purple-green.css';
+
+$background: rgb(48,48,48);
+$mviwo-pup: 'https://assets.bondivet.com/attachments/e2227498a230f5ffbf59eb262c284939478acf99/store/c4a031594d341bf97e2b84602f3edbd097d9d0fc8fee0557ce08df788f2a/image.jpeg';
+
+body {
+	background-color: $background;
+}
+
+.mviwo-head {
+	background-image: url($mviwo-pup);
+	background-size: cover;
+}

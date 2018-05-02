@@ -5,13 +5,15 @@ export interface TokenResponse {
 	token: string;
 }
 
-/**
- *
- */
-export interface TokenPayload {
-	email?: string;
+export interface RegistrationPayload {
+	email: string;
+	username: string;
 	password: string;
-	username?: string;
+}
+
+export interface LoginPayload {
+	login: string;
+	password: string;
 }
 
 export interface UserDetails {

@@ -1,0 +1,66 @@
+$cardwidth: 400px;
+
+:host {
+	perspective: 10000px;
+	display: block;
+	.container {
+		transition: 0.3s;
+		transform-style: preserve-3d;
+		height: 88vh;
+		width: 100vw;
+		width: $cardwidth;
+		margin:auto;
+		// position: relative;
+		// border: 3px solid green;
+	}
+	.front,
+	.back {
+		width: $cardwidth;
+		height: 88vh;
+		backface-visibility: hidden;
+		position: absolute;
+		top: 0;
+		left: 0;
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		// border: 3px solid orange;
+	}
+	.front {
+		z-index: 2;
+		transform: rotateY(0deg);
+	}
+	.back {
+		transform: rotateY(180deg);
+	}
+	.rotate {
+		-webkit-transform: rotateY(180deg);
+		-moz-transform: rotateY(180deg);
+		-o-transform: rotateY(180deg);
+		transform: rotateY(180deg);
+	}
+
+}
+
+mat-card {
+	max-width: $cardwidth;
+}
+
+mat-card-content > * {
+	width: 100%;
+}
+
+mat-card {
+	// max-width: 400px;
+	// max-height: 400px;
+}
+
+mat-card-actions:last-child {
+	// margin-left: 0;
+	margin: 0;
+}
+
+button {
+	// margin-top: 5 !important;
+}

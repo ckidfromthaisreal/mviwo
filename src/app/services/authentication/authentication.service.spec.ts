@@ -48,4 +48,22 @@ describe('AuthenticationService', () => {
 			req.flush({ token: '' });
 		});
 	});
+
+	describe('login user', () => {
+		it('should login', async () => {
+			const user = {
+				username: 'test001',
+				password: 'comeatmebro'
+			};
+
+			service.login(user).subscribe(response => {
+				expect(typeof response).toBe('object');
+				expect(response.hasOwnProperty('token')).toBe(true);
+			});
+
+			const req = httpMock.expectOne(`${service.API_URL}/login`);
+			expect(req.request.method).toBe('POST');
+			req.flush({ token: '' });
+		});
+	});
 });

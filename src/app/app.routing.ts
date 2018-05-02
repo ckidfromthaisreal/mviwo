@@ -1,18 +1,24 @@
-import {
-	Routes,
-	RouterModule
-} from '@angular/router';
-import {
-	ModuleWithProviders
-} from '@angular/core';
-import {
-	RegistrationComponent
-} from './registration/registration.component';
+import { ModuleWithProviders } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
 
-const routes: Routes = [{
+import { AuthGuardService } from './services/auth-guard/auth-guard.service';
+
+import { LoginComponent } from './login/login.component';
+import { HomeComponent } from './home/home.component';
+
+const routes: Routes = [
+	{
 		path: '',
-		pathMatch: 'full',
-		component: RegistrationComponent
+		// loadChildren: './home/home.module#HomeModule',
+		component: HomeComponent,
+		canActivate: [
+			AuthGuardService
+		]
+	},
+	{
+		path: 'login',
+		component: LoginComponent,
+		// loadChildren: './login/login.module#LoginModule',
 	},
 	// {
 	// 	path: 'metrics',
