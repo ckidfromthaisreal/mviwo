@@ -1,0 +1,9 @@
+@import '~@angular/material/theming';
+
+button {
+	color: white;
+}
+
+.navbar {
+	@include mat-elevation(2);
+}

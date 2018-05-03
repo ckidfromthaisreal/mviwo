@@ -1,24 +1,22 @@
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatInputModule, MatButtonModule, MatFormFieldModule, MatCardModule, MatTooltipModule } from '@angular/material';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
 
-import { MaterialModule } from './../material.module';
-
 import { LoginComponent } from './login.component';
+import { routing } from './login.routing';
 
 @NgModule({
 	imports: [
 		CommonModule,
 		FormsModule,
-		FlexLayoutModule,
+		routing,
 
 		MatButtonModule,
 		MatCardModule,
 		MatFormFieldModule,
 		MatInputModule,
-		MatTooltipModule
+		MatTooltipModule,
 	],
 	declarations: [
 		LoginComponent

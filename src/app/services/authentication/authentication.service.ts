@@ -16,7 +16,7 @@ export class AuthenticationService {
 	private token: string;
 
 	constructor(private http: HttpClient, private router: Router) {
-		this.logout(); // <<--------------------- REMOVE
+		// this.logout(); // <<--------------------- REMOVE
 	}
 
 	/**
@@ -47,7 +47,7 @@ export class AuthenticationService {
 	public logout(): void {
 		this.token = '';
 		localStorage.removeItem('mviwo-token');
-		this.router.navigateByUrl('/');
+		this.router.navigateByUrl('/login');
 	}
 
 	/**

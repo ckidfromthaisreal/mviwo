@@ -19,9 +19,18 @@
       "testTsconfig": "tsconfig.spec.json",
       "prefix": "mviwo",
       "styles": [
+		"../node_modules/perfect-scrollbar/css/perfect-scrollbar.css",
+		"./assets/scss/material-dashboard.scss",
         "styles.scss"
       ],
-      "scripts": [],
+      "scripts": [
+		  "../node_modules/jquery/dist/jquery.min.js",
+		  "../node_modules/popper.js/dist/umd/popper.min.js",
+		  "../node_modules/bootstrap-material-design/dist/js/bootstrap-material-design.min.js",
+		  "../node_modules/arrive/src/arrive.js",
+		  "../node_modules/perfect-scrollbar/dist/perfect-scrollbar.min.js",
+		  "../node_modules/bootstrap-notify/bootstrap-notify.js"
+	  ],
       "environmentSource": "environments/environment.ts",
       "environments": {
         "dev": "environments/environment.ts",

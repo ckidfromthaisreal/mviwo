@@ -1,25 +1,41 @@
-import { ModuleWithProviders } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { BrowserModule } from '@angular/platform-browser';
 
 import { AuthGuardService } from './services/auth-guard/auth-guard.service';
 
-import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
 
 const routes: Routes = [
 	{
 		path: '',
-		// loadChildren: './home/home.module#HomeModule',
+		pathMatch: 'full',
+		redirectTo: 'dashboard',
+		canActivate: [
+			AuthGuardService
+		],
+	}
+	,
+	{
+		path: '',
 		component: HomeComponent,
 		canActivate: [
 			AuthGuardService
+		],
+		children: [
+			{
+				path: '',
+				loadChildren: './home/home.module#HomeModule',
+			},
 		]
-	},
+	}
+	,
 	{
 		path: 'login',
-		component: LoginComponent,
-		// loadChildren: './login/login.module#LoginModule',
-	},
+		loadChildren: './login/login.module#LoginModule',
+	}
+
 	// {
 	// 	path: 'metrics',
 	// 	loadChildren: './components/metric/metric.module#MetricModule'
@@ -32,6 +48,20 @@ const routes: Routes = [
 	// 	path: 'examinations',
 	// 	loadChildren: './components/examination/examination.module#ExaminationModule'
 	// }
+	, {
+		path: '**',
+		loadChildren: './not-found/not-found.module#NotFoundModule'
+	}
 ];
 
-export const routing: ModuleWithProviders = RouterModule.forRoot(routes);
+@NgModule({
+	imports: [
+		CommonModule,
+		BrowserModule,
+		RouterModule.forRoot(routes)
+	],
+	exports: [
+
+	],
+})
+export class RoutingModule {}

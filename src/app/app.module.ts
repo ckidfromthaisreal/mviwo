@@ -1,40 +1,42 @@
-import { AuthGuardService } from './services/auth-guard/auth-guard.service';
-import { HomeModule } from './home/home.module';
-import { MaterialModule } from './material.module';
+import { BrowserService } from './services/browser/browser.service';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
+import { GestureConfig } from '@angular/material';
 
-import { routing } from './app.routing';
-import { LoginModule } from './login/login.module';
+import { RoutingModule } from './app.routing';
+import { NavigationModule } from './navigation/navigation.module';
 
 import { AuthenticationService } from './services/authentication/authentication.service';
+import { AuthGuardService } from './services/auth-guard/auth-guard.service';
 
 import { AppComponent } from './app.component';
-import { FlexLayoutModule } from '@angular/flex-layout';
+import { HomeComponent } from './home/home.component';
 
 @NgModule({
 	declarations: [
-		AppComponent
+		AppComponent,
+		HomeComponent,
 	],
 	imports: [
-		BrowserModule,
+		BrowserAnimationsModule,
 		FormsModule,
 		HttpClientModule,
-		routing,
-		FlexLayoutModule,
-
-		MaterialModule,
-		BrowserAnimationsModule,
-		// HomeModule,
-		// LoginModule
+		NavigationModule,
+		RouterModule,
+		RoutingModule
 	],
 	providers: [
 		AuthenticationService,
-		AuthGuardService
+		AuthGuardService,
+		BrowserService,
+		{
+			provide: HAMMER_GESTURE_CONFIG,
+			useClass: GestureConfig
+		}
 	],
 	bootstrap: [AppComponent]
 })
