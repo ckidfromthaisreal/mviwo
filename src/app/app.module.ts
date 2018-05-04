@@ -1,3 +1,5 @@
+import { MviwoSnackbarComponent } from './material/mviwo-snackbar/mviwo-snackbar.component';
+import { NotificationService } from './services/notification/notification.service';
 import { BrowserService } from './services/browser/browser.service';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
@@ -5,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { BrowserModule, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { GestureConfig } from '@angular/material';
+import { GestureConfig, MatSnackBarModule } from '@angular/material';
 
 import { RoutingModule } from './app.routing';
 import { NavigationModule } from './navigation/navigation.module';
@@ -15,6 +17,7 @@ import { AuthGuardService } from './services/auth-guard/auth-guard.service';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
+import { MviwoSnackbarModule } from './material/mviwo-snackbar/mviwo-snackbar.module';
 
 @NgModule({
 	declarations: [
@@ -27,7 +30,10 @@ import { HomeComponent } from './home/home.component';
 		HttpClientModule,
 		NavigationModule,
 		RouterModule,
-		RoutingModule
+		RoutingModule,
+
+		MatSnackBarModule,
+		MviwoSnackbarModule,
 	],
 	providers: [
 		AuthenticationService,
@@ -36,7 +42,11 @@ import { HomeComponent } from './home/home.component';
 		{
 			provide: HAMMER_GESTURE_CONFIG,
 			useClass: GestureConfig
-		}
+		},
+		NotificationService,
+	],
+	entryComponents: [
+		MviwoSnackbarComponent
 	],
 	bootstrap: [AppComponent]
 })

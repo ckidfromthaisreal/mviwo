@@ -10,17 +10,19 @@
 				</mat-card-header>
 				<mat-card-content>
 					<mat-form-field [hideRequiredMarker]="true">
-						<input matInput type="text" placeholder="email OR username" required [(ngModel)]="login" name="login">
+						<input matInput type="text" placeholder="email OR username" required ngModel name="login">
+						<mat-error>tell me one of these!</mat-error>
 					</mat-form-field>
 					<mat-form-field [hideRequiredMarker]="true">
-						<input matInput type="password" placeholder="password" required [(ngModel)]="password" name="password">
+						<input matInput type="password" placeholder="password" required ngModel name="password">
+						<mat-error>you must have a password!</mat-error>
 					</mat-form-field>
 				</mat-card-content>
 				<!-- <mat-card-footer> -->
-					<mat-card-actions align="end">
-						<button mat-button color="accent" type="reset" [disableRipple]="true" (click)="onFlipClick()" matTooltip="switch to registration form..">No, I'm new around here..</button>
-						<button mat-raised-button [disabled]="!form1.valid" (click)="onLoginClick()" color="primary" matTooltip="login">Yes, let me in!</button>
-					</mat-card-actions>
+				<mat-card-actions align="end">
+					<button mat-button color="accent" type="reset" [disableRipple]="true" (click)="onFlipClick()" matTooltip="switch to registration form..">No, I'm new around here..</button>
+					<button mat-raised-button [disabled]="!form1.valid" (click)="onLoginClick(form1.value)" color="primary" matTooltip="login">Yes, let me in!</button>
+				</mat-card-actions>
 				<!-- </mat-card-footer> -->
 				<!-- <mat-card-actions align="start">
 				</mat-card-actions> -->
@@ -38,24 +40,36 @@
 				</mat-card-header>
 				<mat-card-content>
 					<mat-form-field [hideRequiredMarker]="true">
-						<input matInput type="text" placeholder="username" required [(ngModel)]="username" name="username">
+						<input matInput type="text" placeholder="username" required pattern="^[a-zA-Z0-9]+" minlength="3" ngModel name="username"
+						    #username="ngModel">
+						<mat-error *ngIf="username.errors?.pattern">i hate special characters!</mat-error>
+						<mat-error *ngIf="username.errors?.required">i need to know your name!</mat-error>
+						<mat-error *ngIf="username.errors?.minlength && !username.errors?.pattern">that name is too short for my liking!</mat-error>
 					</mat-form-field>
 					<mat-form-field [hideRequiredMarker]="true">
-						<input matInput type="text" placeholder="email" required email [(ngModel)]="email" name="email">
+						<input matInput type="text" placeholder="email" required email ngModel name="email" #email="ngModel">
+						<mat-error *ngIf="email.errors?.required">i need to know your email!</mat-error>
+						<mat-error *ngIf="email.errors?.email && !email.errors?.required">this is not a legit address!</mat-error>
 					</mat-form-field>
 					<mat-form-field [hideRequiredMarker]="true">
-						<input matInput type="password" placeholder="password" required minlength="8" [pattern]="form2.value.password2" [(ngModel)]="password1" name="password1">
+						<input matInput type="password" placeholder="password" required minlength="8" ngModel
+						    name="password1" #password1="ngModel">
 						<mat-hint align="end">minlength: 8</mat-hint>
+						<mat-error *ngIf="password1.errors?.required">you need a password!</mat-error>
+						<mat-error *ngIf="password1.errors?.minlength">that password is too short! gimme {{ 8 - password1.value.length }} more characters..</mat-error>
 					</mat-form-field>
 					<mat-form-field [hideRequiredMarker]="true">
-						<input matInput type="password" placeholder="repeat password" required [pattern]="form2.value.password1" [(ngModel)]="password2" name="password2">
+						<input matInput type="password" placeholder="repeat password" required [pattern]="!password1.errors ? form2.value.password1 : ''" ngModel
+							name="password2" #password2="ngModel">
+						<mat-error *ngIf="!password1.errors && password2.errors?.required">type your password again!</mat-error>
+						<mat-error *ngIf="!password1.errors && password2.errors?.pattern">it doesn't match your password!</mat-error>
 					</mat-form-field>
 				</mat-card-content>
 				<!-- <mat-card-footer> -->
-					<mat-card-actions align="end">
-						<button mat-button color="accent" type="reset" [disableRipple]="true" (click)="onFlipClick()" matTooltip="switch to login form..">Actually, I have a user..</button>
-						<button mat-raised-button [disabled]="!form2.valid" (click)="onRegisterClick()" color="primary" matTooltip="register">Nice to meet you!</button>
-					</mat-card-actions>
+				<mat-card-actions align="end">
+					<button mat-button color="accent" type="reset" [disableRipple]="true" (click)="onFlipClick()" matTooltip="switch to login form..">Actually, I have a user..</button>
+					<button mat-raised-button [disabled]="!form2.valid" (click)="onRegisterClick(form2.value)" color="primary" matTooltip="register">Nice to meet you!</button>
+				</mat-card-actions>
 				<!-- </mat-card-footer> -->
 				<!-- <mat-card-actions align="start">
 						</mat-card-actions> -->

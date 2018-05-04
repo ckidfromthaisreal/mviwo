@@ -52,6 +52,11 @@ const port = process.env.PORT || config.DEFAULT_APPLICATION_PORT;
 /** custom-made error handler. */
 const errorHandler = require('./server/util/error-handler');
 
+/** https://github.com/expressjs/cors
+ * a node.js package for providing a Connect/Express middleware that can
+ * be used to enable CORS with various options. */
+const cors = require('cors');
+
 /* tells the application to use JSON. */
 app.use(bodyParser.json());
 
@@ -92,6 +97,8 @@ if (config.USE_VIEW_ENGINE) {
 if (config.CUSTOM_ERROR_HANDLER) {
 	app.use(errorHandler);
 }
+
+app.options('*', cors());
 
 /** http server. */
 const server = http.createServer(app);

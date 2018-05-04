@@ -10,6 +10,8 @@ const metricGroupRouter = require('./metric-group/metric-group.router');
 /** user router. */
 const userRouter = require('./user/user.router');
 
+const cors = require('cors');
+
 /* bind some response to the root. */
 router.get('/', (req, res) => {
 	res.send('welcome to mviwo api!');
@@ -22,7 +24,7 @@ router.use('/metric', metricRouter);
 router.use('/metric-group', metricGroupRouter);
 
 /* bind '/user/' route to user router. */
-router.use('/user', userRouter);
+router.use('/user', cors(), userRouter);
 
 /* export router */
 module.exports = router;

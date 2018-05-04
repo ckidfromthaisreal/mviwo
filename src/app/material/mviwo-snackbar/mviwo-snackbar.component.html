@@ -1,0 +1,8 @@
+<mat-card class="mat-elevation-z0">
+	<mat-card-header>
+		<div mat-card-avatar class="mviwo-head"></div>
+		<mat-card-title>mviwo.</mat-card-title>
+		<mat-card-subtitle *ngIf="data.message">{{ data.message }}</mat-card-subtitle>
+		<button *ngIf="data.action" mat-button type="button" color="accent">{{ data.action }}</button>
+	</mat-card-header>
+</mat-card>
