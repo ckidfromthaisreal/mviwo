@@ -1,6 +1,6 @@
-import { NotificationService } from './../services/notification/notification.service';
+import { NotificationService } from './../../services/notification/notification.service';
 import { Router } from '@angular/router';
-import { AuthenticationService } from './../services/authentication/authentication.service';
+import { AuthenticationService } from './../../services/authentication/authentication.service';
 import { Component, OnInit, Renderer2, ViewChild, ChangeDetectionStrategy, SimpleChanges, OnChanges } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 

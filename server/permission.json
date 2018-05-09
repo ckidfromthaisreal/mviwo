@@ -1,25 +1,20 @@
 {
 	"0": {
 		"alias": "guest",
-		"allowed": [
-			"metric:getMany",
-			"metric:getOne",
-			"metric-group:getMany",
-			"metric-group:getOne",
-			"examination:getMany",
-			"examination:getOne"
-		]
+		"allowed": []
 	},
 	"200": {
 		"alias": "student",
 		"allowed": [
-			"metric:getMany",
-			"metric:getOne",
-			"metric-group:getMany",
-			"metric-group:getOne",
-			"examination:getMany",
-			"examination:getOne",
-			"measure:insertOne"
+			"record:getMany",
+			"record:getOne",
+			"record:insertMany",
+			"record:insertOne",
+			"record:updateMany",
+			"record:updateOne",
+			"record:deleteMany",
+			"record:deleteOne",
+			"user:updatePassword"
 		]
 	},
 	"800": {
@@ -41,14 +36,30 @@
 			"metric-group:updateOne",
 			"metric-group:deleteMany",
 			"metric-group:deleteOne",
-			"examination:getMany",
-			"examination:getOne",
-			"measure:insertOne"
+			"session:getMany",
+			"session:getOne",
+			"session:insertMany",
+			"session:insertOne",
+			"session:updateMany",
+			"session:updateOne",
+			"session:deleteMany",
+			"session:deleteOne",
+			"record:getMany",
+			"record:getOne",
+			"record:insertMany",
+			"record:insertOne",
+			"record:updateMany",
+			"record:updateOne",
+			"record:deleteMany",
+			"record:deleteOne",
+			"user:getMany",
+			"user:updatePassword"
 		]
 	},
 	"999": {
 		"alias": "power user",
 		"allowed": [
+			"dashboard",
 			"metric:getMany",
 			"metric:getOne",
 			"metric:updateOne",
@@ -65,11 +76,25 @@
 			"metric-group:updateOne",
 			"metric-group:deleteMany",
 			"metric-group:deleteOne",
-			"examination:getMany",
-			"examination:getOne",
-			"measure:insertOne",
-			"user:delete",
-			"user:register"
+			"session:getMany",
+			"session:getOne",
+			"session:insertMany",
+			"session:insertOne",
+			"session:updateMany",
+			"session:updateOne",
+			"session:deleteMany",
+			"session:deleteOne",
+			"record:getMany",
+			"record:getOne",
+			"record:insertMany",
+			"record:insertOne",
+			"record:updateMany",
+			"record:updateOne",
+			"record:deleteMany",
+			"record:deleteOne",
+			"user:getMany",
+			"user:updatePower",
+			"user:banOne"
 		]
 	}
 }

@@ -1,4 +1,4 @@
-import { MviwoSnackbarComponent } from './../../material/mviwo-snackbar/mviwo-snackbar.component';
+import { MviwoSnackbarComponent } from './../../components/material/mviwo-snackbar/mviwo-snackbar.component';
 import {
 	MatSnackBar
 } from '@angular/material';

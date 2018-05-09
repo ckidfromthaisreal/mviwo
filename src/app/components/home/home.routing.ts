@@ -1,6 +1,6 @@
 import { DashboardComponent } from './../dashboard/dashboard.component';
 import { MetricGalleryComponent } from './../metric/metric-gallery/metric-gallery.component';
-import { AuthGuardService } from './../services/auth-guard/auth-guard.service';
+import { AuthGuardService } from './../../services/auth-guard/auth-guard.service';
 import { HomeComponent } from './home.component';
 import { Routes, RouterModule } from '@angular/router';
 import { ModuleWithProviders } from '@angular/core';

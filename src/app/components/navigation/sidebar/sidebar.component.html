@@ -56,13 +56,16 @@
 	</div>
 	<ul class="nav">
 		<li routerLinkActive="active" *ngFor="let menuItem of menuItems" class="{{menuItem.class}} nav-item">
+			<mat-divider *ngIf="menuItem.title === 'Users'"></mat-divider>
 			<a class="nav-link" [routerLink]="[menuItem.path]">
 				<i class="material-icons">{{menuItem.icon}}</i>
 				<p>{{menuItem.title}}</p>
 			</a>
 		</li>
 		<li *ngIf="isMobile()" class="nav-item">
+			<mat-divider></mat-divider>
 			<a class="nav-link" (click)="logout()">
+				<i class="material-icons">exit_to_app</i>
 				<p>Logout</p>
 			</a>
 		</li>

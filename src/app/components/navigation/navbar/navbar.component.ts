@@ -1,4 +1,4 @@
-import { AuthenticationService } from './../../services/authentication/authentication.service';
+import { AuthenticationService } from './../../../services/authentication/authentication.service';
 import {
 	Component,
 	OnInit,

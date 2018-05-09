@@ -77,6 +77,21 @@ export class AuthenticationService {
 		return false;
 	}
 
+	/**
+	 * checks if user has given permission.
+	 * @param element model equivalent. case insensitive.
+	 * @param what operation, lower-case camel.
+	 */
+	public hasPermission(element: String, what?: String): boolean {
+		console.log(element, what, this.getUserDetails().permissions);
+		const permissions = this.getUserDetails().permissions;
+		element = element.toLocaleLowerCase().replace(/[\s]/g, '-');
+		return permissions.includes(`${element}:${what}`) || 
+			permissions.includes(`${element.substring(0, element.length - 1)}:${what}`) ||
+			permissions.includes(`${element}`) ||
+			permissions.includes(`${element.substring(0, element.length - 1)}`);
+	}
+
 	public login(user: LoginPayload): Observable<TokenResponse> {
 		return this.request('post', 'login', user);
 	}

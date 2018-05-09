@@ -1,12 +1,14 @@
-import { AuthenticationService } from './../../services/authentication/authentication.service';
+import { AuthenticationService } from './../../../services/authentication/authentication.service';
 import {
 	BrowserService
-} from './../../services/browser/browser.service';
+} from './../../../services/browser/browser.service';
 import {
 	Component,
 	OnInit
 } from '@angular/core';
 import { Location, LocationStrategy, PathLocationStrategy } from '@angular/common';
+import { Router } from '@angular/router';
+import { NotificationService } from '../../../services/notification/notification.service';
 
 declare interface RouteInfo {
 	path: string;
@@ -17,9 +19,11 @@ declare interface RouteInfo {
 
 export const ROUTES: RouteInfo[] = [
 	{ path: '/dashboard', title: 'Dashboard', icon: 'dashboard', class: '' },
-	{ path: '/metrics', title: 'Metrics', icon: '', class: '' },
-	{ path: '/metric-groups', title: 'Metric Groups', icon: '', class: '' },
-	{ path: '/examinations', title: 'Examinations', icon: '', class: '' },
+	{ path: '/metrics', title: 'Metrics', icon: 'scatter_plot', class: '' },
+	{ path: '/metric-groups', title: 'Metric Groups', icon: 'timeline', class: '' },
+	{ path: '/sessions', title: 'Sessions', icon: 'event', class: '' },
+	{ path: '/records', title: 'Records', icon: 'how_to_vote', class: '' },
+	{ path: '/users', title: 'Users', icon: 'supervised_user_circle', class: '' },
 	// { path: '/'}
 ];
 
@@ -36,10 +40,21 @@ export class SidebarComponent implements OnInit {
 		public browser: BrowserService,
 		private auth: AuthenticationService,
 		private location: Location,
+		private router: Router,
+		private notification: NotificationService
 	) {}
 
 	ngOnInit() {
-		this.menuItems = ROUTES.filter(menuItem => menuItem);
+		this.menuItems = ROUTES.filter(menuItem => this.hasPermission(menuItem.title));
+
+		if (!this.menuItems.length) {
+			this.notification.openCustomSnackbar('Oops! you\'re unauthurized to proceed.');
+			this.auth.logout();
+		}
+
+		if (!this.menuItems.map(elem => elem.title).includes('Dashboard')) {
+			this.router.navigateByUrl(this.menuItems[0].path);
+		}
 	}
 
 	isMobile(): boolean {
@@ -64,5 +79,9 @@ export class SidebarComponent implements OnInit {
 		}
 
 		return '';
+	}
+
+	hasPermission(element: String): boolean {
+		return this.auth.hasPermission(element, 'getMany');
 	}
 }

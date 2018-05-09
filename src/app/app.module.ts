@@ -1,4 +1,3 @@
-import { MviwoSnackbarComponent } from './material/mviwo-snackbar/mviwo-snackbar.component';
 import { NotificationService } from './services/notification/notification.service';
 import { BrowserService } from './services/browser/browser.service';
 import { HttpClientModule } from '@angular/common/http';
@@ -10,14 +9,15 @@ import { RouterModule } from '@angular/router';
 import { GestureConfig, MatSnackBarModule } from '@angular/material';
 
 import { RoutingModule } from './app.routing';
-import { NavigationModule } from './navigation/navigation.module';
+import { NavigationModule } from './components/navigation/navigation.module';
 
 import { AuthenticationService } from './services/authentication/authentication.service';
 import { AuthGuardService } from './services/auth-guard/auth-guard.service';
 
 import { AppComponent } from './app.component';
-import { HomeComponent } from './home/home.component';
-import { MviwoSnackbarModule } from './material/mviwo-snackbar/mviwo-snackbar.module';
+import { HomeComponent } from './components/home/home.component';
+import { MviwoSnackbarComponent } from './components/material/mviwo-snackbar/mviwo-snackbar.component';
+import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-snackbar.module';
 
 @NgModule({
 	declarations: [

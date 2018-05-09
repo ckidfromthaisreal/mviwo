@@ -5,7 +5,7 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AuthGuardService } from './services/auth-guard/auth-guard.service';
 
-import { HomeComponent } from './home/home.component';
+import { HomeComponent } from './components/home/home.component';
 
 const routes: Routes = [
 	{
@@ -26,14 +26,14 @@ const routes: Routes = [
 		children: [
 			{
 				path: '',
-				loadChildren: './home/home.module#HomeModule',
+				loadChildren: './components/home/home.module#HomeModule',
 			},
 		]
 	}
 	,
 	{
 		path: 'login',
-		loadChildren: './login/login.module#LoginModule',
+		loadChildren: './components/login/login.module#LoginModule',
 	}
 
 	// {
@@ -50,7 +50,7 @@ const routes: Routes = [
 	// }
 	, {
 		path: '**',
-		loadChildren: './not-found/not-found.module#NotFoundModule'
+		loadChildren: './components/not-found/not-found.module#NotFoundModule'
 	}
 ];
 

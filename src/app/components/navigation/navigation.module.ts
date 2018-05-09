@@ -7,7 +7,7 @@ import {
 	CommonModule
 } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatButtonModule } from '@angular/material';
+import { MatButtonModule, MatDividerModule, MatIconModule, MatTooltipModule } from '@angular/material';
 
 @NgModule({
 	imports: [
@@ -15,6 +15,9 @@ import { MatButtonModule } from '@angular/material';
 		RouterModule,
 
 		MatButtonModule,
+		MatDividerModule,
+		MatIconModule,
+		MatTooltipModule,
 	],
 	declarations: [
 		SidebarComponent,

@@ -6,7 +6,7 @@ import { Router, NavigationStart, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs/Subscription';
 import PerfectScrollbar from 'perfect-scrollbar';
 
-import { BrowserService } from './../services/browser/browser.service';
+import { BrowserService } from './../../services/browser/browser.service';
 
 @Component({
 	// tslint:disable-next-line:component-selector

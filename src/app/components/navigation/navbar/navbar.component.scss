@@ -7,3 +7,8 @@ button {
 .navbar {
 	@include mat-elevation(2);
 }
+
+.navbar-toggler {
+	min-width: 16px;
+	margin-right: 0;
+}
