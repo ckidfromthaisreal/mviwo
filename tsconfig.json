@@ -16,9 +16,6 @@
       "dom"
     ],
     "paths": {
-      "rxjs": [
-        "./vendor/rxjs.ts"
-      ]
     }
   }
 }

@@ -16,7 +16,7 @@ export class NotificationService {
 	public openSnackbar(message?: string, action?: string, duration?: number, extraClasses?: string) {
 		this.snackbar.open(message, action, {
 			duration: duration || 2000,
-			extraClasses: extraClasses || ['mviwo-snackbar-dark']
+			panelClass: extraClasses || ['mviwo-snackbar-dark']
 		});
 	}
 
@@ -27,7 +27,7 @@ export class NotificationService {
 				action: action
 			},
 			duration: duration || 2000,
-			extraClasses: extraClasses || ['mviwo-snackbar-dark']
+			panelClass: extraClasses || ['mviwo-snackbar-dark']
 		});
 	}
 }
