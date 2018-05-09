@@ -18,12 +18,13 @@ declare interface RouteInfo {
 }
 
 export const ROUTES: RouteInfo[] = [
+	{ path: '/news', title: 'News', icon: 'track_changes', class: ''},
 	{ path: '/dashboard', title: 'Dashboard', icon: 'dashboard', class: '' },
 	{ path: '/metrics', title: 'Metrics', icon: 'scatter_plot', class: '' },
 	{ path: '/metric-groups', title: 'Metric Groups', icon: 'timeline', class: '' },
 	{ path: '/sessions', title: 'Sessions', icon: 'event', class: '' },
 	{ path: '/records', title: 'Records', icon: 'how_to_vote', class: '' },
-	{ path: '/users', title: 'Users', icon: 'supervised_user_circle', class: '' },
+	{ path: '/users', title: 'Users', icon: 'group', class: '' },
 	// { path: '/'}
 ];
 
@@ -45,16 +46,16 @@ export class SidebarComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
-		this.menuItems = ROUTES.filter(menuItem => this.hasPermission(menuItem.title));
+		this.menuItems = ROUTES.filter(menuItem => menuItem.title === 'News' || this.hasPermission(menuItem.title));
 
-		if (!this.menuItems.length) {
-			this.notification.openCustomSnackbar('Oops! you\'re unauthurized to proceed.');
-			this.auth.logout();
-		}
+		// if (!this.menuItems.length) {
+		// 	this.notification.openCustomSnackbar('Oops! you\'re unauthurized to proceed.');
+		// 	this.auth.logout();
+		// }
 
-		if (!this.menuItems.map(elem => elem.title).includes('Dashboard')) {
-			this.router.navigateByUrl(this.menuItems[0].path);
-		}
+		// if (!this.menuItems.map(elem => elem.title).includes('Dashboard')) {
+		// 	this.router.navigateByUrl(this.menuItems[0].path);
+		// }
 	}
 
 	isMobile(): boolean {

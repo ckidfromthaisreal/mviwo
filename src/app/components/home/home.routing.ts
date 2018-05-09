@@ -22,6 +22,13 @@ const routes: Routes = [
 	// 	// ],
 	// },
 	{
+		path: 'news',
+		component: DashboardComponent, // <<<---------
+		canActivate: [
+			AuthGuardService
+		]
+	},
+	{
 		path: 'dashboard',
 		component: DashboardComponent,
 		canActivate: [
@@ -32,6 +39,34 @@ const routes: Routes = [
 		path: 'metrics',
 		// loadChildren: 'app/metric/metric.module#MetricModule',
 		component: MetricGalleryComponent,
+		canActivate: [
+			AuthGuardService
+		]
+	},
+	{
+		path: 'metric-groups',
+		component: MetricGalleryComponent, // <<<--------
+		canActivate: [
+			AuthGuardService
+		]
+	},
+	{
+		path: 'sessions',
+		component: MetricGalleryComponent, // <<<--------
+		canActivate: [
+			AuthGuardService
+		]
+	},
+	{
+		path: 'records',
+		component: MetricGalleryComponent, // <<<--------
+		canActivate: [
+			AuthGuardService
+		]
+	},
+	{
+		path: 'users',
+		component: MetricGalleryComponent, // <<<-------
 		canActivate: [
 			AuthGuardService
 		]

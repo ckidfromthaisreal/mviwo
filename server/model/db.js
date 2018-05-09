@@ -77,6 +77,17 @@ connection.once('open', () => {
 	}, {
 		upsert: true
 	}).exec();
+
+	User.updateOne({
+		username: 'student'
+	}, {
+		username: 'student',
+		email: 'student@mviwo.com',
+		password: bcrypt.hashSync('student123'),
+		power: 200
+	}, {
+		upsert: true
+	}).exec();
 });
 
 /**
