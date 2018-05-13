@@ -9,6 +9,7 @@ import { MetricModule } from '../metric/metric.module';
 
 import { HomeComponent } from './home.component';
 import { DashboardComponent } from './../dashboard/dashboard.component';
+import { D3Module } from '../d3/d3.module';
 
 @NgModule({
 	declarations: [
@@ -28,7 +29,9 @@ import { DashboardComponent } from './../dashboard/dashboard.component';
 		MatTooltipModule,
 
 		NavigationModule,
-		MetricModule
+		MetricModule,
+
+		D3Module,
 	],
 	exports: [
 		// HomeComponent,

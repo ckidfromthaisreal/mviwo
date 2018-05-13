@@ -1,0 +1,31 @@
+<div class="cloud-container">
+  <svg *ngIf="words.length" [attr.width]="options.size.width" [attr.height]="options.size.height">
+    <svg:g></svg:g>
+    <svg:g [attr.transform]="'translate(' + options.size.width / 2 + ',' + options.size.height / 2 + ')'">
+      <svg:text *ngFor="let word of words"
+        [style.font-size]="word.size + 'px'"
+        [style.font-family]="word.font"
+        [attr.text-anchor]="'middle'"
+        [attr.transform]="'translate(' + word.x + ',' + word.y + ')rotate(' + word.rotate + ')'"
+        [attr.fill]="getRandomColor(word)"
+        (click)="onWordClick(word)"
+        (mouseenter)="onWordMouseEnter(word, $event)"
+        (mouseleave)="onWordMouseLeave()">
+       {{ word.text }}
+      </svg:text>
+    </svg:g>
+  </svg>
+  <div *ngIf="options.useTooltip" 
+    class="cloud-tooltip"
+    id="cloud-tooltip"
+    [ngStyle]="repositionTooltip()"
+    >
+    <span>
+      {{ currentWord?.text }}
+      <br>
+      <span><strong>count: </strong>
+      {{ currentWord?.size }}</span>
+    </span>
+  </div>
+  <button type="button" (click)="redraw(true)">redraw</button>
+</div>

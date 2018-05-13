@@ -83,7 +83,6 @@ export class AuthenticationService {
 	 * @param what operation, lower-case camel.
 	 */
 	public hasPermission(element: String, what?: String): boolean {
-		console.log(element, what, this.getUserDetails().permissions);
 		const permissions = this.getUserDetails().permissions;
 		element = element.toLocaleLowerCase().replace(/[\s]/g, '-');
 		return permissions.includes(`${element}:${what}`) || 
