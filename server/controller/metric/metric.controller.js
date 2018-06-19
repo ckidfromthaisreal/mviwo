@@ -29,7 +29,7 @@ const logger = require('../../util/logger');
  *
  * req.headers.filter - filter object. if not provided, fetches all metrics in db.
  *
- * req.headers.select - specifies which fields should be included in returned metric.
+ * req.headers.fields - specifies which fields should be included in returned metric.
  *
  * req.headers.groupsPopulate = if true, populates metric's groups array with metric-group objects.
  *
@@ -47,12 +47,12 @@ exports.getMany = async (req, res, next) => {
 		query = Metric.find();
 	}
 
-	if (req.headers.select) {
-		query.select(req.headers.select);
+	if (req.headers.fields) {
+		query.select(req.headers.fields);
 	}
 
 	if (req.headers.groupspopulate === 'true' &&
-		(!req.headers.select || req.headers.select.includes('groups'))) {
+		(!req.headers.fields || req.headers.fields.includes('groups'))) {
 		query.populate({
 			path: 'groups._id',
 			select: req.headers.groupsselect
@@ -77,7 +77,7 @@ exports.getMany = async (req, res, next) => {
  *
  * req.user - object including user credentials.
  *
- * req.headers.select - specifies which fields should be included in returned metric.
+ * req.headers.fields - specifies which fields should be included in returned metric.
  *
  * req.headers.groupspopulate = if true, populates metric's groups array with metric-group objects.
  *
@@ -89,12 +89,12 @@ exports.getOne = async (req, res, next) => {
 	const operationName = 'metric.controller:getOne';
 	const query = Metric.findById(req.params.id);
 
-	if (req.headers.select) {
-		query.select(req.headers.select);
+	if (req.headers.fields) {
+		query.select(req.headers.fields);
 	}
 
 	if (req.headers.groupspopulate === 'true' &&
-		(!req.headers.select || req.headers.select.includes('groups'))) {
+		(!req.headers.fields || req.headers.fields.includes('groups'))) {
 		query.populate({
 			path: 'groups._id',
 			select: req.headers.groupsselect

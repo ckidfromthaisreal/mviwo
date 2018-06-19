@@ -17,14 +17,14 @@ export abstract class CrudService {
 	) {}
 
 	/**
-	 * fetches many instances of given element.
+	 * fetches many instances of given element from server.
 	 * @param filter filter results by.
-	 * @param select project only given fields. space seperated field names.
-	 * @param options more headers.
+	 * @param fields project only given fields. space seperated field names.
+	 * @param options more headers. keys equal to other parameter names or 'Authorization' are ignored.
 	 */
 	getMany<T>(
 		filter?: object
-		, select?: string
+		, fields?: string
 		, options?: object
 	): Observable<T[]> {
 		if (!this.auth.isLoggedIn) {
@@ -44,20 +44,22 @@ export abstract class CrudService {
 		// 	return Observable.of(elements);
 		// }
 
-		const headers: HttpHeaders = new HttpHeaders()
+		let headers: HttpHeaders = new HttpHeaders()
 			.set('Authorization', `Bearer ${this.auth.getToken()}`);
 
 		if (filter) {
-			headers.set('filter', JSON.stringify(filter));
+			headers = headers.set('filter', JSON.stringify(filter));
 		}
 
-		if (select) {
-			headers.set('select', select);
+		if (fields) {
+			headers = headers.set('fields', fields);
 		}
 
 		if (options) {
 			Object.keys(options).forEach(key => {
-				headers.set(key, options['key']);
+				if (!['Authorization', 'filter', 'select'].includes(key)) {
+					headers = headers.set(key, options['key']);
+				}
 			});
 		}
 
