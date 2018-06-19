@@ -1,3 +1,4 @@
+import { MviwoCardModule } from './../material/mviwo-card/mviwo-card.module';
 import { NgModule } from '@angular/core';
 import { routing } from './home.routing';
 import { CommonModule } from '@angular/common';
@@ -32,6 +33,7 @@ import { D3Module } from '../d3/d3.module';
 		MetricModule,
 
 		D3Module,
+		MviwoCardModule,
 	],
 	exports: [
 		// HomeComponent,

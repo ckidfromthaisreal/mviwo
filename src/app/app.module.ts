@@ -1,3 +1,4 @@
+import { MviwoCardModule } from './components/material/mviwo-card/mviwo-card.module';
 import { NotificationService } from './services/notification/notification.service';
 import { BrowserService } from './services/browser/browser.service';
 import { HttpClientModule } from '@angular/common/http';
@@ -13,6 +14,7 @@ import { NavigationModule } from './components/navigation/navigation.module';
 
 import { AuthenticationService } from './services/authentication/authentication.service';
 import { AuthGuardService } from './services/auth-guard/auth-guard.service';
+import { MetricCrudService } from './services/crud/metric-crud.service';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
@@ -34,6 +36,7 @@ import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-
 
 		MatSnackBarModule,
 		MviwoSnackbarModule,
+		MviwoCardModule,
 	],
 	providers: [
 		AuthenticationService,
@@ -44,6 +47,7 @@ import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-
 			useClass: GestureConfig
 		},
 		NotificationService,
+		MetricCrudService,
 	],
 	entryComponents: [
 		MviwoSnackbarComponent

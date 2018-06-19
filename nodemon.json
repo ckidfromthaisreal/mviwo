@@ -2,6 +2,9 @@
     "ignore": [
         ".git",
 		"node_modules/**/node_modules",
-		"test"
+		"test",
+		"src",
+		"public",
+		"dist"
     ]
 }

@@ -32,7 +32,7 @@ export class AuthenticationService {
 	 * retrieves token from memory or local storage.
 	 * @returns token string.
 	 */
-	private getToken(): string {
+	public getToken(): string {
 		if (!this.token) {
 			this.token = localStorage.getItem('mviwo-token');
 		}
@@ -85,7 +85,7 @@ export class AuthenticationService {
 	public hasPermission(element: String, what?: String): boolean {
 		const permissions = this.getUserDetails().permissions;
 		element = element.toLocaleLowerCase().replace(/[\s]/g, '-');
-		return permissions.includes(`${element}:${what}`) || 
+		return permissions.includes(`${element}:${what}`) ||
 			permissions.includes(`${element.substring(0, element.length - 1)}:${what}`) ||
 			permissions.includes(`${element}`) ||
 			permissions.includes(`${element.substring(0, element.length - 1)}`);

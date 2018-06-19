@@ -60,10 +60,27 @@ connection.on('error', () => {
 	}
 });
 
+connection.on('disconnected', () => {
+	logger.info('DB', 'db.js:mongoose.connect', `disconnected from: ${currentDB}`);
+});
+
 /* on successful connection, log a message. */
 connection.once('open', () => {
 	logger.info('DB', 'db.js:mongoose.connect', `successfully connected to: ${currentDB}`);
+	initUsers();
+});
 
+/**
+ * connect to database.
+ */
+exports.connect = () => {
+	mongoose.connect(currentDB = config.CONNECT_TO_LOCAL ? localDB : remoteDB);
+};
+
+/**
+ * persistent users initialization.
+ */
+function initUsers() {
 	const User = require('./user/user.model');
 	const bcrypt = require('bcryptjs');
 
@@ -72,7 +89,7 @@ connection.once('open', () => {
 	}, {
 		username: 'superuser',
 		email: 'mviwo.hq@gmail.com',
-		password: bcrypt.hashSync(require('../secret').superpassword),
+		password: bcrypt.hashSync(require('../secret').superpassword || 'superuser123'),
 		power: 999
 	}, {
 		upsert: true
@@ -88,11 +105,4 @@ connection.once('open', () => {
 	}, {
 		upsert: true
 	}).exec();
-});
-
-/**
- * connect to database.
- */
-exports.connect = () => {
-	mongoose.connect(currentDB = config.CONNECT_TO_LOCAL ? localDB : remoteDB);
-};
+}

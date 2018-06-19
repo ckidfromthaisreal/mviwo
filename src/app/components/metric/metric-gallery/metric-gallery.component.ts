@@ -1,3 +1,4 @@
+import { MetricCrudService } from './../../../services/crud/metric-crud.service';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
@@ -7,8 +8,14 @@ import { Component, OnInit } from '@angular/core';
 	styleUrls: ['./metric-gallery.component.scss']
 })
 export class MetricGalleryComponent implements OnInit {
+	data: any[];
 
-	constructor() { }
+	constructor(private crud: MetricCrudService) { }
 
-	ngOnInit() {}
+	ngOnInit() {
+		this.crud.getMany().subscribe(data => {
+			console.log(data);
+			this.data = data;
+		});
+	}
 }
