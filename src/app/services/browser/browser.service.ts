@@ -23,7 +23,7 @@ export class BrowserService {
 		return window.matchMedia(`(min-width: ${width}px)`).matches;
 	}
 
-	private width(): number {
+	width(): number {
 		return Math.max(
 			document.documentElement['clientWidth'],
 			document.body['scrollWidth'],

@@ -16,7 +16,8 @@ import {
 	FormGroup,
 	FormControl,
 	FormArray,
-	Validators
+	Validators,
+	AbstractControl
 } from '@angular/forms';
 import {
 	MAT_DIALOG_DATA,
@@ -52,21 +53,30 @@ import { Updateable } from '../../../services/crud/crud.service';
 	styleUrls: ['./metric-form.component.scss']
 })
 export class MetricFormComponent implements OnInit {
+	/** @see Metric.dataTypes */
 	dataTypes = Metric.dataTypes;
+
+	/** @see Metric.rules */
 	rules = Metric.rules;
 
-	initialGroups: FormControl[] = [];
+	/** holds metric's initial groups. */
+	private initialGroups: FormControl[] = [];
+
+	/** metric's current groups. */
 	metricGroups: FormControl[] = [];
 
+	/** enum values control. */
 	xxValuesInput: FormControl;
 
+	/** main form. */
 	form: FormGroup;
 
 	constructor(
 		private crud: MetricCrudService
 		, private groupsCrud: MetricGroupCrudService
 		, private arrays: ArraysService
-		, protected dialogRef: MatDialogRef < MetricFormComponent > , @Inject(MAT_DIALOG_DATA) protected data: ElementFormInput < Metric >
+		, protected dialogRef: MatDialogRef < MetricFormComponent >
+		, @Inject(MAT_DIALOG_DATA) public data: ElementFormInput < Metric >
 	) {}
 
 	ngOnInit(): void {
@@ -236,7 +246,7 @@ export class MetricFormComponent implements OnInit {
 	/**
 	 * initializes groups control.
 	 */
-	initxxGroups() { // ??!?!
+	initxxGroups() {
 		const xxGroups: FormArray = this.form.get('xxGroups') as FormArray;
 
 		if (this.data.resource) {
@@ -250,10 +260,10 @@ export class MetricFormComponent implements OnInit {
 				data = data.filter(obj => obj._id !== item.value._id);
 			});
 			data.forEach(item => {
-				this.initialGroups.push(new FormControl(item));
+				const fc = new FormControl(item);
+				this.initialGroups.push(fc);
+				this.metricGroups.push(fc);
 			});
-
-			this.initialGroups.forEach(item => this.metricGroups.push(item));
 		});
 	}
 
@@ -611,12 +621,12 @@ export class MetricFormComponent implements OnInit {
 
 		if (current !== 'boolean') {}
 
-		if (current !== 'date') {}
-
-		// if (current !== 'blob') {}
+		if (current !== 'date') {
+			// TODO
+		}
 
 		if (current !== 'enum') {
-
+			// TODO
 		}
 	}
 
@@ -833,5 +843,13 @@ export class MetricFormComponent implements OnInit {
 		});
 
 		return updateable;
+	}
+
+	getxxValuesControls(): AbstractControl[] {
+		return (<FormArray>this.form.get('grpEnumParams').get('xxValues')).controls;
+	}
+
+	getxxGroupsControls(): AbstractControl[] {
+		return (<FormArray>this.form.get('xxGroups')).controls;
 	}
 }

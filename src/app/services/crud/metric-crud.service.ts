@@ -1,3 +1,4 @@
+import { NotificationService } from './../notification/notification.service';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CrudService } from './crud.service';
@@ -8,7 +9,11 @@ const URL = '/api/metric';
 
 @Injectable({ providedIn: 'root' })
 export class MetricCrudService extends CrudService {
-	constructor(http: HttpClient, auth: AuthenticationService) {
-		super(ELEMENT, URL, http, auth);
+	constructor(
+		http: HttpClient
+		, auth: AuthenticationService
+		, notification: NotificationService
+	) {
+		super(ELEMENT, URL, http, auth, notification);
 	}
 }

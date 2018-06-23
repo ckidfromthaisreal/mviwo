@@ -7,7 +7,7 @@ import {
 	ArraysService
 } from './arrays.service';
 
-describe('ArrayService', () => {
+describe('ArraysService', () => {
 	beforeEach(() => {
 		TestBed.configureTestingModule({
 			providers: [ArraysService]

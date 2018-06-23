@@ -1,3 +1,5 @@
+@import '~@angular/material/theming';
+
 table {
 	width: 100%;
 }
@@ -10,12 +12,9 @@ th.mat-sort-header-sorted {
 	color: black;
 }
 
-.mat-header-row {
-	// position: sticky;
-	// position: -webkit-sticky;
-	// z-index: 1;
-	// top: 0;
-	// background-color: inherit;
+/* ripple effect to not be cutoff. */
+.mat-column-select, .mat-column-action, .mat-column-createdAt, .mat-column-updatedAt {
+	overflow: initial;
 }
 
 .mat-row:hover {
@@ -33,7 +32,7 @@ mat-form-field {
 
 .table-container {
 	height: 65vh;
-	overflow-y: auto;
+	overflow: auto;
 	background-color: rgb(45,45,45);
 }
 

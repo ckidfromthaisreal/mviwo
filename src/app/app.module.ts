@@ -23,6 +23,8 @@ import { HomeComponent } from './components/home/home.component';
 import { MviwoSnackbarComponent } from './components/material/mviwo-snackbar/mviwo-snackbar.component';
 import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-snackbar.module';
 
+import { DndModule } from 'ng2-dnd';
+
 @NgModule({
 	declarations: [
 		AppComponent,
@@ -39,6 +41,8 @@ import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-
 		MatSnackBarModule,
 		MviwoSnackbarModule,
 		MviwoCardModule,
+
+		DndModule.forRoot(),
 	],
 	providers: [
 		ArraysService,

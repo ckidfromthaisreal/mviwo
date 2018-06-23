@@ -156,7 +156,7 @@
 				  <div *ngIf="form.get('slDataType').value === 'enum'">
 					<mat-label>Value List</mat-label>
 					<mat-list style="height: 160px; overflow-y:auto">
-					  <mat-list-item *ngFor="let valueCtrl of form.get('grpEnumParams').get('xxValues').controls">
+					  <mat-list-item *ngFor="let valueCtrl of getxxValuesControls()">
 						<mat-icon color="warn" (click)="removeEnumValue(valueCtrl)">
 						  <button class="btn btn-danger btn-circle btn-sm">
 							<i class="fa fa-minus" aria-hidden="true"></i>
@@ -181,7 +181,7 @@
 					  <ng-template #singleChoice>
 						<mat-form-field labelfloat="auto">
 						  <mat-select ngModel #enumPrev1="ngModel" name="enumPrev1" [placeholder]="form.get('tfName').value" [required]="form.get('cbRequired')">
-							<mat-option *ngFor="let ctrl of form.get('grpEnumParams').get('xxValues').controls" [value]="ctrl.value">
+							<mat-option *ngFor="let ctrl of getxxValuesControls()" [value]="ctrl.value">
 							  {{ ctrl.value }}
 							</mat-option>
 						  </mat-select>
@@ -193,7 +193,7 @@
 					  <ng-template #multipleChoice>
 						<mat-form-field labelfloat="auto">
 						  <mat-select ngModel #enumPrev2="ngModel" name="enumPrev2" [placeholder]="form.get('tfName').value" multiple [required]="form.get('cbRequired')">
-							<mat-option *ngFor="let ctrl of form.get('grpEnumParams').get('xxValues').controls" [value]="ctrl.value">
+							<mat-option *ngFor="let ctrl of getxxValuesControls()" [value]="ctrl.value">
 							  {{ ctrl.value }}
 							</mat-option>
 						  </mat-select>
@@ -331,7 +331,7 @@
 		  <mat-tab label="Metric Groups">
 			<div mat-dialog-content>
 			  <br>
-			  <!-- <div class="row" style="max-height: 500px; min-height: 300px">
+			  <div class="row" style="max-height: 500px; min-height: 300px">
 				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
 				  <div class="panel panel-info" dnd-sortable-container [sortableData]="metricGroups">
 					<mat-label>Available Groups</mat-label>
@@ -355,14 +355,14 @@
 				  </div>
 				</div>
 				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-				  <div class="panel panel-info" dnd-sortable-container [sortableData]="form.get('xxGroups').controls">
+				  <div class="panel panel-info" dnd-sortable-container [sortableData]="getxxGroupsControls()">
 					<mat-label>Selected Groups</mat-label>
 					<div class="scroll-div-sm panel-body" dnd-draggable dnd-droppable [dropZones]="['zone0']">
 					  <ul class="list-group">
-						<li *ngIf="!form.get('xxGroups').controls.length" class="empty-list-item list-group-item">
+						<li *ngIf="!getxxGroupsControls().length" class="empty-list-item list-group-item">
 						  drag here to select..
 						</li>
-						<li *ngFor="let ctrl of form.get('xxGroups').controls; let i = index" dnd-sortable [sortableIndex]="i" [dragEnabled]="true"
+						<li *ngFor="let ctrl of getxxGroupsControls(); let i = index" dnd-sortable [sortableIndex]="i" [dragEnabled]="true"
 						  [dragData]="ctrl" class="list-group-item" (onDropSuccess)="onGroupDragSuccessful()">
 						  <span dnd-draggable-handle style="padding-right: 5px">
 							<i class="fa fa-ellipsis-v" aria-hidden="true"></i>
@@ -376,7 +376,7 @@
 					</div>
 				  </div>
 				</div>
-			  </div> -->
+			  </div>
 			</div>
 		  </mat-tab>
 		</mat-tab-group>

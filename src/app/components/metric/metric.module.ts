@@ -10,6 +10,7 @@ import { MatIconModule, MatButtonModule, MatMenuModule,
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MetricFormComponent } from './metric-form/metric-form.component';
+import { DndModule } from 'ng2-dnd';
 
 @NgModule({
 	imports: [
@@ -34,6 +35,8 @@ import { MetricFormComponent } from './metric-form/metric-form.component';
 		MatSlideToggleModule,
 		MatSelectModule,
 		MatListModule,
+
+		DndModule,
 	],
 	declarations: [
 		MetricGalleryComponent,
