@@ -1,3 +1,5 @@
+import { ArraysService } from './services/arrays/arrays.service';
+import { MetricGroupCrudService } from './services/crud/metric-group-crud.service';
 import { MviwoCardModule } from './components/material/mviwo-card/mviwo-card.module';
 import { NotificationService } from './services/notification/notification.service';
 import { BrowserService } from './services/browser/browser.service';
@@ -39,6 +41,7 @@ import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-
 		MviwoCardModule,
 	],
 	providers: [
+		ArraysService,
 		AuthenticationService,
 		AuthGuardService,
 		BrowserService,
@@ -48,6 +51,7 @@ import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-
 		},
 		NotificationService,
 		MetricCrudService,
+		MetricGroupCrudService,
 	],
 	entryComponents: [
 		MviwoSnackbarComponent

@@ -1,7 +1,7 @@
 {
 	"CONNECT_TO_LOCAL" : true,
 	"MONGO_LOCAL_PORT": "32768",
-	"MONGO_NAME": "mviwo",
+	"MONGO_NAME": "LadakhEHealthDB",
     "MAXIMUM_ATTEMPTS" : 3,
     "FALLBACK_TO_LOCAL": false,
     "DEFAULT_APPLICATION_PORT": "8080",

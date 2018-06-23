@@ -6,6 +6,8 @@ button {
 
 .navbar {
 	@include mat-elevation(2);
+	background-color: rgb(48,48,48) !important;
+	position:fixed;
 }
 
 .navbar-toggler {

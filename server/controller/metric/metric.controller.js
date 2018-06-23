@@ -392,7 +392,7 @@ exports.updateOne = async (req, res, next) => {
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
 exports.deleteMany = async (req, res, next) => {
-	const operationName = 'metric.controller:deleteOne';
+	const operationName = 'metric.controller:deleteMany';
 	let err = null;
 
 	if (!req.body || !req.body.length) {

@@ -1,0 +1,396 @@
+<h1 mat-dialog-title>
+		<div *ngIf="data.isEdit; then editTitle else createTitle"></div>
+		<ng-template #editTitle>
+		  Editing Metric:
+		  <span style="font-size: 70%;"> {{ data.resource._id }}</span>
+		</ng-template>
+		<ng-template #createTitle>
+		  Creating New Metric
+		</ng-template>
+		<button mat-dialog-close mat-icon-button class="pull-right" style="font-size: 150%" (click)="onCancelClick()">&times;</button>
+	  </h1>
+	  <form [formGroup]="form">
+		<mat-tab-group dynamicHeight>
+		  <mat-tab label="General Information" class="mviwo-unselectable">
+			<div mat-dialog-content>
+			  <br>
+			  <div class="row">
+				<div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+				  <mat-form-field floatLabel="auto">
+					<input matInput type="text" placeholder="Metric Name" formControlName="tfName" required [maxLength]="rules.nameMaxLength"
+					  cdkFocusInitial>
+					<mat-hint align="end">
+					  characters left: {{ rules.nameMaxLength - form.get('tfName').value.length }}
+					</mat-hint>
+					<mat-error *ngIf="form.get('tfName').invalid">
+					  {{ getNameErrorMessage() }}
+					</mat-error>
+				  </mat-form-field>
+				</div>
+				<!-- col 1 -->
+				<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+				  <mat-slide-toggle matTooltip="must be given a value" formControlName="cbRequired">
+					Required
+				  </mat-slide-toggle>
+				</div>
+				<!-- col 2 -->
+			  </div>
+			  <!-- row 1 -->
+			  <br>
+			  <div class="row">
+				<div class="col-lg-12-col-md-12 col-sm-12 col-xs-12">
+				  <mat-form-field floatLabel="auto">
+					<textarea matInput placeholder="Description" formControlName="taDescription" matTextareaAutosize [maxLength]="rules.descriptionMaxLength"></textarea>
+					<mat-hint align="end">
+					  characters left: {{ (form.get('taDescription').value) ? rules.descriptionMaxLength - form.get('taDescription').value.length
+					  : rules.descriptionMaxLength }}
+					</mat-hint>
+				  </mat-form-field>
+				</div>
+			  </div>
+			  <!-- row 2 -->
+			</div>
+		  </mat-tab>
+		  <!-- general info tab -->
+		  <mat-tab label="Data Type">
+			<div mat-dialog-content>
+			  <br>
+			  <div class="row">
+				<div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
+				  <mat-form-field floatLabel="auto" style="padding: 10px; border-radius: 5px; border:1px solid lightgrey">
+					<mat-select placeholder="Date Type" required formControlName="slDataType" style="width:100%" (selectionChange)="onDataTypeChange()">
+					  <mat-option *ngIf="!data.isEdit && !form.get('slDataType').value">Select a datatype..</mat-option>
+					  <mat-option *ngFor="let dType of dataTypes" [disabled]="dType.name === 'blob' || dType.name === 'date'" [matTooltip]="dType.desc"
+						[matTooltipShowDelay]="500" [value]="dType.name">
+						{{ dType.simpleName }}
+					  </mat-option>
+					</mat-select>
+					<mat-error *ngIf="form.get('slDataType').invalid">
+					  must select a data type!
+					</mat-error>
+				  </mat-form-field>
+				</div>
+				<!-- col 1 -->
+				<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+				  <div formGroupName="grpEnumParams" *ngIf="form.get('slDataType').value === 'enum'">
+					<mat-slide-toggle formControlName="cbMultiple">
+					  Multiple Choice
+					</mat-slide-toggle>
+				  </div>
+				  <div *ngIf="form.get('slDataType').value === 'string'">
+					<div class="row" style="padding: 10px">
+					  <div class="col-lg-12">
+						<div formGroupName="grpStringParams">
+						  <mat-slide-toggle formControlName="cbLineBreaks" (change)="onLineBreaksTicked()">
+							Line Breaks
+						  </mat-slide-toggle>
+						</div>
+					  </div>
+					</div>
+					<div class="row" style="padding: 10px">
+					  <div class="col-lg-12">
+						<div formGroupName="grpStringParams">
+						  <mat-slide-toggle formControlName="cbEmail" (change)="onEmailTicked()">
+							Email Field
+						  </mat-slide-toggle>
+						</div>
+					  </div>
+					</div>
+				  </div>
+				</div>
+				<!-- col 2 -->
+			  </div>
+			  <!-- row 1-->
+			  <div class="row">
+				<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+				  <mat-form-field *ngIf="form.get('slDataType').value === 'string'" floatLabel="auto" formGroupName="grpStringParams">
+					<input matInput type="text" placeholder="Hint" formControlName="tfHint" [maxlength]="rules.hintMaxLength">
+					<mat-hint align="start">shown under input control</mat-hint>
+					<mat-hint align="end">
+					  characters left: {{ (form.get('grpStringParams').get('tfHint').value) ? rules.hintMaxLength - form.get('grpStringParams').get('tfHint').value.length
+					  : rules.hintMaxLength }}
+					</mat-hint>
+				  </mat-form-field>
+				  <div *ngIf="form.get('slDataType').value === 'boolean'">
+					<hr>
+					<div class="form-group">
+					  <label class="text-muted">Preview</label>
+					  <br>
+					  <mat-checkbox style="padding-left: 20px !important" color="primary" [indeterminate]="!form.get('cbRequired').value">{{ form.get('tfName').value }}</mat-checkbox>
+					</div>
+				  </div>
+				</div>
+				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+				  <br>
+				  <mat-form-field *ngIf="form.get('slDataType').value === 'number'" floatLabel="auto" formGroupName="grpNumberParams">
+					<input matInput type="number" placeholder="Minimum Value" formControlName="tfMinValue" (change)="onMinMaxValueChange('min')">
+					<mat-hint align="end">default to 0</mat-hint>
+					<mat-error *ngIf="form.get('grpNumberParams').get('tfMinValue').invalid">
+					  {{ getMinValueErrorMessage() }}
+					</mat-error>
+				  </mat-form-field>
+				  <mat-form-field floatLabel="auto" *ngIf="form.get('slDataType').value === 'enum'">
+					<input matInput type="text" placeholder="add list values.." [pattern]="rules.enumValuePattern" [formControl]="xxValuesInput">
+					<mat-error *ngIf="xxValuesInput.invalid">
+					  {{ xxValuesInput.hasError('pattern') ? 'letters only!' : xxValuesInput.hasError('valueNotExists') ? 'value already in list!'
+					  : xxValuesInput.hasError('dependancy') ? 'minimum 2 values!' : '' }}
+					</mat-error>
+					<mat-icon matSuffix *ngIf="xxValuesInput.value && xxValuesInput.value.length && !xxValuesInput.hasError('pattern') && !xxValuesInput.hasError('valueNotExists')"
+					  color="accent" (click)="addEnumValue()">
+					  <button class="btn btn-success btn-circle btn-sm">
+						<i class="fa fa-plus" aria-hidden="true"></i>
+					  </button>
+					</mat-icon>
+				  </mat-form-field>
+				</div>
+				<!-- col 1 -->
+				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+				  <br>
+				  <mat-form-field *ngIf="form.get('slDataType').value === 'number'" floatLabel="auto" formGroupName="grpNumberParams">
+					<input matInput type="number" placeholder="Maximum Value" formControlName="tfMaxValue" (change)="onMinMaxValueChange('max')">
+					<mat-hint align="end">default to 100</mat-hint>
+					<mat-error *ngIf="form.get('grpNumberParams').get('tfMaxValue').invalid">
+					  {{ getMaxValueErrorMessage() }}
+					</mat-error>
+				  </mat-form-field>
+				  <div *ngIf="form.get('slDataType').value === 'enum'">
+					<mat-label>Value List</mat-label>
+					<mat-list style="height: 160px; overflow-y:auto">
+					  <mat-list-item *ngFor="let valueCtrl of form.get('grpEnumParams').get('xxValues').controls">
+						<mat-icon color="warn" (click)="removeEnumValue(valueCtrl)">
+						  <button class="btn btn-danger btn-circle btn-sm">
+							<i class="fa fa-minus" aria-hidden="true"></i>
+						  </button>
+						</mat-icon>
+						<span style="padding-left: 15px">{{ valueCtrl.value }}</span>
+					  </mat-list-item>
+					</mat-list>
+				  </div>
+				</div>
+				<!-- col 2 -->
+			  </div>
+			  <!-- row 2 -->
+			  <br>
+			  <div class="row">
+				<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+				  <form *ngIf="form.get('slDataType').value === 'enum'" ngForm>
+					<hr>
+					<div class="form-group">
+					  <label class="text-muted">Preview</label>
+					  <div *ngIf="form.get('grpEnumParams').get('cbMultiple').value; then multipleChoice; else singleChoice"></div>
+					  <ng-template #singleChoice>
+						<mat-form-field labelfloat="auto">
+						  <mat-select ngModel #enumPrev1="ngModel" name="enumPrev1" [placeholder]="form.get('tfName').value" [required]="form.get('cbRequired')">
+							<mat-option *ngFor="let ctrl of form.get('grpEnumParams').get('xxValues').controls" [value]="ctrl.value">
+							  {{ ctrl.value }}
+							</mat-option>
+						  </mat-select>
+						  <mat-error *ngIf="enumPrev1.invalid">
+							you must select a {{ form.get('tfName').value | lowercase }}!
+						  </mat-error>
+						</mat-form-field>
+					  </ng-template>
+					  <ng-template #multipleChoice>
+						<mat-form-field labelfloat="auto">
+						  <mat-select ngModel #enumPrev2="ngModel" name="enumPrev2" [placeholder]="form.get('tfName').value" multiple [required]="form.get('cbRequired')">
+							<mat-option *ngFor="let ctrl of form.get('grpEnumParams').get('xxValues').controls" [value]="ctrl.value">
+							  {{ ctrl.value }}
+							</mat-option>
+						  </mat-select>
+						  <mat-error *ngIf="enumPrev2.invalid">
+							you must select {{ form.get('tfName').value | lowercase }}!
+						  </mat-error>
+						</mat-form-field>
+					  </ng-template>
+					</div>
+				  </form>
+				</div>
+				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+				  <mat-form-field *ngIf="form.get('slDataType').value === 'string'" floatLabel="auto" formGroupName="grpStringParams">
+					<input matInput type="number" placeholder="Minimum Length" formControlName="tfMinLength" min="0" (change)="onMinMaxLengthChange('min')">
+					<mat-hint align="end">defaults to 0</mat-hint>
+					<mat-error *ngIf="form.get('grpStringParams').get('tfMinLength').invalid">
+					  {{ getMinLengthErrorMessage() }}
+					</mat-error>
+				  </mat-form-field>
+				  <mat-form-field *ngIf="form.get('slDataType').value === 'number'" floatLabel="auto" formGroupName="grpNumberParams">
+					<input matInput type="number" placeholder="Step" formControlName="tfStep">
+					<mat-hint align="start">gap between values</mat-hint>
+					<mat-hint align="end">defaults to 1</mat-hint>
+					<mat-error *ngIf="form.get('grpNumberParams').get('tfStep').invalid">
+					  {{ getStepErrorMessage() }}
+					</mat-error>
+				  </mat-form-field>
+				</div>
+				<!-- col 1 -->
+				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+				  <mat-form-field *ngIf="form.get('slDataType').value === 'string'" floatLabel="auto" formGroupName="grpStringParams">
+					<input matInput type="number" placeholder="Maximum Length" formControlName="tfMaxLength" min="1" (change)="onMinMaxLengthChange('max')">
+					<mat-error *ngIf="form.get('grpStringParams').get('tfMaxLength').invalid">
+					  {{ getMaxLengthErrorMessage() }}
+					</mat-error>
+				  </mat-form-field>
+				  <mat-form-field *ngIf="form.get('slDataType').value === 'number'" floatLabel="auto" formGroupName="grpNumberParams">
+					<input matInput type="number" placeholder="Tick Interval" formControlName="tfTickInterval" min="0">
+					<mat-hint align="start">tick every _ values</mat-hint>
+					<mat-hint align="end">defaults to 1</mat-hint>
+					<mat-error *ngIf="form.get('grpNumberParams').get('tfTickInterval').invalid">
+					  {{ getTickIntervalErrorMessage() }}
+					</mat-error>
+				  </mat-form-field>
+				</div>
+				<!-- col 2 -->
+			  </div>
+			  <!-- row 3 -->
+			  <br>
+			  <div class="row">
+				<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+				  <div *ngIf="form.get('slDataType').value === 'string'" style="min-height: 70px">
+					<mat-form-field *ngIf="!form.get('grpStringParams').get('cbLineBreaks').value && !form.get('grpStringParams').get('cbEmail').value"
+					  floatLabel="auto" formGroupName="grpStringParams">
+					  <input matInput type="text" placeholder="Pattern" formControlName="tfPattern">
+					  <mat-hint>enter a regular expression</mat-hint>
+					  <mat-error *ngIf="form.get('grpStringParams').get('tfPattern').invalid">
+						{{ getPatternErrorMessage() }}
+					  </mat-error>
+					</mat-form-field>
+				  </div>
+				</div>
+				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="form.get('slDataType').value === 'number'">
+				  <mat-form-field floatLabel="auto" formGroupName="grpNumberParams">
+					<input matInput placeholder="Prefix" type="text" formControlName="tfPrefix">
+					<mat-hint align="right">displayed before value</mat-hint>
+				  </mat-form-field>
+				</div>
+				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="form.get('slDataType').value === 'number'">
+				  <mat-form-field floatLabel="auto" formGroupName="grpNumberParams">
+					<input matInput placeholder="Postfix" type="text" formControlName="tfPostfix">
+					<mat-hint align="right">displayed after value</mat-hint>
+				  </mat-form-field>
+				</div>
+			  </div>
+			  <!-- row 4 -->
+			  <div class="row">
+				<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+				  <form ngForm *ngIf="form.get('slDataType').value === 'number'">
+					<hr>
+					<div form-group>
+					  <label for="sliderPrev" class="text-muted">Preview</label>
+					  <br>
+					  <mat-label>{{ form.get('tfName').value }}</mat-label>
+					  <mat-slider [ngModel]="form.get('grpNumberParams').get('tfMinValue').value || 0" style="width: 65%" [min]="form.get('grpNumberParams').get('tfMinValue').value"
+						[max]="form.get('grpNumberParams').get('tfMaxValue').value" [step]="form.get('grpNumberParams').get('tfStep').value"
+						[tickInterval]="form.get('grpNumberParams').get('tfTickInterval').value || 1" thumbLabel="true" #sliderPrev="ngModel"
+						name="sliderPrev"></mat-slider>
+					  <mat-label>{{ ((form.get('grpNumberParams').get('tfPrefix').value) ? (form.get('grpNumberParams').get('tfPrefix').value
+						+ ' ') : '') + sliderPrev.value + ((form.get('grpNumberParams').get('tfPostfix').value) ? (' ' + form.get('grpNumberParams').get('tfPostfix').value)
+						: '') }}</mat-label>
+					</div>
+				  </form>
+				  <form ngForm *ngIf="form.get('slDataType').value === 'string'">
+					<hr>
+					<div class="form-group">
+					  <label class="text-muted">Preview</label>
+					  <div *ngIf="form.get('grpStringParams').get('cbLineBreaks').value; then textarea; else inputfield"></div>
+					  <ng-template #inputfield>
+						<mat-form-field floatLabel="auto">
+						  <input matInput ngModel #textfieldPrev="ngModel" name="textfieldPrev" type="text" [placeholder]="form.get('tfName').value"
+							[required]="form.get('cbRequired').value" [minlength]="form.get('grpStringParams').get('tfMinLength').value"
+							[maxlength]="form.get('grpStringParams').get('tfMaxLength').value" [email]="form.get('grpStringParams').get('cbEmail').value"
+							[pattern]="(form.get('grpStringParams').get('cbEmail').value) ? '' : form.get('grpStringParams').get('tfPattern').value">
+						  <mat-hint align="start">{{ form.get('grpStringParams').get('tfHint').value }}</mat-hint>
+						  <mat-hint align="end" *ngIf="form.get('grpStringParams').get('tfMaxLength').value">
+							characters left: {{ (textfieldPrev.value) ? form.get('grpStringParams').get('tfMaxLength').value - textfieldPrev.value.length
+							: form.get('grpStringParams').get('tfMaxLength').value }}
+						  </mat-hint>
+						  <mat-error *ngIf="textfieldPrev.invalid">
+							{{ textfieldPrev.hasError('required') ? 'you must enter ' + (form.get('tfName').value | lowercase) + '!' : textfieldPrev.hasError('email')
+							? 'invalid email address!' : textfieldPrev.hasError('pattern') ? 'invalid value!' : textfieldPrev.hasError('minlength')
+							? 'too short!' : '' }}
+						  </mat-error>
+						</mat-form-field>
+					  </ng-template>
+					  <ng-template #textarea>
+						<mat-form-field floatLabel="auto">
+						  <textarea matInput matTextareaAutosize ngModel #textareaPrev="ngModel" [placeholder]="form.get('tfName').value" name="textareaPrev"
+							[required]="form.get('cbRequired').value" [maxlength]="form.get('grpStringParams').get('tfMaxLength').value"></textarea>
+						  <mat-hint align="start">{{ form.get('grpStringParams').get('tfHint').value }}</mat-hint>
+						  <mat-hint align="end" *ngIf="form.get('grpStringParams').get('tfMaxLength').value">
+							characters left: {{ (textareaPrev.value) ? form.get('grpStringParams').get('tfMaxLength').value - textareaPrev.value.length
+							: form.get('grpStringParams').get('tfMaxLength').value }}
+						  </mat-hint>
+						</mat-form-field>
+					  </ng-template>
+					</div>
+				  </form>
+				</div>
+			  </div>
+			  <!-- row 5 -->
+			</div>
+		  </mat-tab>
+		  <mat-tab label="Metric Groups">
+			<div mat-dialog-content>
+			  <br>
+			  <!-- <div class="row" style="max-height: 500px; min-height: 300px">
+				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+				  <div class="panel panel-info" dnd-sortable-container [sortableData]="metricGroups">
+					<mat-label>Available Groups</mat-label>
+					<div class="scroll-div-sm panel-body" dnd-draggable dnd-droppable [dropZones]="['zone0']">
+					  <ul class="list-group">
+						<li *ngIf="!metricGroups || !metricGroups.length" class="empty-list-item list-group-item">
+						  drag here to deselect..
+						</li>
+						<li *ngFor="let ctrl of metricGroups; let i = index" class="list-group-item" dnd-sortable [sortableIndex]="i" [dragEnabled]="true"
+						  [dragData]="ctrl" (onDropSuccess)="onGroupDragSuccessful()">
+						  <span dnd-draggable-handle style="padding-right: 5px">
+							<i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+						  </span>
+						  {{ ctrl.value.name }}
+						  <button type="button" class="btn btn-success btn-circle btn-sm pull-right" (click)="addGroup(ctrl)">
+							<i class="fa fa-plus" aria-hidden="true"></i>
+						  </button>
+						</li>
+					  </ul>
+					</div>
+				  </div>
+				</div>
+				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+				  <div class="panel panel-info" dnd-sortable-container [sortableData]="form.get('xxGroups').controls">
+					<mat-label>Selected Groups</mat-label>
+					<div class="scroll-div-sm panel-body" dnd-draggable dnd-droppable [dropZones]="['zone0']">
+					  <ul class="list-group">
+						<li *ngIf="!form.get('xxGroups').controls.length" class="empty-list-item list-group-item">
+						  drag here to select..
+						</li>
+						<li *ngFor="let ctrl of form.get('xxGroups').controls; let i = index" dnd-sortable [sortableIndex]="i" [dragEnabled]="true"
+						  [dragData]="ctrl" class="list-group-item" (onDropSuccess)="onGroupDragSuccessful()">
+						  <span dnd-draggable-handle style="padding-right: 5px">
+							<i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+						  </span>
+						  {{ ctrl.value.name }}
+						  <button type="button" class="btn btn-danger btn-circle btn-sm pull-right" (click)="removeGroup(ctrl)">
+							<i class="fa fa-minus" aria-hidden="true"></i>
+						  </button>
+						</li>
+					  </ul>
+					</div>
+				  </div>
+				</div>
+			  </div> -->
+			</div>
+		  </mat-tab>
+		</mat-tab-group>
+	  </form>
+	  <br>
+	  <div mat-dialog-actions class="modal-footer">
+		<button mat-raised-button color="primary" matTooltip="save changes" type="button" [disabled]="form.invalid || form.pristine"
+		  (click)="onSaveClick()">
+		  <i class="fa fa-floppy-o" aria-hidden="true"></i>
+		</button>
+		<button mat-raised-button color="accent" matTooltip="undo changes" type="button" [disabled]="form.pristine" (click)="onResetClick()">
+		  <i class="fa fa-undo" aria-hidden="true"></i>
+		</button>
+		<button mat-raised-button matTooltip="cancel" type="button" (click)="onCancelClick()">
+		  <i class="fa fa-times" aria-hidden="true"></i>
+		</button>
+	  </div>

@@ -27,7 +27,7 @@ export class NotificationService {
 				action: action
 			},
 			duration: duration || 2000,
-			panelClass: extraClasses || ['mviwo-snackbar-dark']
+			panelClass: extraClasses || ['mviwo-snackbar-dark'],
 		});
 	}
 }

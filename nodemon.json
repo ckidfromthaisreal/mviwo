@@ -5,6 +5,20 @@
 		"test",
 		"src",
 		"public",
-		"dist"
+		"dist",
+		"angular.json",
+		".editorconfig",
+		".eslintrc.json",
+		".gitignore",
+		"karma.conf.js",
+		"LICENSE",
+		"nodemon.json",
+		"package-lock.json",
+		"package.json",
+		"protractor.conf.js",
+		"proxy.conf.json",
+		"README.md",
+		"tsconfig.json",
+		"tslint.json"
     ]
 }
