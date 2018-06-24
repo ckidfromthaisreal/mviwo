@@ -71,6 +71,17 @@ export class MetricFormComponent implements OnInit {
 	/** main form. */
 	form: FormGroup;
 
+	/** used to bind both preview slider & input field */
+	sliderPrev = 0;
+
+	numberPresets = [{
+		name: 'Scale 1-5',
+		minValue: 1,
+		maxValue: 5,
+		step: 1,
+		tickInterval: 1
+	}];
+
 	constructor(
 		private crud: MetricCrudService
 		, private groupsCrud: MetricGroupCrudService
@@ -208,6 +219,12 @@ export class MetricFormComponent implements OnInit {
 						this.data.resource.numberParams &&
 						this.data.resource.numberParams.postfix) ?
 					this.data.resource.numberParams.postfix : '',
+				),
+				'cbFreeInput': new FormControl(
+					(this.data.resource &&
+						this.data.resource.numberParams &&
+						this.data.resource.numberParams.freeInput) ?
+					this.data.resource.numberParams.freeInput : this.rules.defaultFreeInput,
 				)
 			}),
 			'grpEnumParams': new FormGroup({
@@ -225,7 +242,7 @@ export class MetricFormComponent implements OnInit {
 	/**
 	 * initializes enum values controls.
 	 */
-	private initxxValues() {
+	private initxxValues(): void {
 		const xxValues: FormArray = this.form.get('grpEnumParams').get('xxValues') as FormArray;
 		xxValues.controls.splice(0, xxValues.controls.length);
 
@@ -246,7 +263,7 @@ export class MetricFormComponent implements OnInit {
 	/**
 	 * initializes groups control.
 	 */
-	initxxGroups() {
+	private initxxGroups(): void {
 		const xxGroups: FormArray = this.form.get('xxGroups') as FormArray;
 
 		if (this.data.resource) {
@@ -273,15 +290,21 @@ export class MetricFormComponent implements OnInit {
 	 * sends request to server in accordance to modal's edit mode.
 	 * @param value ngForm value
 	 */
-	onSaveClick() {
+	onSaveClick(): void {
 		this.data.isEdit ? this.update(this.prepareBody()) : this.insert(this.prepareBody());
 	}
 
-	onCancelClick() {
+	/**
+	 * cancel button event. closes the dialog.
+	 */
+	onCancelClick(): void {
 		this.dialogRef.close();
 	}
 
-	onResetClick() {
+	/**
+	 * reset button event. resets all controls.
+	 */
+	onResetClick(): void {
 		const name = this.form.get('tfName');
 		name.reset((this.data.resource) ? this.data.resource.name : '');
 		name.updateValueAndValidity();
@@ -360,6 +383,11 @@ export class MetricFormComponent implements OnInit {
 				this.data.resource.numberParams &&
 				this.data.resource.numberParams.postfix) ?
 			this.data.resource.numberParams.postfix : '');
+		const freeInput = grpNumber.get('cbFreeInput');
+		freeInput.reset((this.data.resource &&
+				this.data.resource.numberParams &&
+				this.data.resource.numberParams.freeInput) ?
+			this.data.resource.numberParams.freeInput : this.rules.defaultFreeInput);
 		grpNumber.updateValueAndValidity();
 
 		const grpEnum = this.form.get('grpEnumParams');
@@ -383,7 +411,10 @@ export class MetricFormComponent implements OnInit {
 		this.initialGroups.forEach(item => this.metricGroups.push(item));
 	}
 
-	onEnumValuesChange() {
+	/**
+	 *
+	 */
+	onEnumValuesChange(): void {
 		const ctrlArr: FormArray = this.form.get('grpEnumParams').get('xxValues') as FormArray;
 
 		let dirty = true;
@@ -401,6 +432,9 @@ export class MetricFormComponent implements OnInit {
 		}
 	}
 
+	/**
+	 *
+	 */
 	onGroupDragSuccessful(): void {
 		const xxGroups = < FormArray > this.form.get('xxGroups');
 		xxGroups.updateValueAndValidity();
@@ -419,6 +453,9 @@ export class MetricFormComponent implements OnInit {
 		}
 	}
 
+	/**
+	 *
+	 */
 	onEmailTicked(): void {
 		const grp = this.form.get('grpStringParams');
 		const email = grp.get('cbEmail');
@@ -449,6 +486,9 @@ export class MetricFormComponent implements OnInit {
 		}
 	}
 
+	/**
+	 *
+	 */
 	onLineBreaksTicked(): void {
 		const grp = this.form.get('grpStringParams');
 		const email = grp.get('cbEmail');
@@ -472,6 +512,10 @@ export class MetricFormComponent implements OnInit {
 		}
 	}
 
+	/**
+	 *
+	 * @param source
+	 */
 	onMinMaxValueChange(source: String): void {
 		const grp = this.form.get('grpNumberParams');
 		const max = grp.get('tfMaxValue');
@@ -502,8 +546,17 @@ export class MetricFormComponent implements OnInit {
 				max.setErrors(null);
 			}
 		}
+
+		this.sliderPrev = min.value && this.sliderPrev < min.value ? min.value :
+			!min.value && this.sliderPrev < 0 ? 0 :
+			max.value && this.sliderPrev > max.value ? max.value :
+			!max.value && this.sliderPrev > 100 ? 100 : this.sliderPrev;
 	}
 
+	/**
+	 *
+	 * @param source
+	 */
 	onMinMaxLengthChange(source: String): void {
 		const grp = this.form.get('grpStringParams');
 		const max = grp.get('tfMaxLength');
@@ -536,7 +589,10 @@ export class MetricFormComponent implements OnInit {
 		}
 	}
 
-	onDataTypeChange() {
+	/**
+	 *
+	 */
+	onDataTypeChange(): void {
 		const current = this.form.get('slDataType').value;
 
 		if (current === 'enum') {
@@ -630,9 +686,50 @@ export class MetricFormComponent implements OnInit {
 		}
 	}
 
+	/**
+	 *
+	 * @param preset
+	 */
+	onPresetPicked(preset): void {
+		const grp = this.form.get('grpNumberParams');
+
+		const minVal = grp.get('tfMinValue');
+		minVal.setValue(preset.minValue);
+		if (!this.data.resource || (this.data.resource.numberParams && preset.minValue !== this.data.resource.numberParams.minValue)) {
+			minVal.markAsDirty();
+		}
+		minVal.updateValueAndValidity();
+
+		const maxVal = grp.get('tfMaxValue');
+		maxVal.setValue(preset.maxValue);
+		if (!this.data.resource || (this.data.resource.numberParams && preset.maxValue !== this.data.resource.numberParams.maxValue)) {
+			maxVal.markAsDirty();
+		}
+		maxVal.updateValueAndValidity();
+
+		const step = grp.get('tfStep');
+		step.setValue(preset.step);
+		if (!this.data.resource || (this.data.resource.numberParams && preset.step !== this.data.resource.numberParams.step)) {
+			step.markAsDirty();
+		}
+		step.updateValueAndValidity();
+
+		const tick = grp.get('tfTickInterval');
+		tick.setValue(preset.tickInterval);
+		if (!this.data.resource || (this.data.resource.numberParams && preset.tickInterval !== this.data.resource.numberParams.tickInterval)) {
+			tick.markAsDirty();
+		}
+		tick.updateValueAndValidity();
+
+		this.onMinMaxValueChange(undefined);
+	}
+
 	// MANIPULATION
 
-	addEnumValue() {
+	/**
+	 *
+	 */
+	addEnumValue(): void {
 		const ctrlArr: FormArray = this.form.get('grpEnumParams').get('xxValues') as FormArray;
 		const ctrl = this.xxValuesInput;
 
@@ -644,19 +741,31 @@ export class MetricFormComponent implements OnInit {
 		} else {}
 	}
 
-	removeEnumValue(value) {
+	/**
+	 *
+	 * @param value
+	 */
+	removeEnumValue(value): void {
 		const ctrlArr: FormArray = this.form.get('grpEnumParams').get('xxValues') as FormArray;
 		ctrlArr.removeAt(ctrlArr.controls.indexOf(value));
 		this.onEnumValuesChange();
 		this.xxValuesInput.updateValueAndValidity();
 	}
 
+	/**
+	 *
+	 * @param ctrl
+	 */
 	addGroup(ctrl: FormControl): void {
 		( < FormArray > this.form.get('xxGroups')).controls.push(ctrl);
 		this.metricGroups.splice(this.metricGroups.indexOf(ctrl), 1);
 		this.onGroupDragSuccessful();
 	}
 
+	/**
+	 *
+	 * @param ctrl
+	 */
 	removeGroup(ctrl: FormControl): void {
 		const xxGroups: FormControl[] = < FormControl[] > ( < FormArray > this.form.get('xxGroups')).controls;
 		this.metricGroups.push(ctrl);
@@ -668,7 +777,7 @@ export class MetricFormComponent implements OnInit {
 	 * sends insert request to server.
 	 * @param insertedMetric inserted metric model obj.
 	 */
-	private insert(metric: Updateable) {
+	private insert(metric: Updateable): void {
 		this.crud.insertOne(metric)
 			.subscribe(response => {
 				this.dialogRef.close(response);
@@ -679,7 +788,7 @@ export class MetricFormComponent implements OnInit {
 	 * sends update request to server.
 	 * @param updatedMetric updated metric model obj.
 	 */
-	private update(updateable: Updateable) {
+	private update(updateable: Updateable): void {
 		this.crud.updateOne(updateable)
 			.subscribe(response => {
 				this.dialogRef.close(response);
@@ -688,6 +797,11 @@ export class MetricFormComponent implements OnInit {
 
 	// UTIL //
 
+	/**
+	 *
+	 * @param controlName
+	 * @param groupName
+	 */
 	private getControlValue(controlName: string, groupName?: string): any {
 		return this.form ?
 			(groupName ?
@@ -696,11 +810,19 @@ export class MetricFormComponent implements OnInit {
 			null;
 	}
 
-	getInvalid(controlName: string, grpName?: string) {
+	/**
+	 *
+	 * @param controlName
+	 * @param grpName
+	 */
+	getInvalid(controlName: string, grpName?: string): boolean {
 		return this.form.get(grpName).get(controlName).invalid;
 	}
 
-	getNameErrorMessage() {
+	/**
+	 *
+	 */
+	getNameErrorMessage(): string {
 		const field = this.form.get('tfName');
 		return (field.hasError('required')) ?
 			'you must enter a metric name!' :
@@ -708,7 +830,10 @@ export class MetricFormComponent implements OnInit {
 			'too short!' : '';
 	}
 
-	getMinLengthErrorMessage() {
+	/**
+	 *
+	 */
+	getMinLengthErrorMessage(): string {
 		const field = this.form.get('grpStringParams').get('tfMinLength');
 		return (field.hasError('discrete')) ?
 			'must be discrete!' :
@@ -716,7 +841,10 @@ export class MetricFormComponent implements OnInit {
 			'must be <= max length!' : '';
 	}
 
-	getMaxLengthErrorMessage() {
+	/**
+	 *
+	 */
+	getMaxLengthErrorMessage(): string {
 		const field = this.form.get('grpStringParams').get('tfMaxLength');
 		return (field.hasError('discrete')) ?
 			'must be discrete!' :
@@ -724,13 +852,19 @@ export class MetricFormComponent implements OnInit {
 			'must be >= min length!' : '';
 	}
 
-	getPatternErrorMessage() {
+	/**
+	 *
+	 */
+	getPatternErrorMessage(): string {
 		const field = this.form.get('grpStringParams').get('tfPattern');
 		return (field.hasError('regex')) ?
 			'invalid regular expression! train yourself here: https://regexr.com/' : '';
 	}
 
-	getMinValueErrorMessage() {
+	/**
+	 *
+	 */
+	getMinValueErrorMessage(): string {
 		const field = this.form.get('grpNumberParams').get('tfMinValue');
 		return (field.hasError('required')) ?
 			'you must enter a minimum value!' :
@@ -738,7 +872,10 @@ export class MetricFormComponent implements OnInit {
 			'must be < max value!' : '';
 	}
 
-	getMaxValueErrorMessage() {
+	/**
+	 *
+	 */
+	getMaxValueErrorMessage(): string {
 		const field = this.form.get('grpNumberParams').get('tfMaxValue');
 		return (field.hasError('required')) ?
 			'you must enter a maximum value!' :
@@ -746,7 +883,10 @@ export class MetricFormComponent implements OnInit {
 			'must be > min value!' : '';
 	}
 
-	getStepErrorMessage() {
+	/**
+	 *
+	 */
+	getStepErrorMessage(): string {
 		const field = this.form.get('grpNumberParams').get('tfStep');
 		return (field.hasError('required')) ?
 			'you must enter a step value!' :
@@ -754,7 +894,10 @@ export class MetricFormComponent implements OnInit {
 			'must be > 0!' : '';
 	}
 
-	getTickIntervalErrorMessage() {
+	/**
+	 *
+	 */
+	getTickIntervalErrorMessage(): string {
 		const field = this.form.get('grpNumberParams').get('tfTickInterval');
 		return (field.hasError('required')) ?
 			'you must enter a tick interval value!' :
@@ -804,7 +947,8 @@ export class MetricFormComponent implements OnInit {
 				step: grp.get('tfStep').value,
 				tickInterval: grp.get('tfTickInterval').value,
 				prefix: grp.get('tfPrefix').value,
-				postfix: grp.get('tfPostfix').value
+				postfix: grp.get('tfPostfix').value,
+				freeInput: grp.get('cbFreeInput').value
 			};
 		} else if (dType === 'enum') {
 			const grp = this.form.get('grpEnumParams');
@@ -845,10 +989,16 @@ export class MetricFormComponent implements OnInit {
 		return updateable;
 	}
 
+	/**
+	 *
+	 */
 	getxxValuesControls(): AbstractControl[] {
 		return (<FormArray>this.form.get('grpEnumParams').get('xxValues')).controls;
 	}
 
+	/**
+	 *
+	 */
 	getxxGroupsControls(): AbstractControl[] {
 		return (<FormArray>this.form.get('xxGroups')).controls;
 	}

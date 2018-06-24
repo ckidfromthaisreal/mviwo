@@ -42,6 +42,9 @@ export class MetricGalleryComponent implements OnInit {
 	@ViewChild(MatSort) sort: MatSort;
 	@ViewChild(MatPaginator) paginator: MatPaginator;
 
+	/**
+	 * for visual purposes.
+	 */
 	highlightedRow = -1;
 
 	constructor(
@@ -90,6 +93,9 @@ export class MetricGalleryComponent implements OnInit {
 	editOnClick(event, element): void {
 		this.openForm(true, element, (result) => {
 			console.log(result);
+			this.notification.openCustomSnackbar(`metric edited successfully!`);
+			this.data[element.position - 1] = result[0];
+			this.dataSource.data = this.data;
 		});
 	}
 

@@ -63,7 +63,11 @@ export abstract class CrudService {
 		return this.http.get<T[]>(this.url, { headers: headers })
 			.pipe(
 				catchError(this.handleError),
-				// tap(e => this.store(e))
+				// tap(e => this.store(e)),
+				tap(e => {
+					let i = 0;
+					e.forEach(elem => elem['position'] = ++i);
+				})
 			);
 	}
 

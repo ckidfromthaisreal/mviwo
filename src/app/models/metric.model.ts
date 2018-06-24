@@ -76,7 +76,8 @@ export class Metric implements Mongoloid {
 		hintMaxLength: 25,
 		defaultLineBreaks: false,
 		defaultIsMultiple: false,
-		enumValuePattern: '[A-z][A-z ,\'\*\.\\/\-0-9_:]*'
+		enumValuePattern: '[A-z][A-z ,\'\*\.\\/\-0-9_:]*',
+		defaultFreeInput: false
 	};
 
 	constructor(
@@ -104,7 +105,8 @@ export class Metric implements Mongoloid {
 			step: number
 			tickInterval: number,
 			prefix?: string,
-			postfix?: string
+			postfix?: string,
+			freeInput: boolean
 		}
 		, public enumParams?: {
 			isMultiple: boolean,

@@ -37,6 +37,10 @@ const numberParamsSchema = new mongoose.Schema({
 	},
 	postfix: {
 		type: String
+	},
+	freeInput: {
+		type: Boolean,
+		required: true
 	}
 });
 
@@ -82,15 +86,15 @@ const enumParamsSchema = new mongoose.Schema({
 });
 
 /** blob datatype parameters sub-schema. */
-const blobParamsSchema = new mongoose.Schema({
-	_id: {
-		auto: false
-	},
-	maxSize: {
-		type: Number
-	},
-	extensions: [String]
-});
+// const blobParamsSchema = new mongoose.Schema({
+// 	_id: {
+// 		auto: false
+// 	},
+// 	maxSize: {
+// 		type: Number
+// 	},
+// 	extensions: [String]
+// });
 
 /** date datatype parameters sub-schema. */
 const dateParamsSchema = new mongoose.Schema({
@@ -161,9 +165,9 @@ const metricSchema = new mongoose.Schema({
 	enumParams: {
 		type: enumParamsSchema
 	},
-	blobParams: {
-		type: blobParamsSchema
-	},
+	// blobParams: {
+	// 	type: blobParamsSchema
+	// },
 	dateParams: {
 		type: dateParamsSchema
 	},

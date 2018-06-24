@@ -21,3 +21,19 @@ select {
 mat-form-field {
     width: 100%;
 }
+
+.newL {
+	margin-top: 10px
+}
+
+@media only screen and (min-width: 992px) {
+	.mat-dialog-content {
+		max-height: 90vh;
+		overflow-y: auto;
+	}
+
+	.xxValuesList {
+		max-height: 160px;
+		overflow-y: auto;
+	}
+}
