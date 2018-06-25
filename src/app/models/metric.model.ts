@@ -117,9 +117,13 @@ export class Metric implements Mongoloid {
 		// 	extensions?: String[]
 		// }
 		, public dateParams?: {
-			minDate?: Date
+			minDate?: Date,
 			maxDate?: Date,
-			format?: String
+			isMinDateCurrent: boolean,
+			isMaxDateCurrent: boolean,
+			minDateOffset?: number,
+			maxDateOffset?: number
 		}
+		, public position?: number
 	) {}
 }

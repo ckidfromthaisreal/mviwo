@@ -101,15 +101,25 @@ const dateParamsSchema = new mongoose.Schema({
 	_id: {
 		auto: false
 	},
-	format: {
-		type: String,
-		default: 'yyyy-dd-mm'
-	},
 	minDate: {
 		type: Date
 	},
 	maxDate: {
 		type: Date
+	},
+	isMinDateCurrent: {
+		type: Boolean,
+		required: true
+	},
+	isMaxDateCurrent: {
+		type: Boolean,
+		required: true
+	},
+	minDateOffset: {
+		type: Number
+	},
+	maxDateOffset: {
+		type: Number
 	}
 });
 

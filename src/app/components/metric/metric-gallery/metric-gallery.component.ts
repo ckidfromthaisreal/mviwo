@@ -15,7 +15,8 @@ import {
 	MatTableDataSource,
 	MatSort,
 	MatPaginator,
-	MatDialog
+	MatDialog,
+	MatTable
 } from '@angular/material';
 import {
 	SelectionModel
@@ -37,8 +38,9 @@ export class MetricGalleryComponent implements OnInit {
 
 	displayedColumns = ['select', 'type', 'name', 'group', 'createdAt', 'updatedAt', 'action'];
 	dataSource = new MatTableDataSource<Metric>(this.data);
-	selection = new SelectionModel<Metric>(true, []);
+	selection = new SelectionModel<Metric>(true);
 
+	@ViewChild('metricTable') table: MatTable<Metric>;
 	@ViewChild(MatSort) sort: MatSort;
 	@ViewChild(MatPaginator) paginator: MatPaginator;
 
@@ -53,16 +55,17 @@ export class MetricGalleryComponent implements OnInit {
 		, private notification: NotificationService
 		, private browser: BrowserService
 		, public dialog: MatDialog
-	) {}
+	) {
+		this.dataSource.sort = this.sort;
+		this.dataSource.filterPredicate = (item, filter) => {
+			return (item.name.toLowerCase().indexOf(filter.trim().toLowerCase()) > -1);
+		};
+	}
 
 	ngOnInit() {
 		this.crud.getMany<Metric>().subscribe(data => {
-			this.dataSource.data = this.data = data;
-			this.dataSource.sort = this.sort;
-			this.dataSource.filterPredicate = (item, filter) => {
-				return (item.name.toLowerCase().indexOf(filter.trim().toLowerCase()) > -1);
-			};
-			this.dataSource.paginator = this.paginator;
+			this.data.unshift(...data);
+			this.dataSource.paginator = this.paginator; // ALSO REFRESHES RENDERED ROWS!
 		});
 	}
 
@@ -92,55 +95,54 @@ export class MetricGalleryComponent implements OnInit {
 
 	editOnClick(event, element): void {
 		this.openForm(true, element, (result) => {
-			console.log(result);
-			this.notification.openCustomSnackbar(`metric edited successfully!`);
 			this.data[element.position - 1] = result[0];
-			this.dataSource.data = this.data;
+			this.paginator._changePageSize(this.paginator.pageSize);	// HACK TO UPDATE RENDERED ROWS.
+			this.notification.openCustomSnackbar(`metric edited successfully!`);
 		});
 	}
 
 	deleteOneOnClick(event, element): void {
-		this.crud.deleteOne(element).subscribe(
-			res => {
-				this.dataSource.data = this.data = this.data.filter(item => item !== element);
+		this.crud.deleteOne(element).subscribe((result) => {
 				this.selection.deselect(element);
+				for (let i = element.position; i < this.dataSource.data.length; i++) {
+					this.data[i].position -= 1;
+				}
+				this.data.splice(element.position - 1, 1);
+				this.paginator._changePageSize(this.paginator.pageSize);	// HACK TO UPDATE RENDERED ROWS.
 				this.notification.openCustomSnackbar(`metric deleted successfully!`);
-			}
-		);
+		});
 	}
 
 	deleteManyOnClick() {
 		const total = this.selection.selected.length;
-		this.crud.deleteMany(this.selection.selected).subscribe(
-			res => {
-				this.dataSource.data = this.data = this.data.filter(item => !this.selection.selected.includes(item));
+		this.crud.deleteMany(this.selection.selected).subscribe((result) => {
+				const filtered = this.data.filter(item => !this.selection.selected.includes(item));
+				this.data.splice(0, this.data.length, ...filtered);
+				for (let i = 0; i < this.data.length; i++) {
+					this.data[i].position = i + 1;
+				}
 				this.selection.clear();
+				this.paginator._changePageSize(this.paginator.pageSize);	// HACK TO UPDATE RENDERED ROWS.
 				this.notification.openCustomSnackbar(`${total} metric${total > 1 ? 's' : ''} deleted successfully!`);
 			}
 		);
 	}
 
-	insertOneOnClick() { // TODO
+	insertOneOnClick() {
 		// this.crud.insertOne({
 		// 	name: 'test',
 		// 	groups: [],
 		// 	dataType: 'boolean',
 		// 	isRequired: false
 		// }).subscribe(
-		// 	res => {
-		// 		this.notification.openCustomSnackbar(`metric inserted successfully!`);
-		// 		this.data.push(res[0]);
-		// 		this.dataSource.data = this.data;
-		// 		this.paginator.lastPage();
-		// 	}
 		// );
 
 		this.openForm(false, null, (result) => {
-			console.log(result);
-			this.notification.openCustomSnackbar(`metric inserted successfully!`);
+			result[0].position = this.data.length + 1;
 			this.data.push(result[0]);
-			this.dataSource.data = this.data;
+			this.paginator._changePageSize(this.paginator.pageSize);	// HACK TO UPDATE RENDERED ROWS.
 			this.paginator.lastPage();
+			this.notification.openCustomSnackbar(`metric inserted successfully!`);
 		});
 	}
 

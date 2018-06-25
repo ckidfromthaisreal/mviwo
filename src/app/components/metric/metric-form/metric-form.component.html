@@ -57,8 +57,7 @@
 						<mat-form-field floatLabel="auto" style="padding: 10px; border-radius: 5px; border:1px solid lightgrey">
 							<mat-select placeholder="Date Type" required formControlName="slDataType" style="width:100%" (selectionChange)="onDataTypeChange()">
 								<mat-option *ngIf="!data.isEdit && !form.get('slDataType').value">Select a datatype..</mat-option>
-								<mat-option *ngFor="let dType of dataTypes" [disabled]="dType.name === 'blob' || dType.name === 'date'" [matTooltip]="dType.desc"
-								    [matTooltipShowDelay]="500" [value]="dType.name">
+								<mat-option *ngFor="let dType of dataTypes" [matTooltip]="dType.desc" [matTooltipShowDelay]="500" [value]="dType.name">
 									{{ dType.simpleName }}
 								</mat-option>
 							</mat-select>
@@ -110,6 +109,26 @@
 								</div>
 							</div>
 						</div>
+						<div *ngIf="form.get('slDataType').value === 'date'">
+							<div class="row" style="padding: 10px">
+								<div class="col-lg-12">
+									<div formGroupName="grpDateParams">
+										<mat-slide-toggle formControlName="cbIsMinDateCurrent">
+											Min Current
+										</mat-slide-toggle>
+									</div>
+								</div>
+							</div>
+							<div class="row" style="padding: 10px">
+								<div class="col-lg-12">
+									<div formGroupName="grpDateParams">
+										<mat-slide-toggle formControlName="cbIsMaxDateCurrent">
+											Max Current
+										</mat-slide-toggle>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 					<!-- col 2 -->
 				</div>
@@ -119,7 +138,8 @@
 						<div *ngIf="form.get('slDataType').value === 'boolean'">
 							<hr>
 							<div class="form-group">
-								<label class="text-muted">Preview</label><br>
+								<label class="text-muted">Preview</label>
+								<br>
 								<mat-checkbox style="padding-left: 20px !important" color="primary" [indeterminate]="!form.get('cbRequired').value">{{ form.get('tfName').value || '{METRIC_NAME}' }}</mat-checkbox>
 							</div>
 						</div>
@@ -153,6 +173,19 @@
 								</button>
 							</mat-icon>
 						</mat-form-field>
+						<mat-form-field *ngIf="form.get('slDataType').value === 'date' && !form.get('grpDateParams').get('cbIsMinDateCurrent').value"
+						    floatLabel="auto" formGroupName="grpDateParams">
+							<input matInput readonly (click)="dp.open()" [matDatepicker]="dp" placeholder="Minimum Date" formControlName="dpMinDate" [max]="form.get('grpDateParams').get('dpMaxDate').value">
+							<mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+							<mat-datepicker #dp></mat-datepicker>
+						</mat-form-field>
+						<mat-form-field *ngIf="form.get('slDataType').value === 'date' && form.get('grpDateParams').get('cbIsMinDateCurrent').value === true"
+						    floatLabel="auto" formGroupName="grpDateParams">
+							<span matPrefix *ngIf="form.get('grpDateParams').get('tfMinDateOffset').value > 0">+</span>
+							<input type="number" matInput placeholder="Min Date Offset" formControlName="tfMinDateOffset" [step]="1">
+							<span matSuffix> days</span>
+							<mat-hint align="end">defaults to 0</mat-hint>
+						</mat-form-field>
 					</div>
 					<!-- col 1 -->
 					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="form.get('slDataType').value !== 'boolean'">
@@ -180,23 +213,37 @@
 									<small>NO VALUES ADDED</small>
 								</mat-list-item>
 								<mat-list-item style="padding-bottom: 15px; background-color: rgb(70,70,70)" class="mat-elevation-z2" *ngFor="let valueCtrl of getxxValuesControls()">
-										<button class="btn btn-danger btn-circle" (click)="removeEnumValue(valueCtrl)">
-											<i class="fa fa-minus" aria-hidden="true"></i>
-										</button>
+									<button class="btn btn-danger btn-circle" (click)="removeEnumValue(valueCtrl)">
+										<i class="fa fa-minus" aria-hidden="true"></i>
+									</button>
 									<span style="padding-left: 15px;">{{ valueCtrl.value }}</span>
 								</mat-list-item>
 							</mat-list>
 						</div>
+						<mat-form-field *ngIf="form.get('slDataType').value === 'date' && !form.get('grpDateParams').get('cbIsMaxDateCurrent').value"
+						    floatLabel="auto" formGroupName="grpDateParams">
+							<input matInput readonly (click)="dp.open()" [matDatepicker]="dp" placeholder="Maximum Date" formControlName="dpMaxDate" [min]="form.get('grpDateParams').get('dpMinDate').value">
+							<mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+							<mat-datepicker #dp></mat-datepicker>
+						</mat-form-field>
+						<mat-form-field *ngIf="form.get('slDataType').value === 'date' && form.get('grpDateParams').get('cbIsMaxDateCurrent').value === true"
+						    floatLabel="auto" formGroupName="grpDateParams">
+							<span matPrefix *ngIf="form.get('grpDateParams').get('tfMaxDateOffset').value > 0">+</span>
+							<input type="number" matInput placeholder="Max Date Offset" formControlName="tfMaxDateOffset" [step]="1">
+							<span matSuffix> days</span>
+							<mat-hint align="end">defaults to 0</mat-hint>
+						</mat-form-field>
 					</div>
 					<!-- col 2 -->
 				</div>
 				<!-- row 2 -->
-				<div class="row newL" *ngIf="form.get('slDataType').value && form.get('slDataType').value !== 'boolean'">
+				<div class="row newL" *ngIf="form.get('slDataType').value && !['boolean'].includes(form.get('slDataType').value)">
 					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 						<form *ngIf="form.get('slDataType').value === 'enum'" ngForm>
 							<hr>
 							<div class="form-group">
-								<label class="text-muted">Preview</label><br>
+								<label class="text-muted">Preview</label>
+								<br>
 								<div *ngIf="form.get('grpEnumParams').get('cbMultiple').value; then multipleChoice; else singleChoice"></div>
 								<ng-template #singleChoice>
 									<mat-form-field labelfloat="auto">
@@ -212,7 +259,8 @@
 								</ng-template>
 								<ng-template #multipleChoice>
 									<mat-form-field labelfloat="auto">
-										<mat-select ngModel #enumPrev2="ngModel" name="enumPrev2" [placeholder]="form.get('tfName').value || '{METRIC_NAME}'" multiple [required]="form.get('cbRequired')">
+										<mat-select ngModel #enumPrev2="ngModel" name="enumPrev2" [placeholder]="form.get('tfName').value || '{METRIC_NAME}'" multiple
+										    [required]="form.get('cbRequired')">
 											<mat-option *ngFor="let ctrl of getxxValuesControls()" [value]="ctrl.value">
 												{{ ctrl.value }}
 											</mat-option>
@@ -223,6 +271,22 @@
 									</mat-form-field>
 								</ng-template>
 							</div>
+						</form>
+						<form *ngIf="form.get('slDataType').value === 'date'">
+							<hr>
+							<label class="text-muted">Preview</label>
+							<br>
+							<mat-form-field>
+								<input matInput readonly (click)="picker.open()"
+										#pickertf="ngModel" ngModel name="pickertf" [required]="form.get('cbRequired').value" [min]="form.get('grpDateParams').get('cbIsMinDateCurrent').value ?
+										dates.offsetDate(form.get('grpDateParams').get('tfMinDateOffset').value) :
+										form.get('grpDateParams').get('dpMinDate').value" [max]="form.get('grpDateParams').get('cbIsMaxDateCurrent').value ?
+										dates.offsetDate(form.get('grpDateParams').get('tfMaxDateOffset').value) :
+										form.get('grpDateParams').get('dpMaxDate').value" [matDatepicker]="picker" [placeholder]="form.get('tfName').value || '{METRIC_NAME}'">
+								<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+								<mat-datepicker #picker></mat-datepicker>
+								<mat-error>{{ pickertf.hasError('required') ? 'you must enter a ' + (form.get('tfName').value || '{METRIC_NAME}' | lowercase) + '!' : 'invalid date!' }}</mat-error>
+							</mat-form-field>
 						</form>
 					</div>
 					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
@@ -262,7 +326,7 @@
 					<!-- col 2 -->
 				</div>
 				<!-- row 3 -->
-				<div class="row newL" *ngIf="form.get('slDataType').value && form.get('slDataType').value !== 'boolean'">
+				<div class="row newL" *ngIf="form.get('slDataType').value && !['boolean', 'date'].includes(form.get('slDataType').value)">
 					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 					</div>
 					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="form.get('slDataType').value === 'number'">
@@ -279,19 +343,19 @@
 					</div>
 				</div>
 				<!-- row 4 -->
-				<div class="row" *ngIf="form.get('slDataType').value && form.get('slDataType').value !== 'boolean'">
+				<div class="row" *ngIf="form.get('slDataType').value && !['boolean', 'date'].includes(form.get('slDataType').value)">
 					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 						<form ngForm *ngIf="form.get('slDataType').value === 'number'">
 							<hr>
 							<div form-group>
-								<label for="sliderPrev" class="text-muted">Preview</label><br>
+								<label for="sliderPrev" class="text-muted">Preview</label>
+								<br>
 								<mat-label>{{ form.get('tfName').value || '{METRIC_NAME}' }}</mat-label>
 								<div class="row">
 									<div class="col-md-8 col-sm-8 col-xs-8">
-										<mat-slider style="width: 100%" [(ngModel)]="sliderPrev" [min]="form.get('grpNumberParams').get('tfMinValue').value"
-											[max]="form.get('grpNumberParams').get('tfMaxValue').value" [step]="form.get('grpNumberParams').get('tfStep').value"
-											[tickInterval]="form.get('grpNumberParams').get('tfTickInterval').value || 1" thumbLabel="true"
-											name="sliderPrev">
+										<mat-slider style="width: 100%" [(ngModel)]="sliderPrev" [min]="form.get('grpNumberParams').get('tfMinValue').value" [max]="form.get('grpNumberParams').get('tfMaxValue').value"
+										    [step]="form.get('grpNumberParams').get('tfStep').value" [tickInterval]="form.get('grpNumberParams').get('tfTickInterval').value || 1"
+										    thumbLabel="true" name="sliderPrev">
 										</mat-slider>
 									</div>
 									<div class="col-md-4 col-sm-4 col-xs-4">
@@ -302,10 +366,9 @@
 										</mat-label>
 										<mat-form-field class="freeInput" *ngIf="form.get('grpNumberParams').get('cbFreeInput').value === true" style="width: 100%">
 											<span matPrefix>{{ form.get('grpNumberParams').get('tfPrefix').value }} </span>
-											<input matInput type="number" [(ngModel)]="sliderPrev" name="sliderPrevInput"
-												min="{{form.get('grpNumberParams').get('tfMinValue').value || 0}}" max="{{form.get('grpNumberParams').get('tfMaxValue').value || 100}}"
-												[step]="form.get('grpNumberParams').get('tfStep').value || 1"
-												(keyup)="sliderPrev = form.get('grpNumberParams').get('tfMinValue').value && sliderPrev < form.get('grpNumberParams').get('tfMinValue').value ? form.get('grpNumberParams').get('tfMinValue').value :
+											<input matInput type="number" [(ngModel)]="sliderPrev" name="sliderPrevInput" min="{{form.get('grpNumberParams').get('tfMinValue').value || 0}}"
+											    max="{{form.get('grpNumberParams').get('tfMaxValue').value || 100}}" [step]="form.get('grpNumberParams').get('tfStep').value || 1"
+											    (keyup)="sliderPrev = form.get('grpNumberParams').get('tfMinValue').value && sliderPrev < form.get('grpNumberParams').get('tfMinValue').value ? form.get('grpNumberParams').get('tfMinValue').value :
 												!form.get('grpNumberParams').get('tfMinValue').value && sliderPrev < 0 ? 0 :
 												form.get('grpNumberParams').get('tfMaxValue').value && form.get('grpNumberParams').get('tfMaxValue').value < sliderPrev ? form.get('grpNumberParams').get('tfMaxValue').value :
 												!form.get('grpNumberParams').get('tfMaxValue').value && 100 < sliderPrev ? 100 : sliderPrev">
@@ -331,9 +394,9 @@
 											: form.get('grpStringParams').get('tfMaxLength').value }}
 										</mat-hint>
 										<mat-error *ngIf="textfieldPrev.invalid">
-											{{ textfieldPrev.hasError('required') ? 'you must enter ' + (form.get('tfName').value || '{METRIC_NAME}' | lowercase) + '!' : textfieldPrev.hasError('email')
-											? 'invalid email address!' : textfieldPrev.hasError('pattern') ? 'invalid value!' : textfieldPrev.hasError('minlength')
-											? 'too short!' : '' }}
+											{{ textfieldPrev.hasError('required') ? 'you must enter ' + (form.get('tfName').value || '{METRIC_NAME}' | lowercase) + '!'
+											: textfieldPrev.hasError('email') ? 'invalid email address!' : textfieldPrev.hasError('pattern') ? 'invalid value!'
+											: textfieldPrev.hasError('minlength') ? 'too short!' : '' }}
 										</mat-error>
 									</mat-form-field>
 								</ng-template>

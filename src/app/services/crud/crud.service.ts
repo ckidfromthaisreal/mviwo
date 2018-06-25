@@ -1,6 +1,6 @@
 import { NotificationService } from './../notification/notification.service';
 import { AuthenticationService } from './../authentication/authentication.service';
-import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/catch';
@@ -183,7 +183,7 @@ export abstract class CrudService {
 			.set('Authorization', `Bearer ${this.auth.getToken()}`);
 
 		return this.http.patch<T>(`${this.url}/${updateable._id}`, updateable, { headers: headers }).pipe(
-			tap(e => console.log(e)),
+			tap(e => e[0].position = updateable['position']),
 			catchError(this.handleError)
 		);
 	}
@@ -274,13 +274,12 @@ export abstract class CrudService {
 		};
 
 		let req = new HttpRequest('DELETE', `${this.url}/${deleteable._id}`);
-		req = req.clone({ headers: headers, body: body });
+		req = req.clone({ headers: headers, body: body, responseType: 'json' });
 
 		return this.http.request(req)
 			.pipe(
-				// tap(e => console.log(e)),
 				catchError(this.handleError)
-			);
+			).filter(e => e instanceof HttpResponse);
 	}
 
 	/**

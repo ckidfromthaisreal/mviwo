@@ -1,3 +1,4 @@
+import { DatesService } from './services/dates/dates.service';
 import { ArraysService } from './services/arrays/arrays.service';
 import { MetricGroupCrudService } from './services/crud/metric-group-crud.service';
 import { MviwoCardModule } from './components/material/mviwo-card/mviwo-card.module';
@@ -53,6 +54,7 @@ import { DndModule } from 'ng2-dnd';
 			provide: HAMMER_GESTURE_CONFIG,
 			useClass: GestureConfig
 		},
+		DatesService,
 		NotificationService,
 		MetricCrudService,
 		MetricGroupCrudService,

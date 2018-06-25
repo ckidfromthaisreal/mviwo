@@ -1,3 +1,4 @@
+import { DatesService } from './../../../services/dates/dates.service';
 import {
 	ArraysService
 } from './../../../services/arrays/arrays.service';
@@ -86,6 +87,7 @@ export class MetricFormComponent implements OnInit {
 		private crud: MetricCrudService
 		, private groupsCrud: MetricGroupCrudService
 		, private arrays: ArraysService
+		, public dates: DatesService
 		, protected dialogRef: MatDialogRef < MetricFormComponent >
 		, @Inject(MAT_DIALOG_DATA) public data: ElementFormInput < Metric >
 	) {}
@@ -234,6 +236,38 @@ export class MetricFormComponent implements OnInit {
 					this.data.resource.enumParams.isMultiple : this.rules.defaultIsMultiple
 				),
 				'xxValues': new FormArray([])
+			}),
+			'grpDateParams': new FormGroup({
+				'dpMinDate': new FormControl(
+					(this.data.resource &&
+						this.data.resource.dateParams) ?
+					this.data.resource.dateParams.minDate : '',
+				),
+				'dpMaxDate': new FormControl(
+					(this.data.resource &&
+						this.data.resource.dateParams) ?
+					this.data.resource.dateParams.maxDate : '',
+				),
+				'cbIsMinDateCurrent': new FormControl(
+					(this.data.resource &&
+						this.data.resource.dateParams) ?
+					this.data.resource.dateParams.isMinDateCurrent : false,
+				),
+				'cbIsMaxDateCurrent': new FormControl(
+					(this.data.resource &&
+						this.data.resource.dateParams) ?
+					this.data.resource.dateParams.isMaxDateCurrent : false,
+				),
+				'tfMinDateOffset': new FormControl(
+					(this.data.resource &&
+						this.data.resource.dateParams) ?
+					this.data.resource.dateParams.minDateOffset : '',
+				),
+				'tfMaxDateOffset': new FormControl(
+					(this.data.resource &&
+						this.data.resource.dateParams) ?
+					this.data.resource.dateParams.maxDateOffset : '',
+				),
 			}),
 			'xxGroups': new FormArray([])
 		});
@@ -397,6 +431,46 @@ export class MetricFormComponent implements OnInit {
 			this.data.resource.enumParams.isMultiple : this.rules.defaultIsMultiple);
 		multiple.updateValueAndValidity();
 		this.initxxValues();
+
+		const grpDate = this.form.get('grpDateParams');
+		grpDate.get('cbIsMinDateCurrent').reset(
+			(this.data.resource &&
+				this.data.resource.dateParams) ?
+			this.data.resource.dateParams.isMinDateCurrent : false
+		);
+		grpDate.get('cbIsMaxDateCurrent').reset(
+			(this.data.resource &&
+				this.data.resource.dateParams) ?
+			this.data.resource.dateParams.isMaxDateCurrent : false
+		);
+		const minDate = grpDate.get('tfMinDate');
+		minDate.reset(
+			(this.data.resource &&
+				this.data.resource.dateParams) ?
+			this.data.resource.dateParams.minDate : ''
+		);
+		minDate.updateValueAndValidity();
+		const maxDate = grpDate.get('tfMaxDate');
+		maxDate.reset(
+			(this.data.resource &&
+				this.data.resource.dateParams) ?
+			this.data.resource.dateParams.maxDate : ''
+		);
+		maxDate.updateValueAndValidity();
+		const minOff = grpDate.get('tfMinDateOffset');
+		minOff.reset(
+			(this.data.resource &&
+				this.data.resource.dateParams) ?
+			this.data.resource.dateParams.minDateOffset : ''
+		);
+		minOff.updateValueAndValidity();
+		const maxOff = grpDate.get('tfMaxDateOffset');
+		maxOff.reset(
+			(this.data.resource &&
+				this.data.resource.dateParams) ?
+			this.data.resource.dateParams.maxDateOffset : ''
+		);
+		maxOff.updateValueAndValidity();
 
 		const xxGroups: FormArray = < FormArray > this.form.get('xxGroups');
 		xxGroups.controls.splice(0, xxGroups.controls.length);
@@ -791,6 +865,7 @@ export class MetricFormComponent implements OnInit {
 	private update(updateable: Updateable): void {
 		this.crud.updateOne(updateable)
 			.subscribe(response => {
+				console.log(response);
 				this.dialogRef.close(response);
 			});
 	}
@@ -922,7 +997,8 @@ export class MetricFormComponent implements OnInit {
 			undefined,
 			undefined,
 			undefined,
-			undefined
+			undefined,
+			(this.data.isEdit) ? this.data.resource.position : undefined
 		);
 
 		if (dType === 'string') {
@@ -959,16 +1035,21 @@ export class MetricFormComponent implements OnInit {
 			};
 		} else if (dType === 'date') {
 			const grp = this.form.get('grpDateParams');
+			const minCur = grp.get('cbIsMinDateCurrent').value;
+			const maxCur = grp.get('cbIsMaxDateCurrent').value;
 
 			tempMetric.dateParams = {
-				minDate: grp.get('dpMinDate').value,
-				maxDate: grp.get('dpMaxDate').value,
-				format: grp.get('tfFormat').value
+				minDate: !minCur ? grp.get('dpMinDate').value : undefined,
+				maxDate: !maxCur ? grp.get('dpMaxDate').value : undefined,
+				isMinDateCurrent: minCur,
+				isMaxDateCurrent: maxCur,
+				minDateOffset: minCur ? grp.get('tfMinDateOffset').value : undefined,
+				maxDateOffset: maxCur ? grp.get('tfMaxDateOffset').value : undefined
 			};
 		}
 
 		const removedGroups: string[] = [];
-		if (this.data.resource) { // EDIT MODE
+		if (this.data.isEdit) {
 			const currentGroups: string[] = tempMetric.groups.map(item => item._id);
 			this.data.resource.groups.forEach(group => {
 				if (!currentGroups.includes(group._id)) {

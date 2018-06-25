@@ -6,7 +6,7 @@ import { MatIconModule, MatButtonModule, MatMenuModule,
 	MatFormFieldModule, MatInputModule, MatPaginatorModule,
 	MatTooltipModule, MatDialogModule, MatTabsModule,
 	MatButtonToggleModule, MatSliderModule, MatSlideToggleModule,
-	MatSelectModule, MatListModule} from '@angular/material';
+	MatSelectModule, MatListModule, MatDatepickerModule, MatNativeDateModule} from '@angular/material';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MetricFormComponent } from './metric-form/metric-form.component';
@@ -35,6 +35,8 @@ import { DndModule } from 'ng2-dnd';
 		MatSlideToggleModule,
 		MatSelectModule,
 		MatListModule,
+		MatDatepickerModule,
+		MatNativeDateModule,
 
 		DndModule,
 	],
