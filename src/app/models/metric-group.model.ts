@@ -19,6 +19,7 @@ export class MetricGroup implements Mongoloid {
 			, isRequired: boolean
 		}[]
 		, public description?: string
+		, public position?: number
 	) {}
 
 	/**

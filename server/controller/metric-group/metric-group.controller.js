@@ -383,7 +383,7 @@ exports.deleteMany = async (req, res, next) => {
  * deletes a metric-group from db.
  * @param {*} req http request.
  *
- * req.body - array of metrics ids to remove metric-group from.
+ * req.body.metrics - array of metrics ids to remove metric-group from.
  *
  * @param {*} res http response. expected to return a result object.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
@@ -405,7 +405,7 @@ exports.deleteOne = async (req, res, next) => {
 	try {
 		result2 = await removeFromMetrics({
 			_id: req.params.id,
-			metrics: req.body
+			metrics: req.body.metrics
 		});
 	} catch (err) {
 		logger.error('API', operationName, `metric-group ${req.params.id} deleted with errors: ${err}`);

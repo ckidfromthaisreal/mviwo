@@ -4,6 +4,7 @@ import { AuthGuardService } from './../../services/auth-guard/auth-guard.service
 import { HomeComponent } from './home.component';
 import { Routes, RouterModule } from '@angular/router';
 import { ModuleWithProviders } from '@angular/core';
+import { MetricGroupGalleryComponent } from '../metric-group/metric-group-gallery/metric-group-gallery.component';
 
 const routes: Routes = [
 	// {
@@ -45,14 +46,14 @@ const routes: Routes = [
 	},
 	{
 		path: 'metric-groups',
-		component: MetricGalleryComponent, // <<<--------
+		component: MetricGroupGalleryComponent, // <<<--------
 		canActivate: [
 			AuthGuardService
 		]
 	},
 	{
 		path: 'sessions',
-		component: MetricGalleryComponent, // <<<--------
+		component: MetricGroupGalleryComponent, // <<<--------
 		canActivate: [
 			AuthGuardService
 		]

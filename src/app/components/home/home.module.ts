@@ -7,8 +7,8 @@ import { MatButtonModule, MatInputModule, MatRippleModule, MatTooltipModule, Mat
 
 import { NavigationModule } from './../navigation/navigation.module';
 import { MetricModule } from '../metric/metric.module';
+import { MetricGroupModule } from '../metric-group/metric-group.module';
 
-import { HomeComponent } from './home.component';
 import { DashboardComponent } from './../dashboard/dashboard.component';
 import { D3Module } from '../d3/d3.module';
 
@@ -31,6 +31,7 @@ import { D3Module } from '../d3/d3.module';
 
 		NavigationModule,
 		MetricModule,
+		MetricGroupModule,
 
 		D3Module,
 		MviwoCardModule,

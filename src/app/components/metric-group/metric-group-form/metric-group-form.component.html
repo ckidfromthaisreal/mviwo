@@ -1,0 +1,121 @@
+<h1 mat-dialog-title>
+	<div *ngIf="data.isEdit == true; then editTitle else createTitle"></div>
+	<ng-template #editTitle>
+		Editing Group:
+		<span style="font-size: 70%;"> {{ data.resource._id }}</span>
+	</ng-template>
+	<ng-template #createTitle>
+		Creating New Group
+	</ng-template>
+	<button mat-dialog-close mat-icon-button class="pull-right" style="font-size: 150%" (click)="onCancelClick()">&times;</button>
+</h1>
+<form [formGroup]="form">
+	<mat-tab-group dynamicHeight>
+		<mat-tab label="General">
+			<div mat-dialog-content>
+				<div class="row newL">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+						<mat-form-field floatLabel="auto">
+							<input matInput type="text" placeholder="Group Name" formControlName="tfName" required [maxLength]="rules.nameMaxLength"
+							    cdkFocusInitial>
+							<mat-hint align="end">
+								characters left: {{ rules.nameMaxLength - form.get('tfName').value.length }}
+							</mat-hint>
+							<mat-error *ngIf="form.get('tfName').invalid">
+								{{ getNameErrorMessage() }}
+							</mat-error>
+						</mat-form-field>
+					</div>
+					<!-- col 1 -->
+					<!-- <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+						<mat-slide-toggle matTooltip="force group in all new examinations" formControlName="cbMandatory">
+							Mandatory
+						</mat-slide-toggle>
+					</div> -->
+					<!-- col 2 -->
+				</div>
+				<!-- row 1 -->
+				<div class="row newL">
+					<div class="col-lg-12-col-md-12 col-sm-12 col-xs-12">
+						<mat-form-field floatLabel="auto">
+							<textarea matInput placeholder="Description" formControlName="taDescription" matTextareaAutosize [maxLength]="rules.descriptionMaxLength"></textarea>
+							<mat-hint align="end">
+								characters left: {{ (form.get('taDescription').value) ? rules.descriptionMaxLength - form.get('taDescription').value.length
+								: rules.descriptionMaxLength }}
+							</mat-hint>
+						</mat-form-field>
+					</div>
+				</div>
+				<!-- row 2 -->
+			</div>
+			<!-- dialog content -->
+		</mat-tab>
+		<!-- general info tab -->
+		<mat-tab mat-dialog-content label="Metrics">
+			<div mat-dialog-content>
+				<div class="row newL">
+					<div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+						<div class="panel panel-info" dnd-sortable-container [sortableData]="metrics">
+							<div class="panel-heading">Available Metrics</div>
+							<div class="scroll-div-sm panel-body" dnd-draggable dnd-droppable [dropZones]="['zone0']">
+								<ul class="list-group">
+									<li *ngIf="!metrics || !metrics.length" class="empty-list-item list-group-item">
+										drag here to deselect..
+									</li>
+									<li *ngFor="let ctrl of metrics; let i = index" class="list-group-item" dnd-sortable [sortableIndex]="i" [dragEnabled]="true"
+									    [dragData]="ctrl" (onDropSuccess)="onMetricDragSuccessful()">
+										<span dnd-draggable-handle style="padding-right: 5px">
+											<i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+										</span>
+										<i matTooltip="{{ ctrl.value.isRequired ? 'required field during form filling.' : '' }}" class="fa fa-exclamation-circle {{ (ctrl.value.isRequired ? 'important' : 'not-important') }}-item-indicator"
+										    aria-hidden="true"></i> {{ ctrl.value.name }}
+										<button type="button" class="btn btn-success btn-circle btn-sm pull-right" (click)="addMetric(ctrl)">
+											<i class="fa fa-plus" aria-hidden="true"></i>
+										</button>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+						<div class="panel panel-info" dnd-sortable-container [sortableData]="getxxMetricsControls()">
+							<div class="panel-heading">Selected Metrics</div>
+							<div class="scroll-div-sm panel-body" dnd-draggable dnd-droppable [dropZones]="['zone0']">
+								<ul class="list-group">
+									<li *ngIf="!getxxMetricsControls().length" class="empty-list-item list-group-item">
+										drag here to select..
+									</li>
+									<li *ngFor="let ctrl of getxxMetricsControls(); let i = index" dnd-sortable [sortableIndex]="i" [dragEnabled]="true"
+									    [dragData]="ctrl" class="list-group-item" (onDropSuccess)="onMetricDragSuccessful()" (onDragSuccess)="onMetricDragSuccessful()">
+										<span dnd-draggable-handle style="padding-right: 5px">
+											<i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+										</span>
+										{{ i+1 }}.
+										<i matTooltip="{{ ctrl.value.isRequired ? 'required field during form filling.' : '' }}" class="fa fa-exclamation-circle {{ (ctrl.value.isRequired ? 'important' : 'not-important') }}-item-indicator"
+										    aria-hidden="true"></i> {{ ctrl.value.name }}
+										<button type="button" class="btn btn-danger btn-circle btn-sm pull-right" (click)="removeMetric(ctrl)">
+											<i class="fa fa-minus" aria-hidden="true"></i>
+										</button>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</mat-tab>
+		<!-- metrics tab -->
+	</mat-tab-group>
+</form>
+<div mat-dialog-actions class="modal-footer newL">
+	<button mat-raised-button color="primary" matTooltip="save changes" type="button" [disabled]="form.invalid || form.pristine"
+	    (click)="onSaveClick()">
+		<i class="fa fa-floppy-o" aria-hidden="true"></i>
+	</button>
+	<button mat-raised-button color="accent" matTooltip="undo changes" type="button" [disabled]="form.pristine" (click)="onResetClick()">
+		<i class="fa fa-undo" aria-hidden="true"></i>
+	</button>
+	<button mat-raised-button matTooltip="cancel" type="button" (click)="onCancelClick()">
+		<i class="fa fa-times" aria-hidden="true"></i>
+	</button>
+</div>

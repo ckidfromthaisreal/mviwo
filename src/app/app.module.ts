@@ -7,7 +7,7 @@ import { BrowserService } from './services/browser/browser.service';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BrowserModule, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
+import { HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { GestureConfig, MatSnackBarModule } from '@angular/material';
@@ -25,6 +25,7 @@ import { MviwoSnackbarComponent } from './components/material/mviwo-snackbar/mvi
 import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-snackbar.module';
 
 import { DndModule } from 'ng2-dnd';
+import { MongoloidsService } from './services/mongoloids/mongoloids.service';
 
 @NgModule({
 	declarations: [
@@ -58,6 +59,7 @@ import { DndModule } from 'ng2-dnd';
 		NotificationService,
 		MetricCrudService,
 		MetricGroupCrudService,
+		MongoloidsService,
 	],
 	entryComponents: [
 		MviwoSnackbarComponent

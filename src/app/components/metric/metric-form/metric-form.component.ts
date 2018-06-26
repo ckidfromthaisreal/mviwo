@@ -888,7 +888,7 @@ export class MetricFormComponent implements OnInit {
 
 	/**
 	 * sends insert request to server.
-	 * @param insertedMetric inserted metric model obj.
+	 * @param metric
 	 */
 	private insert(metric: Updateable): void {
 		this.crud.insertOne(metric)
@@ -899,7 +899,7 @@ export class MetricFormComponent implements OnInit {
 
 	/**
 	 * sends update request to server.
-	 * @param updatedMetric updated metric model obj.
+	 * @param updateable
 	 */
 	private update(updateable: Updateable): void {
 		this.crud.updateOne(updateable)
@@ -1020,7 +1020,7 @@ export class MetricFormComponent implements OnInit {
 
 	/**
 	 * returns new metric model obj based on form value.
-	 * @param value ngForm's value.
+	 * @param metric
 	 */
 	private prepareBody(metric?: Metric): Updateable {
 		const tempMetric = metric || this.prepareMetric();
@@ -1037,7 +1037,7 @@ export class MetricFormComponent implements OnInit {
 
 		const updateable = {
 			_id: tempMetric._id
-			, removedGroups: this.data.resource ? removedGroups : undefined
+			, removedGroups: this.data.isEdit ? removedGroups : undefined
 		};
 
 		Object.keys(tempMetric).forEach(key => {
