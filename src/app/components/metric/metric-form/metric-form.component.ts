@@ -8,7 +8,9 @@ import {
 import {
 	Component,
 	OnInit,
-	Inject
+	Inject,
+	Output,
+	EventEmitter
 } from '@angular/core';
 import {
 	MetricGroupCrudService
@@ -74,6 +76,8 @@ export class MetricFormComponent implements OnInit {
 
 	/** used to bind both preview slider & input field */
 	sliderPrev = 0;
+
+	@Output() edited: EventEmitter<Metric> = new EventEmitter();
 
 	numberPresets = [{
 		name: 'Scale 1-5',
@@ -142,8 +146,8 @@ export class MetricFormComponent implements OnInit {
 					(this.data.resource &&
 						this.data.resource.stringParams &&
 						this.data.resource.stringParams.minLength) ?
-					this.data.resource.stringParams.minLength : '', [
-						// Validators.min(0),
+					this.data.resource.stringParams.minLength : 0, [
+						Validators.min(0),
 						NumericValidators.discreteValidator(), NumericValidators.lessThanEqualValidator(
 							() => this.getControlValue('tfMaxLength', 'grpStringParams')
 						)
@@ -154,7 +158,7 @@ export class MetricFormComponent implements OnInit {
 						this.data.resource.stringParams &&
 						this.data.resource.stringParams.maxLength) ?
 					this.data.resource.stringParams.maxLength : '', [
-						// Validators.min(1),
+						Validators.min(1),
 						NumericValidators.discreteValidator(), NumericValidators.greaterThanEqualValidator(
 							() => this.getControlValue('tfMinLength', 'grpStringParams')
 						)
@@ -180,7 +184,7 @@ export class MetricFormComponent implements OnInit {
 					(this.data.resource &&
 						this.data.resource.numberParams &&
 						this.data.resource.numberParams.minValue) ?
-					this.data.resource.numberParams.minValue : '', [
+					this.data.resource.numberParams.minValue : 0, [
 						NumericValidators.lessThanValidator(() => this.getControlValue('tfMaxValue', 'grpNumberParams'))
 					]
 				),
@@ -188,7 +192,7 @@ export class MetricFormComponent implements OnInit {
 					(this.data.resource &&
 						this.data.resource.numberParams &&
 						this.data.resource.numberParams.maxValue) ?
-					this.data.resource.numberParams.maxValue : '', [
+					this.data.resource.numberParams.maxValue : 100, [
 						NumericValidators.greaterThanValidator(() => this.getControlValue('tfMinValue', 'grpNumberParams'))
 					]
 				),
@@ -196,7 +200,7 @@ export class MetricFormComponent implements OnInit {
 					(this.data.resource &&
 						this.data.resource.numberParams &&
 						this.data.resource.numberParams.step) ?
-					this.data.resource.numberParams.step : '', [
+					this.data.resource.numberParams.step : 1, [
 						// Validators.required,
 						NumericValidators.positiveValidator()
 					]
@@ -205,7 +209,7 @@ export class MetricFormComponent implements OnInit {
 					(this.data.resource &&
 						this.data.resource.numberParams &&
 						this.data.resource.numberParams.tickInterval) ?
-					this.data.resource.numberParams.tickInterval : '', [
+					this.data.resource.numberParams.tickInterval : 1, [
 						// Validators.required,
 						NumericValidators.positiveValidator()
 					]
@@ -262,11 +266,13 @@ export class MetricFormComponent implements OnInit {
 					(this.data.resource &&
 						this.data.resource.dateParams) ?
 					this.data.resource.dateParams.minDateOffset : '',
+					NumericValidators.lessThanEqualValidator(() => this.getControlValue('tfMaxDateOffset', 'grpDateParams'))
 				),
 				'tfMaxDateOffset': new FormControl(
 					(this.data.resource &&
 						this.data.resource.dateParams) ?
 					this.data.resource.dateParams.maxDateOffset : '',
+					NumericValidators.greaterThanEqualValidator(() => this.getControlValue('tfMinDateOffset', 'grpDateParams'))
 				),
 			}),
 			'xxGroups': new FormArray([])
@@ -325,7 +331,13 @@ export class MetricFormComponent implements OnInit {
 	 * @param value ngForm value
 	 */
 	onSaveClick(): void {
-		this.data.isEdit ? this.update(this.prepareBody()) : this.insert(this.prepareBody());
+		if (this.data.isEdit) {
+			const metric = this.prepareMetric();
+			this.edited.emit(metric);
+			this.update(this.prepareBody(metric));
+		} else {
+			this.insert(this.prepareBody());
+		}
 	}
 
 	/**
@@ -368,7 +380,7 @@ export class MetricFormComponent implements OnInit {
 		minLen.reset((this.data.resource &&
 				this.data.resource.stringParams &&
 				this.data.resource.stringParams.minLength) ?
-			this.data.resource.stringParams.minLength : '');
+			this.data.resource.stringParams.minLength : 0);
 		const maxLen = grpString.get('tfMaxLength');
 		maxLen.reset((this.data.resource &&
 				this.data.resource.stringParams &&
@@ -391,22 +403,22 @@ export class MetricFormComponent implements OnInit {
 		minVal.reset((this.data.resource &&
 				this.data.resource.numberParams &&
 				this.data.resource.numberParams.minValue) ?
-			this.data.resource.numberParams.minValue : '');
+			this.data.resource.numberParams.minValue : 0);
 		const maxVal = grpNumber.get('tfMaxValue');
 		maxVal.reset((this.data.resource &&
 				this.data.resource.numberParams &&
 				this.data.resource.numberParams.maxValue) ?
-			this.data.resource.numberParams.maxValue : '');
+			this.data.resource.numberParams.maxValue : 100);
 		const step = grpNumber.get('tfStep');
 		step.reset((this.data.resource &&
 				this.data.resource.numberParams &&
 				this.data.resource.numberParams.step) ?
-			this.data.resource.numberParams.step : '');
+			this.data.resource.numberParams.step : 1);
 		const tick = grpNumber.get('tfTickInterval');
 		tick.reset((this.data.resource &&
 				this.data.resource.numberParams &&
 				this.data.resource.numberParams.tickInterval) ?
-			this.data.resource.numberParams.tickInterval : '');
+			this.data.resource.numberParams.tickInterval : 1);
 		const prefix = grpNumber.get('tfPrefix');
 		prefix.reset((this.data.resource &&
 				this.data.resource.numberParams &&
@@ -443,14 +455,14 @@ export class MetricFormComponent implements OnInit {
 				this.data.resource.dateParams) ?
 			this.data.resource.dateParams.isMaxDateCurrent : false
 		);
-		const minDate = grpDate.get('tfMinDate');
+		const minDate = grpDate.get('dpMinDate');
 		minDate.reset(
 			(this.data.resource &&
 				this.data.resource.dateParams) ?
 			this.data.resource.dateParams.minDate : ''
 		);
 		minDate.updateValueAndValidity();
-		const maxDate = grpDate.get('tfMaxDate');
+		const maxDate = grpDate.get('dpMaxDate');
 		maxDate.reset(
 			(this.data.resource &&
 				this.data.resource.dateParams) ?
@@ -669,15 +681,9 @@ export class MetricFormComponent implements OnInit {
 	onDataTypeChange(): void {
 		const current = this.form.get('slDataType').value;
 
-		if (current === 'enum') {
-			const xxValues = this.form.get('grpEnumParams').get('xxValues');
-			xxValues.setValidators(ArrayValidators.minLengthValidator(2));
-			xxValues.updateValueAndValidity();
-		} else {
-			const xxValues = this.form.get('grpEnumParams').get('xxValues');
-			xxValues.setValidators(null);
-			xxValues.updateValueAndValidity();
-		}
+		const xxValues = this.form.get('grpEnumParams').get('xxValues');
+		xxValues.setValidators(current === 'enum' ? ArrayValidators.minLengthValidator(2) : null);
+		xxValues.updateValueAndValidity();
 
 		if (current !== 'string') {
 			const strGrp = this.form.get('grpStringParams');
@@ -687,8 +693,8 @@ export class MetricFormComponent implements OnInit {
 				minLen.reset((this.data.resource &&
 						this.data.resource.stringParams &&
 						this.data.resource.stringParams.minLength) ?
-					this.data.resource.stringParams.minLength : '');
-				minLen.setErrors(null);
+					this.data.resource.stringParams.minLength : 0);
+				minLen.updateValueAndValidity();
 			}
 
 			const maxLen = strGrp.get('tfMaxLength');
@@ -697,7 +703,7 @@ export class MetricFormComponent implements OnInit {
 						this.data.resource.stringParams &&
 						this.data.resource.stringParams.maxLength) ?
 					this.data.resource.stringParams.maxLength : '');
-				maxLen.setErrors(null);
+				maxLen.updateValueAndValidity();
 			}
 
 			const pattern = strGrp.get('tfPattern');
@@ -706,7 +712,7 @@ export class MetricFormComponent implements OnInit {
 						this.data.resource.stringParams &&
 						this.data.resource.stringParams.pattern) ?
 					this.data.resource.stringParams.pattern : '');
-				pattern.setErrors(null);
+				pattern.updateValueAndValidity();
 			}
 		}
 
@@ -717,8 +723,8 @@ export class MetricFormComponent implements OnInit {
 				minVal.reset((this.data.resource &&
 						this.data.resource.numberParams &&
 						this.data.resource.numberParams.minValue) ?
-					this.data.resource.numberParams.minValue : '');
-				minVal.setErrors(null);
+					this.data.resource.numberParams.minValue : 0);
+				minVal.updateValueAndValidity();
 			}
 
 			const maxVal = numGrp.get('tfMaxValue');
@@ -726,8 +732,8 @@ export class MetricFormComponent implements OnInit {
 				maxVal.reset((this.data.resource &&
 						this.data.resource.numberParams &&
 						this.data.resource.numberParams.maxValue) ?
-					this.data.resource.numberParams.maxValue : '');
-				maxVal.setErrors(null);
+					this.data.resource.numberParams.maxValue : 100);
+				maxVal.updateValueAndValidity();
 			}
 
 			const steps = numGrp.get('tfStep');
@@ -735,8 +741,8 @@ export class MetricFormComponent implements OnInit {
 				steps.reset((this.data.resource &&
 						this.data.resource.numberParams &&
 						this.data.resource.numberParams.step) ?
-					this.data.resource.numberParams.step : '');
-				steps.setErrors(null);
+					this.data.resource.numberParams.step : 1);
+				steps.updateValueAndValidity();
 			}
 
 			const tickIval = numGrp.get('tfTickInterval');
@@ -744,19 +750,33 @@ export class MetricFormComponent implements OnInit {
 				tickIval.reset((this.data.resource &&
 						this.data.resource.numberParams &&
 						this.data.resource.numberParams.tickInterval) ?
-					this.data.resource.numberParams.tickInterval : '');
-				tickIval.setErrors(null);
+					this.data.resource.numberParams.tickInterval : 1);
+				tickIval.updateValueAndValidity();
 			}
 		}
 
 		if (current !== 'boolean') {}
 
 		if (current !== 'date') {
-			// TODO
-		}
+			const grp = this.form.get('grpDateParams');
 
-		if (current !== 'enum') {
-			// TODO
+			const minOff = grp.get('tfMinDateOffset');
+			const maxOff = grp.get('tfMaxDateOffset');
+			if (minOff.invalid || maxOff.invalid) {
+				minOff.reset(
+					(this.data.resource &&
+						this.data.resource.dateParams &&
+						this.data.resource.dateParams.minDateOffset) ?
+					this.data.resource.dateParams.minDateOffset : 0);
+				maxOff.reset(
+					(this.data.resource &&
+						this.data.resource.dateParams &&
+						this.data.resource.dateParams.maxDateOffset) ?
+					this.data.resource.dateParams.maxDateOffset : 0);
+
+				minOff.updateValueAndValidity();
+				maxOff.updateValueAndValidity();
+			}
 		}
 	}
 
@@ -796,6 +816,25 @@ export class MetricFormComponent implements OnInit {
 		tick.updateValueAndValidity();
 
 		this.onMinMaxValueChange(undefined);
+	}
+
+	onMinMaxCurrentChange(minOrMax: 'min'|'max'): void {
+		const minmax = minOrMax.charAt(0).toUpperCase() + minOrMax.substring(1);
+
+		const grp = this.form.get('grpDateParams');
+
+		const tf = grp.get(`tf${minmax}DateOffset`);
+		tf.reset(grp.get(`cbIs${minmax}DateCurrent`).value ? 0 : '');
+		tf.updateValueAndValidity();
+
+		const dp = grp.get(`dp${minmax}Date`);
+		dp.reset();
+		tf.updateValueAndValidity();
+
+
+		const othertf = grp.get(`tf${minOrMax === 'min' ? 'Max' : 'Min'}DateOffset`);
+		othertf.setErrors(null);
+		othertf.updateValueAndValidity();
 	}
 
 	// MANIPULATION
@@ -865,7 +904,6 @@ export class MetricFormComponent implements OnInit {
 	private update(updateable: Updateable): void {
 		this.crud.updateOne(updateable)
 			.subscribe(response => {
-				console.log(response);
 				this.dialogRef.close(response);
 			});
 	}
@@ -984,7 +1022,32 @@ export class MetricFormComponent implements OnInit {
 	 * returns new metric model obj based on form value.
 	 * @param value ngForm's value.
 	 */
-	prepareBody(): Updateable {
+	private prepareBody(metric?: Metric): Updateable {
+		const tempMetric = metric || this.prepareMetric();
+
+		const removedGroups: string[] = [];
+		if (this.data.isEdit) {
+			const currentGroups: string[] = tempMetric.groups.map(item => item._id);
+			this.data.resource.groups.forEach(group => {
+				if (!currentGroups.includes(group._id)) {
+					removedGroups.push(group._id);
+				}
+			});
+		}
+
+		const updateable = {
+			_id: tempMetric._id
+			, removedGroups: this.data.resource ? removedGroups : undefined
+		};
+
+		Object.keys(tempMetric).forEach(key => {
+			updateable[key] = tempMetric[key];
+		});
+
+		return updateable;
+	}
+
+	private prepareMetric(): Metric {
 		const dType = this.form.get('slDataType').value;
 
 		const tempMetric = new Metric(
@@ -1048,26 +1111,7 @@ export class MetricFormComponent implements OnInit {
 			};
 		}
 
-		const removedGroups: string[] = [];
-		if (this.data.isEdit) {
-			const currentGroups: string[] = tempMetric.groups.map(item => item._id);
-			this.data.resource.groups.forEach(group => {
-				if (!currentGroups.includes(group._id)) {
-					removedGroups.push(group._id);
-				}
-			});
-		}
-
-		const updateable = {
-			_id: tempMetric._id
-			, removedGroups: this.data.resource ? removedGroups : undefined
-		};
-
-		Object.keys(tempMetric).forEach(key => {
-			updateable[key] = tempMetric[key];
-		});
-
-		return updateable;
+		return tempMetric;
 	}
 
 	/**

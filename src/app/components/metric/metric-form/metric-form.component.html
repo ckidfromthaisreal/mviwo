@@ -113,7 +113,7 @@
 							<div class="row" style="padding: 10px">
 								<div class="col-lg-12">
 									<div formGroupName="grpDateParams">
-										<mat-slide-toggle formControlName="cbIsMinDateCurrent">
+										<mat-slide-toggle formControlName="cbIsMinDateCurrent" (change)="onMinMaxCurrentChange('min')">
 											Min Current
 										</mat-slide-toggle>
 									</div>
@@ -122,7 +122,7 @@
 							<div class="row" style="padding: 10px">
 								<div class="col-lg-12">
 									<div formGroupName="grpDateParams">
-										<mat-slide-toggle formControlName="cbIsMaxDateCurrent">
+										<mat-slide-toggle formControlName="cbIsMaxDateCurrent" (change)="onMinMaxCurrentChange('max')">
 											Max Current
 										</mat-slide-toggle>
 									</div>
@@ -184,7 +184,7 @@
 							<span matPrefix *ngIf="form.get('grpDateParams').get('tfMinDateOffset').value > 0">+</span>
 							<input type="number" matInput placeholder="Min Date Offset" formControlName="tfMinDateOffset" [step]="1">
 							<span matSuffix> days</span>
-							<mat-hint align="end">defaults to 0</mat-hint>
+							<mat-error *ngIf="form.get('grpDateParams').get('tfMinDateOffset').invalid">cannot be greater than max offset!</mat-error>
 						</mat-form-field>
 					</div>
 					<!-- col 1 -->
@@ -231,7 +231,7 @@
 							<span matPrefix *ngIf="form.get('grpDateParams').get('tfMaxDateOffset').value > 0">+</span>
 							<input type="number" matInput placeholder="Max Date Offset" formControlName="tfMaxDateOffset" [step]="1">
 							<span matSuffix> days</span>
-							<mat-hint align="end">defaults to 0</mat-hint>
+							<mat-error *ngIf="form.get('grpDateParams').get('tfMaxDateOffset').invalid">cannot be less than min offset!</mat-error>
 						</mat-form-field>
 					</div>
 					<!-- col 2 -->

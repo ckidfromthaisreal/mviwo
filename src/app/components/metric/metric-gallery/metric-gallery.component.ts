@@ -1,5 +1,9 @@
-import { BrowserService } from './../../../services/browser/browser.service';
-import { MetricFormComponent } from './../metric-form/metric-form.component';
+import {
+	BrowserService
+} from './../../../services/browser/browser.service';
+import {
+	MetricFormComponent
+} from './../metric-form/metric-form.component';
 import {
 	AuthenticationService
 } from './../../../services/authentication/authentication.service';
@@ -24,7 +28,9 @@ import {
 import {
 	NotificationService
 } from '../../../services/notification/notification.service';
-import { Metric } from '../../../models/metric.model';
+import {
+	Metric
+} from '../../../models/metric.model';
 
 @Component({
 	// tslint:disable-next-line:component-selector
@@ -37,10 +43,10 @@ export class MetricGalleryComponent implements OnInit {
 	dataTypes = Metric.dataTypes;
 
 	displayedColumns = ['select', 'type', 'name', 'group', 'createdAt', 'updatedAt', 'action'];
-	dataSource = new MatTableDataSource<Metric>(this.data);
-	selection = new SelectionModel<Metric>(true);
+	dataSource = new MatTableDataSource < Metric > (this.data);
+	selection = new SelectionModel < Metric > (true);
 
-	@ViewChild('metricTable') table: MatTable<Metric>;
+	@ViewChild('metricTable') table: MatTable < Metric > ;
 	@ViewChild(MatSort) sort: MatSort;
 	@ViewChild(MatPaginator) paginator: MatPaginator;
 
@@ -55,16 +61,15 @@ export class MetricGalleryComponent implements OnInit {
 		, private notification: NotificationService
 		, private browser: BrowserService
 		, public dialog: MatDialog
-	) {
-		this.dataSource.sort = this.sort;
-		this.dataSource.filterPredicate = (item, filter) => {
-			return (item.name.toLowerCase().indexOf(filter.trim().toLowerCase()) > -1);
-		};
-	}
+	) {}
 
 	ngOnInit() {
-		this.crud.getMany<Metric>().subscribe(data => {
-			this.data.unshift(...data);
+		this.crud.getMany < Metric > ().subscribe(data => {
+			this.dataSource.filterPredicate = (item, filter) => {
+				return (item.name.toLowerCase().indexOf(filter.trim().toLowerCase()) > -1);
+			};
+			this.dataSource.data.unshift(...data);
+			this.dataSource.sort = this.sort;
 			this.dataSource.paginator = this.paginator; // ALSO REFRESHES RENDERED ROWS!
 		});
 	}
@@ -96,52 +101,51 @@ export class MetricGalleryComponent implements OnInit {
 	editOnClick(event, element): void {
 		this.openForm(true, element, (result) => {
 			this.data[element.position - 1] = result[0];
-			this.paginator._changePageSize(this.paginator.pageSize);	// HACK TO UPDATE RENDERED ROWS.
+			this.dataSource.data = this.data = [...this.data];
 			this.notification.openCustomSnackbar(`metric edited successfully!`);
 		});
 	}
 
 	deleteOneOnClick(event, element): void {
 		this.crud.deleteOne(element).subscribe((result) => {
-				this.selection.deselect(element);
-				for (let i = element.position; i < this.dataSource.data.length; i++) {
-					this.data[i].position -= 1;
-				}
-				this.data.splice(element.position - 1, 1);
-				this.paginator._changePageSize(this.paginator.pageSize);	// HACK TO UPDATE RENDERED ROWS.
-				this.notification.openCustomSnackbar(`metric deleted successfully!`);
+			this.selection.deselect(element);
+			for (let i = element.position; i < this.dataSource.data.length; i++) {
+				this.data[i].position -= 1;
+			}
+			this.data.splice(element.position - 1, 1);
+			this.dataSource.data = this.data = [...this.data];
+			if (element.position === this.data.length + 1) {
+				this.paginator.previousPage();
+			}
+			this.notification.openCustomSnackbar(`metric deleted successfully!`);
 		});
 	}
 
 	deleteManyOnClick() {
 		const total = this.selection.selected.length;
+		const page = this.paginator.pageIndex;
 		this.crud.deleteMany(this.selection.selected).subscribe((result) => {
-				const filtered = this.data.filter(item => !this.selection.selected.includes(item));
-				this.data.splice(0, this.data.length, ...filtered);
-				for (let i = 0; i < this.data.length; i++) {
-					this.data[i].position = i + 1;
-				}
-				this.selection.clear();
-				this.paginator._changePageSize(this.paginator.pageSize);	// HACK TO UPDATE RENDERED ROWS.
-				this.notification.openCustomSnackbar(`${total} metric${total > 1 ? 's' : ''} deleted successfully!`);
+			this.dataSource.data = this.data = this.data.filter(item => !this.selection.selected.includes(item));
+			for (let i = 0; i < this.data.length; i++) {
+				this.data[i].position = i + 1;
 			}
-		);
+			this.selection.clear();
+			setTimeout(() => {
+				if (Math.floor(this.data.length / this.paginator.pageSize) < page) {
+					this.dataSource.paginator.lastPage();
+				}
+			});
+			this.notification.openCustomSnackbar(`${total} metric${total > 1 ? 's' : ''} deleted successfully!`);
+		});
 	}
 
 	insertOneOnClick() {
-		// this.crud.insertOne({
-		// 	name: 'test',
-		// 	groups: [],
-		// 	dataType: 'boolean',
-		// 	isRequired: false
-		// }).subscribe(
-		// );
-
 		this.openForm(false, null, (result) => {
 			result[0].position = this.data.length + 1;
-			this.data.push(result[0]);
-			this.paginator._changePageSize(this.paginator.pageSize);	// HACK TO UPDATE RENDERED ROWS.
-			this.paginator.lastPage();
+			this.dataSource.data = this.data = [...this.data, result[0]];
+			setTimeout(() => {
+				this.dataSource.paginator.lastPage();
+			});
 			this.notification.openCustomSnackbar(`metric inserted successfully!`);
 		});
 	}
@@ -153,8 +157,15 @@ export class MetricGalleryComponent implements OnInit {
 				isEdit: isEdit
 			},
 			width: !this.browser.isMobile() ?
-				`${Math.min(this.browser.width() * 0.60, 650)}px` :
-				`${this.browser.width()}px`
+				`${Math.min(this.browser.width() * 0.60, 650)}px` : `${this.browser.width()}px`
+		});
+
+		let optimismApplied = false;
+
+		dialogRef.componentInstance.edited.subscribe((tempMetric: Metric) => {
+			this.data[metric.position - 1] = tempMetric;
+			this.dataSource.data = this.data = [...this.data];
+			optimismApplied = true;
 		});
 
 		dialogRef.afterClosed().subscribe(result => {
@@ -162,7 +173,13 @@ export class MetricGalleryComponent implements OnInit {
 				if (callback) {
 					callback(result);
 				}
-			} else {}
+			} else { // error or cancel.
+				if (isEdit && optimismApplied) {
+					this.data[metric.position - 1] = metric;
+					this.dataSource.data = this.data = [...this.data];
+					this.notification.openCustomSnackbar(`failed to update metric!`);
+				}
+			}
 		});
 	}
 
