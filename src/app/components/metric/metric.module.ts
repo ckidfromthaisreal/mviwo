@@ -1,3 +1,4 @@
+import { MviwoListSelectModule } from './../material/mviwo-list-select/mviwo-list-select.module';
 import { routing } from './metric.routing';
 import { MetricGalleryComponent } from './metric-gallery/metric-gallery.component';
 import { NgModule } from '@angular/core';
@@ -10,7 +11,7 @@ import { MatIconModule, MatButtonModule, MatMenuModule,
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MetricFormComponent } from './metric-form/metric-form.component';
-import { DndModule } from 'ng2-dnd';
+// import { DndModule } from 'ng2-dnd';
 
 @NgModule({
 	imports: [
@@ -38,7 +39,8 @@ import { DndModule } from 'ng2-dnd';
 		MatDatepickerModule,
 		MatNativeDateModule,
 
-		DndModule,
+		// DndModule,
+		MviwoListSelectModule,
 	],
 	declarations: [
 		MetricGalleryComponent,

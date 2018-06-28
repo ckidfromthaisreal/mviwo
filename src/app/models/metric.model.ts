@@ -88,7 +88,7 @@ export class Metric implements Mongoloid {
 		, public groups: {
 			_id: string,
 			name: string,
-			description: string
+			description?: string
 		}[]
 		, public description?: string
 		, public stringParams?: {

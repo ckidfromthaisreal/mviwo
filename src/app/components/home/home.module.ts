@@ -11,6 +11,7 @@ import { MetricGroupModule } from '../metric-group/metric-group.module';
 
 import { DashboardComponent } from './../dashboard/dashboard.component';
 import { D3Module } from '../d3/d3.module';
+import { MviwoListSelectModule } from '../material/mviwo-list-select/mviwo-list-select.module';
 
 @NgModule({
 	declarations: [
@@ -35,6 +36,7 @@ import { D3Module } from '../d3/d3.module';
 
 		D3Module,
 		MviwoCardModule,
+		MviwoListSelectModule,
 	],
 	exports: [
 		// HomeComponent,

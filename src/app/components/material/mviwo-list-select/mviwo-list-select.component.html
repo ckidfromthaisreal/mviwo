@@ -1,0 +1,75 @@
+<div class="container">
+	<div class="row">
+		<div class="col-md-6">
+			<small class="mviwo-unselectable">{{ sourceLabel || 'Source' }}</small>
+			<div class="pull-right">
+				<button class="action-button" mat-raised-button color="primary" [disabled]="!selectedSource.length || dataTarget.length >= maxItemsTarget"
+				    (click)="addAllOnClick($event)">
+					<mat-icon>add</mat-icon> ({{ selectedSource.length }})
+				</button>
+			</div>
+			<mat-list dense>
+				<mat-list-item class="disabled" *ngIf="!dataSource.length">
+					<small>No Unselected Items</small>
+				</mat-list-item>
+				<mat-list-item class="mat-elevation-z2" *ngFor="let item of dataSource; let i = index" (click)="chkSrc.toggle(); sourceSelectionOnChange(null, chkSrc, item)">
+					<mat-checkbox #chkSrc (click)="$event.stopPropagation()" (change)="sourceSelectionOnChange($event, chkSrc, item)"></mat-checkbox>
+					<small class="item-number mviwo-unselectable" *ngIf="showSourceItemNumber">{{ (i + 1) }}. </small>
+					<span *ngFor="let field of showFields; let j = index">
+						<div *ngIf="[true, false].includes(item[field]); then boolean; else other"></div>
+						<ng-template #boolean>
+							<mat-icon class="field-icon" [matTooltip]="field">thumb_{{ item[field] ? 'up':'down' }}</mat-icon>
+						</ng-template>
+						<ng-template #other>
+							<span [matTooltip]="field">{{ showFieldValue(item, field) }}</span>
+						</ng-template>
+						<strong class="item-divider" *ngIf="j < (showFields.length - 1)"> | </strong>
+					</span>
+					<span class="item-actions">
+						<button class="item-button" mat-icon-button [disabled]="dataTarget.length >= maxItemsTarget" (click)="addOnClick($event, item)">
+							<mat-icon style="color: greenyellow">add</mat-icon>
+						</button>
+					</span>
+				</mat-list-item>
+			</mat-list>
+		</div>
+		<div class="col-md-6">
+			<small class="mviwo-unselectable">{{ targetLabel || 'Target' }}</small>
+			<div class="pull-right">
+				<button class="action-button" mat-raised-button color="warn" [disabled]="!selectedTarget.length" (click)="removeAllOnClick($event)">
+					<mat-icon>remove</mat-icon> ({{ selectedTarget.length }})
+				</button>
+			</div>
+			<mat-list dense>
+				<mat-list-item class="disabled" *ngIf="!dataTarget.length">
+					<small>No Selected Items</small>
+				</mat-list-item>
+				<mat-list-item class="mat-elevation-z2" *ngFor="let item of dataTarget; let i = index" (click)="chkTrg.toggle(); targetSelectionOnChange(null, chkTrg, item)">
+					<mat-checkbox #chkTrg (click)="$event.stopPropagation()" (change)="targetSelectionOnChange($event, chkTrg, item)"></mat-checkbox>
+					<small class="item-number mviwo-unselectable" *ngIf="showTargetItemNumber">{{ (i + 1) }}. </small>
+					<span *ngFor="let field of showFields; let j = index">
+						<div *ngIf="[true, false].includes(item[field]); then boolean; else other"></div>
+						<ng-template #boolean>
+							<mat-icon class="field-icon" [matTooltip]="field">thumb_{{ item[field] ? 'up':'down' }}</mat-icon>
+						</ng-template>
+						<ng-template #other>
+							<span [matTooltip]="field">{{ showFieldValue(item, field) }}</span>
+						</ng-template>
+						<strong class="item-divider" *ngIf="j < (showFields.length - 1)"> | </strong>
+					</span>
+					<span class="item-actions">
+						<button class="item-button" mat-icon-button *ngIf="sortableTarget" [disabled]="dataTarget.indexOf(item) === 0" (click)="targetUpOnClick($event, item)">
+							<mat-icon>keyboard_arrow_up</mat-icon>
+						</button>
+						<button class="item-button" mat-icon-button *ngIf="sortableTarget" [disabled]="dataTarget.indexOf(item) === dataTarget.length - 1" (click)="targetDownOnClick($event, item)">
+							<mat-icon>keyboard_arrow_down</mat-icon>
+						</button>
+						<button class="item-button" mat-icon-button color="warn" (click)="removeOnClick($event, item)">
+							<mat-icon>remove</mat-icon>
+						</button>
+					</span>
+				</mat-list-item>
+			</mat-list>
+		</div>
+	</div>
+</div>

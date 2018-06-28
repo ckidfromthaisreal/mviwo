@@ -14,12 +14,24 @@ const mongoose = require('mongoose').set('debug', config.DEBUG_MONGOOSE);
 
 /** main metric-group schema. */
 const metricGroupSchema = new mongoose.Schema({
-    // _id: Schema.Types.ObjectId,
-    name: {type: String, required: true, unique: true},
-    description: {type: String},
-    isMandatory: {type: Boolean, required: true},
-    metrics: [{type: mongoose.Schema.Types.ObjectId, ref: 'Metric'}],
-    lastUpdate: {type: Date, default: Date.now}
+	// _id: Schema.Types.ObjectId,
+	name: {
+		type: String,
+		required: true,
+		unique: true
+	},
+	description: {
+		type: String
+	},
+	// isMandatory: {type: Boolean, required: true},
+	metrics: [{
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Metric'
+	}],
+	lastUpdate: {
+		type: Date,
+		default: Date.now
+	}
 });
 
 /* virtual for metric's URL */

@@ -12,8 +12,8 @@ export class MetricGroup implements Mongoloid {
 	constructor(
 		public _id: string
 		, public name: string
-		, public isMandatory: boolean
-		, public metrics: {
+		// , public isMandatory: boolean
+		, public metrics?: {
 			_id: string
 			, name: string
 			, isRequired: boolean

@@ -157,7 +157,7 @@ export class MetricGalleryComponent implements OnInit {
 				isEdit: isEdit
 			},
 			width: !this.browser.isMobile() ?
-				`${Math.min(this.browser.width() * 0.60, 650)}px` : `${this.browser.width()}px`
+				`${Math.min(this.browser.width() * 0.6, 1000)}px` : `${this.browser.width()}px`
 		});
 
 		let optimismApplied = false;

@@ -421,49 +421,8 @@
 		<mat-tab label="Group/s" class="mviwo-unselectable">
 			<div mat-dialog-content>
 				<div class="row newL" style="max-height: 500px; min-height: 300px">
-					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-						<div class="panel panel-info" dnd-sortable-container [sortableData]="metricGroups">
-							<mat-label>Available Groups</mat-label>
-							<div class="scroll-div-sm panel-body" dnd-draggable dnd-droppable [dropZones]="['zone0']">
-								<ul class="list-group">
-									<li *ngIf="!metricGroups || !metricGroups.length" class="empty-list-item list-group-item">
-										drag here to deselect..
-									</li>
-									<li *ngFor="let ctrl of metricGroups; let i = index" class="list-group-item" dnd-sortable [sortableIndex]="i" [dragEnabled]="true"
-									    [dragData]="ctrl" (onDropSuccess)="onGroupDragSuccessful()">
-										<span dnd-draggable-handle style="padding-right: 5px">
-											<i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-										</span>
-										{{ ctrl.value.name }}
-										<button type="button" class="btn btn-success btn-circle btn-sm pull-right" (click)="addGroup(ctrl)">
-											<i class="fa fa-plus" aria-hidden="true"></i>
-										</button>
-									</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-						<div class="panel panel-info" dnd-sortable-container [sortableData]="getxxGroupsControls()">
-							<mat-label>Selected Groups</mat-label>
-							<div class="scroll-div-sm panel-body" dnd-draggable dnd-droppable [dropZones]="['zone0']">
-								<ul class="list-group">
-									<li *ngIf="!getxxGroupsControls().length" class="empty-list-item list-group-item">
-										drag here to select..
-									</li>
-									<li *ngFor="let ctrl of getxxGroupsControls(); let i = index" dnd-sortable [sortableIndex]="i" [dragEnabled]="true" [dragData]="ctrl"
-									    class="list-group-item" (onDropSuccess)="onGroupDragSuccessful()">
-										<span dnd-draggable-handle style="padding-right: 5px">
-											<i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-										</span>
-										{{ ctrl.value.name }}
-										<button type="button" class="btn btn-danger btn-circle btn-sm pull-right" (click)="removeGroup(ctrl)">
-											<i class="fa fa-minus" aria-hidden="true"></i>
-										</button>
-									</li>
-								</ul>
-							</div>
-						</div>
+					<div class="col-md-12">
+						<mviwo-list-select [dataSource]="metricGroups" sourceLabel="groups" targetLabel="selected groups" [showFields]="['name','metrics']" formControlName="xxGroups"></mviwo-list-select>
 					</div>
 				</div>
 			</div>

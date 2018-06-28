@@ -71,10 +71,10 @@ export class MetricGroupFormComponent implements OnInit {
 					, Validators.maxLength(MetricGroup.rules.nameMaxLength)
 				]
 			),
-			'cbMandatory': new FormControl(
-				(this.data.resource) ? this.data.resource.isMandatory :
-				MetricGroup.rules.defaultIsMandatory,
-			),
+			// 'cbMandatory': new FormControl(
+			// 	(this.data.resource) ? this.data.resource.isMandatory :
+			// 	MetricGroup.rules.defaultIsMandatory,
+			// ),
 			'taDescription': new FormControl(
 				(this.data.resource) ? this.data.resource.description : '',
 				Validators.maxLength(MetricGroup.rules.descriptionMaxLength)
@@ -135,8 +135,8 @@ export class MetricGroupFormComponent implements OnInit {
 		name.reset((this.data.resource) ? this.data.resource.name : '');
 		name.updateValueAndValidity();
 
-		const mandatory = this.form.get('cbMandatory');
-		mandatory.reset((this.data.resource) ? this.data.resource.isMandatory : this.rules.defaultIsMandatory);
+		// const mandatory = this.form.get('cbMandatory');
+		// mandatory.reset((this.data.resource) ? this.data.resource.isMandatory : this.rules.defaultIsMandatory);
 
 		const desc = this.form.get('taDescription');
 		desc.reset((this.data.resource) ? this.data.resource.description : '');
@@ -212,7 +212,7 @@ export class MetricGroupFormComponent implements OnInit {
 		const tempMetricGroup = new MetricGroup(
 			(this.data.isEdit) ? this.data.resource._id : undefined,
 			this.form.get('tfName').value,
-			this.form.get('cbMandatory').value,
+			// this.form.get('cbMandatory').value,
 			( < FormArray > this.form.get('xxMetrics')).controls.map(item => item.value),
 			this.form.get('taDescription').value,
 			(this.data.isEdit) ? this.data.resource.position : undefined

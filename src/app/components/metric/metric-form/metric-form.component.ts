@@ -63,10 +63,14 @@ export class MetricFormComponent implements OnInit {
 	rules = Metric.rules;
 
 	/** holds metric's initial groups. */
-	private initialGroups: FormControl[] = [];
+	// private initialGroups: FormControl[] = [];
+	private initialGroups: MetricGroup[] = [];
 
 	/** metric's current groups. */
-	metricGroups: FormControl[] = [];
+	// metricGroups: FormControl[] = [];
+	metricGroups: MetricGroup[] = [];
+
+	chosenMetricGroups: MetricGroup[] = [];
 
 	/** enum values control. */
 	xxValuesInput: FormControl;
@@ -275,7 +279,9 @@ export class MetricFormComponent implements OnInit {
 					NumericValidators.greaterThanEqualValidator(() => this.getControlValue('tfMinDateOffset', 'grpDateParams'))
 				),
 			}),
-			'xxGroups': new FormArray([])
+			'xxGroups': new FormControl(
+				this.data.resource ? [...this.data.resource.groups] : [],
+			)
 		});
 	}
 
@@ -304,23 +310,15 @@ export class MetricFormComponent implements OnInit {
 	 * initializes groups control.
 	 */
 	private initxxGroups(): void {
-		const xxGroups: FormArray = this.form.get('xxGroups') as FormArray;
-
 		if (this.data.resource) {
-			this.data.resource.groups.forEach(item => {
-				xxGroups.controls.push(new FormControl(item));
-			});
+			this.chosenMetricGroups.push(...this.data.resource.groups);
 		}
 
-		this.groupsCrud.getMany < MetricGroup > (undefined, 'name description').subscribe(data => {
-			xxGroups.controls.forEach(item => {
-				data = data.filter(obj => obj._id !== item.value._id);
-			});
-			data.forEach(item => {
-				const fc = new FormControl(item);
-				this.initialGroups.push(fc);
-				this.metricGroups.push(fc);
-			});
+		this.groupsCrud.getMany<MetricGroup>(undefined, 'name description').subscribe(data => {
+			const mapped = this.chosenMetricGroups.map(elem => elem._id);
+			data = data.filter(item => !mapped.includes(item._id));
+			this.metricGroups.push(...data);
+			this.initialGroups.push(...data);
 		});
 	}
 
@@ -484,17 +482,16 @@ export class MetricFormComponent implements OnInit {
 		);
 		maxOff.updateValueAndValidity();
 
-		const xxGroups: FormArray = < FormArray > this.form.get('xxGroups');
-		xxGroups.controls.splice(0, xxGroups.controls.length);
-		if (this.data.resource) {
-			this.data.resource.groups.forEach(item => {
-				xxGroups.controls.push(new FormControl(item));
-			});
-		}
+		const xxGroups = this.form.get('xxGroups');
+		xxGroups.reset(this.data.resource ? [...this.data.resource.groups] : []);
 		xxGroups.updateValueAndValidity();
-		xxGroups.markAsPristine();
-		this.metricGroups.splice(0, this.metricGroups.length);
-		this.initialGroups.forEach(item => this.metricGroups.push(item));
+
+		this.metricGroups = [...this.initialGroups];
+		// if (this.data.resource) {
+		// 	this.chosenMetricGroups = [...this.data.resource.groups];
+		// } else {
+		// 	this.chosenMetricGroups = [];
+		// }
 	}
 
 	/**
@@ -515,27 +512,6 @@ export class MetricFormComponent implements OnInit {
 			ctrlArr.markAsDirty();
 		} else {
 			ctrlArr.markAsPristine();
-		}
-	}
-
-	/**
-	 *
-	 */
-	onGroupDragSuccessful(): void {
-		const xxGroups = < FormArray > this.form.get('xxGroups');
-		xxGroups.updateValueAndValidity();
-
-		let dirty = true;
-		if (this.data.resource) {
-			dirty = !this.arrays.sameValues < String > (
-				this.data.resource.groups.map(item => item._id),
-				xxGroups.controls.map(item => item.value._id));
-		}
-
-		if (dirty) {
-			xxGroups.markAsDirty();
-		} else {
-			xxGroups.markAsPristine();
 		}
 	}
 
@@ -866,27 +842,6 @@ export class MetricFormComponent implements OnInit {
 	}
 
 	/**
-	 *
-	 * @param ctrl
-	 */
-	addGroup(ctrl: FormControl): void {
-		( < FormArray > this.form.get('xxGroups')).controls.push(ctrl);
-		this.metricGroups.splice(this.metricGroups.indexOf(ctrl), 1);
-		this.onGroupDragSuccessful();
-	}
-
-	/**
-	 *
-	 * @param ctrl
-	 */
-	removeGroup(ctrl: FormControl): void {
-		const xxGroups: FormControl[] = < FormControl[] > ( < FormArray > this.form.get('xxGroups')).controls;
-		this.metricGroups.push(ctrl);
-		xxGroups.splice(xxGroups.indexOf(ctrl), 1);
-		this.onGroupDragSuccessful();
-	}
-
-	/**
 	 * sends insert request to server.
 	 * @param metric
 	 */
@@ -1055,7 +1010,7 @@ export class MetricFormComponent implements OnInit {
 			this.form.get('tfName').value,
 			this.form.get('cbRequired').value,
 			dType,
-			( < FormArray > this.form.get('xxGroups')).controls.map(item => item.value),
+			this.form.get('xxGroups').value,
 			this.form.get('taDescription').value,
 			undefined,
 			undefined,
@@ -1119,12 +1074,5 @@ export class MetricFormComponent implements OnInit {
 	 */
 	getxxValuesControls(): AbstractControl[] {
 		return (<FormArray>this.form.get('grpEnumParams').get('xxValues')).controls;
-	}
-
-	/**
-	 *
-	 */
-	getxxGroupsControls(): AbstractControl[] {
-		return (<FormArray>this.form.get('xxGroups')).controls;
 	}
 }

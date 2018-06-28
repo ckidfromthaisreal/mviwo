@@ -1,0 +1,49 @@
+mat-list-item {
+	background-color: rgb(70,70,70);
+	margin-bottom: 1px;
+}
+
+.item-actions {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.item-button {
+	// position: absolute;
+	// right: 0;
+	// top: 0;
+}
+
+.disabled {
+	background-color: rgb(50,50,50);
+}
+
+mat-checkbox {
+	margin-top: 5px;
+	padding-right: 10px;
+}
+
+.action-button {
+	// margin-bottom: 30px;
+	// padding-bottom: 30px;
+}
+
+mat-list {
+	margin-top: 10px;
+}
+
+.field-icon {
+	font-size: 20px;
+	padding-top: 5px;
+}
+
+.item-number {
+	padding-right: 5px;
+}
+
+.item-divider {
+	color: rgb(50,50,50);
+	padding-left: 3px;
+	padding-right: 3px;
+}
