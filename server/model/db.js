@@ -45,36 +45,52 @@ const connection = mongoose.connection;
 /** connection attempts. */
 let attempts = 0;
 
-/* on connection failed: by default, if failed on remote, try to connect to local. */
-connection.on('error', () => {
-	logger.error('DB', 'db.js:mongoose.connect', `failed connecting to: ${currentDB}`);
-
-	if (!config.CONNECT_TO_LOCAL) {
-		if (attempts++ < config.MAXIMUM_ATTEMPTS) {
-			mongoose.connect(remoteDB);
-		} else if (config.FALLBACK_TO_LOCAL && currentDB !== localDB) {
-			mongoose.connect((currentDB = localDB), {
-				useMongoClient: true
-			});
-		}
-	}
-});
-
-connection.on('disconnected', () => {
-	logger.info('DB', 'db.js:mongoose.connect', `disconnected from: ${currentDB}`);
-});
-
 /* on successful connection, log a message. */
 connection.once('open', () => {
 	logger.info('DB', 'db.js:mongoose.connect', `successfully connected to: ${currentDB}`);
 	initUsers();
+
+	connection.on('connected', () => {
+		logger.info('DB', 'db.js:mongoose.connect', `successfully connected to: ${currentDB}`);
+	});
+
+	connection.on('disconnected', () => {
+		logger.info('DB', 'db.js:mongoose.connect', `disconnected from: ${currentDB}`);
+	});
+
+	connection.on('reconnected', () => {
+		logger.info('DB', 'db.js:mongoose.connect', `successfully reconnected to: ${currentDB}`);
+	});
+
+	/* on connection failed: by default, if failed on remote, try to connect to local. */
+	connection.on('error', () => {
+		logger.error('DB', 'db.js:mongoose.connect', `failed connecting to: ${currentDB}`);
+
+		if (!config.CONNECT_TO_LOCAL) {
+			if (attempts++ < config.MAXIMUM_ATTEMPTS) {
+				mongoose.connect(remoteDB);
+			} else if (config.FALLBACK_TO_LOCAL && currentDB !== localDB) {
+				mongoose.connect((currentDB = localDB), {
+					useMongoClient: true
+				});
+			}
+		}
+	});
 });
 
 /**
  * connect to database.
  */
 exports.connect = () => {
-	mongoose.connect(currentDB = config.CONNECT_TO_LOCAL ? localDB : remoteDB);
+	mongoose.connect(currentDB = config.CONNECT_TO_LOCAL ? localDB : remoteDB)
+		.then(() => {
+			// server.start();
+		}).catch(error => {
+			if (error) {
+				logger.error('DB', 'db.js:mongoose.connect', error);
+				process.exit(1);
+			}
+		});
 };
 
 /**

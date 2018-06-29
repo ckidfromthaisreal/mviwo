@@ -126,4 +126,34 @@ export class Metric implements Mongoloid {
 		}
 		, public position?: number
 	) {}
+
+	public static shallowClone(metric: Metric): Metric {
+		return new Metric(
+			undefined,
+			metric.name,
+			metric.isRequired,
+			metric.dataType,
+			[],
+			metric.description,
+			metric.stringParams,
+			metric.numberParams,
+			metric.enumParams,
+			metric.dateParams
+		);
+	}
+
+	public static deepClone(metric: Metric): Metric {
+		return new Metric(
+			undefined,
+			metric.name,
+			metric.isRequired,
+			metric.dataType,
+			[...metric.groups],
+			metric.description,
+			metric.stringParams,
+			metric.numberParams,
+			metric.enumParams,
+			metric.dateParams
+		);
+	}
 }

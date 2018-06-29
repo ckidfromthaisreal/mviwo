@@ -1,4 +1,6 @@
-import { DatesService } from './../../../services/dates/dates.service';
+import {
+	DatesService
+} from './../../../services/dates/dates.service';
 import {
 	ArraysService
 } from './../../../services/arrays/arrays.service';
@@ -47,7 +49,9 @@ import {
 import {
 	MetricGroup
 } from '../../../models/metric-group.model';
-import { Updateable } from '../../../services/crud/crud.service';
+import {
+	Updateable
+} from '../../../services/crud/crud.service';
 
 @Component({
 	// tslint:disable-next-line:component-selector
@@ -81,7 +85,9 @@ export class MetricFormComponent implements OnInit {
 	/** used to bind both preview slider & input field */
 	sliderPrev = 0;
 
-	@Output() edited: EventEmitter<Metric> = new EventEmitter();
+	private groupsFetched = false;
+
+	@Output() edited: EventEmitter < Metric > = new EventEmitter();
 
 	numberPresets = [{
 		name: 'Scale 1-5',
@@ -92,12 +98,12 @@ export class MetricFormComponent implements OnInit {
 	}];
 
 	constructor(
-		private crud: MetricCrudService
-		, private groupsCrud: MetricGroupCrudService
-		, private arrays: ArraysService
-		, public dates: DatesService
-		, protected dialogRef: MatDialogRef < MetricFormComponent >
-		, @Inject(MAT_DIALOG_DATA) public data: ElementFormInput < Metric >
+		private crud: MetricCrudService,
+		private groupsCrud: MetricGroupCrudService,
+		private arrays: ArraysService,
+		public dates: DatesService,
+		protected dialogRef: MatDialogRef<MetricFormComponent>,
+		@Inject(MAT_DIALOG_DATA) public data: ElementFormInput<Metric>
 	) {}
 
 	ngOnInit(): void {
@@ -107,8 +113,8 @@ export class MetricFormComponent implements OnInit {
 
 		this.xxValuesInput = new FormControl(
 			'', [
-				AbstractControlValidators.dependancyValidator(this.form.get('grpEnumParams').get('xxValues'))
-				, AbstractControlValidators.valueNotExistsValidator( < FormArray > this.form.get('grpEnumParams').get('xxValues'))
+				AbstractControlValidators.dependancyValidator(this.form.get('grpEnumParams').get('xxValues')),
+				AbstractControlValidators.valueNotExistsValidator(<FormArray>this.form.get('grpEnumParams').get('xxValues'))
 			]
 		);
 	}
@@ -311,14 +317,20 @@ export class MetricFormComponent implements OnInit {
 	 */
 	private initxxGroups(): void {
 		if (this.data.resource) {
-			this.chosenMetricGroups.push(...this.data.resource.groups);
+			this.chosenMetricGroups = [...this.data.resource.groups];
 		}
 
-		this.groupsCrud.getMany<MetricGroup>(undefined, 'name description').subscribe(data => {
+		this.groupsCrud.getMany < MetricGroup > (undefined, 'name description').subscribe(data => {
+			this.chosenMetricGroups.forEach(group => {
+				group.metrics = (data.find(grp => grp._id === group._id)).metrics;
+			});
+
 			const mapped = this.chosenMetricGroups.map(elem => elem._id);
 			data = data.filter(item => !mapped.includes(item._id));
-			this.metricGroups.push(...data);
-			this.initialGroups.push(...data);
+			this.metricGroups = [...data];
+			this.initialGroups = [...data];
+
+			this.form.get('xxGroups').reset([...this.chosenMetricGroups]);
 		});
 	}
 
@@ -483,15 +495,10 @@ export class MetricFormComponent implements OnInit {
 		maxOff.updateValueAndValidity();
 
 		const xxGroups = this.form.get('xxGroups');
-		xxGroups.reset(this.data.resource ? [...this.data.resource.groups] : []);
+		xxGroups.reset(this.data.resource ? [...this.chosenMetricGroups] : []);
 		xxGroups.updateValueAndValidity();
 
 		this.metricGroups = [...this.initialGroups];
-		// if (this.data.resource) {
-		// 	this.chosenMetricGroups = [...this.data.resource.groups];
-		// } else {
-		// 	this.chosenMetricGroups = [];
-		// }
 	}
 
 	/**
@@ -794,7 +801,7 @@ export class MetricFormComponent implements OnInit {
 		this.onMinMaxValueChange(undefined);
 	}
 
-	onMinMaxCurrentChange(minOrMax: 'min'|'max'): void {
+	onMinMaxCurrentChange(minOrMax: 'min' | 'max'): void {
 		const minmax = minOrMax.charAt(0).toUpperCase() + minOrMax.substring(1);
 
 		const grp = this.form.get('grpDateParams');
@@ -991,8 +998,8 @@ export class MetricFormComponent implements OnInit {
 		}
 
 		const updateable = {
-			_id: tempMetric._id
-			, removedGroups: this.data.isEdit ? removedGroups : undefined
+			_id: tempMetric._id,
+			removedGroups: this.data.isEdit ? removedGroups : undefined
 		};
 
 		Object.keys(tempMetric).forEach(key => {
@@ -1073,6 +1080,6 @@ export class MetricFormComponent implements OnInit {
 	 *
 	 */
 	getxxValuesControls(): AbstractControl[] {
-		return (<FormArray>this.form.get('grpEnumParams').get('xxValues')).controls;
+		return ( < FormArray > this.form.get('grpEnumParams').get('xxValues')).controls;
 	}
 }

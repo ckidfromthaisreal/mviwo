@@ -74,9 +74,9 @@ export class MetricGalleryComponent implements OnInit {
 		});
 	}
 
-	renderGroups(element) {
+	renderGroups(element): string {
 		if (!element.groups || element.groups.length === 0) {
-			return 'unbound';
+			return '';
 		}
 
 		if (element.groups.length === 1) {
@@ -84,6 +84,10 @@ export class MetricGalleryComponent implements OnInit {
 		}
 
 		return `${element.groups.length} groups`;
+	}
+
+	renderGroupsTooltip(element: Metric): string {
+			return element.groups.map(grp => grp.name).join();
 	}
 
 	isAllSelected() {
@@ -121,7 +125,7 @@ export class MetricGalleryComponent implements OnInit {
 		});
 	}
 
-	deleteManyOnClick() {
+	deleteManyOnClick(): void {
 		const total = this.selection.selected.length;
 		const page = this.paginator.pageIndex;
 		this.crud.deleteMany(this.selection.selected).subscribe((result) => {
@@ -139,7 +143,7 @@ export class MetricGalleryComponent implements OnInit {
 		});
 	}
 
-	insertOneOnClick() {
+	insertOneOnClick(): void {
 		this.openForm(false, null, (result) => {
 			result[0].position = this.data.length + 1;
 			this.dataSource.data = this.data = [...this.data, result[0]];
@@ -147,6 +151,17 @@ export class MetricGalleryComponent implements OnInit {
 				this.dataSource.paginator.lastPage();
 			});
 			this.notification.openCustomSnackbar(`metric inserted successfully!`);
+		});
+	}
+
+	cloneOneOnClick(event, element: Metric): void {
+		this.crud.insertOne<Metric>(Metric.shallowClone(element)).subscribe(result => {
+			result[0].position = this.data.length + 1;
+			this.dataSource.data = this.data = [...this.data, result[0]];
+			setTimeout(() => {
+				this.dataSource.paginator.lastPage();
+			});
+			this.notification.openCustomSnackbar(`metric cloned successfully!`);
 		});
 	}
 
