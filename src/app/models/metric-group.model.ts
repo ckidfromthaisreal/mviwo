@@ -1,5 +1,4 @@
 import { Mongoloid } from '../services/crud/crud.service';
-import { Metric } from './metric.model';
 
 export class MetricGroup implements Mongoloid {
 	public static rules = {
@@ -12,26 +11,14 @@ export class MetricGroup implements Mongoloid {
 	constructor(
 		public _id: string
 		, public name: string
-		// , public isMandatory: boolean
 		, public metrics?: {
-			_id: string
-			, name: string
-			, isRequired: boolean
+			_id: string,
+			name: string,
+			dataType: string,
+			isRequired: boolean,
+			description?: string
 		}[]
 		, public description?: string
 		, public position?: number
 	) {}
-
-	/**
-	 * returns a shallow copy of given metric group.
-	 * @param metricGroup to be cloned.
-	 */
-	// public static clone(metricGroup: MetricGroupModel): MetricGroupModel {
-	// 	return new MetricGroupModel(
-	// 		undefined,
-	// 		metricGroup.name + '_clone',
-	// 		metricGroup.isMandatory, [],
-	// 		metricGroup.description
-	// 	);
-	// }
 }

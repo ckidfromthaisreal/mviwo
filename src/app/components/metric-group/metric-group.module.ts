@@ -1,3 +1,4 @@
+import { MviwoListSelectModule } from './../material/mviwo-list-select/mviwo-list-select.module';
 // import { routing } from './metric-group.routing';
 import { NgModule } from '@angular/core';
 import { MatIconModule, MatButtonModule, MatMenuModule,
@@ -5,10 +6,10 @@ import { MatIconModule, MatButtonModule, MatMenuModule,
 	MatFormFieldModule, MatInputModule, MatPaginatorModule,
 	MatTooltipModule, MatDialogModule, MatTabsModule,
 	MatButtonToggleModule, MatSliderModule, MatSlideToggleModule,
-	MatSelectModule, MatListModule, MatDatepickerModule, MatNativeDateModule} from '@angular/material';
+	MatSelectModule, MatListModule, MatDatepickerModule,
+	MatNativeDateModule} from '@angular/material';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { DndModule } from 'ng2-dnd';
 import { MetricGroupGalleryComponent } from './metric-group-gallery/metric-group-gallery.component';
 import { MetricGroupFormComponent } from './metric-group-form/metric-group-form.component';
 
@@ -38,7 +39,7 @@ import { MetricGroupFormComponent } from './metric-group-form/metric-group-form.
 		MatDatepickerModule,
 		MatNativeDateModule,
 
-		DndModule,
+		MviwoListSelectModule,
 	],
 	declarations: [
 		MetricGroupGalleryComponent,

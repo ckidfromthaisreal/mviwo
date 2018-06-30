@@ -52,13 +52,15 @@
 				<!-- name column -->
 				<ng-container matColumnDef="name">
 					<th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
-					<td mat-cell *matCellDef="let element"> {{ element.name }} </td>
+					<td mat-cell *matCellDef="let element" [matTooltip]="element.description"> {{ element.name }} </td>
 				</ng-container>
 				<!-- metrics column -->
 				<ng-container matColumnDef="metrics">
 					<th mat-header-cell *matHeaderCellDef mat-sort-header> Metrics </th>
 					<td mat-cell *matCellDef="let element">
-						<button *ngIf="element.metrics.length" (click)="showMetrics(element)"><mat-icon>mouse</mat-icon></button>
+							<div *ngIf="element.metrics.length" [matTooltip]="renderMetricsTooltip(element)">
+									<small>{{ element.metrics.length < 99 ? element.metrics.length : '+99' }}</small> <mat-icon>scatter_plot</mat-icon>
+								</div>
 					</td>
 				</ng-container>
 				<!-- createdAt column -->

@@ -26,7 +26,8 @@ import {
 } from '@angular/forms';
 import {
 	MatDialogRef,
-	MAT_DIALOG_DATA
+	MAT_DIALOG_DATA,
+	SELECT_ITEM_HEIGHT_EM
 } from '@angular/material';
 import { ElementFormInput } from '../../../models/resource-form-input.interface';
 import { Updateable } from '../../../services/crud/crud.service';
@@ -39,11 +40,11 @@ import { MongoloidsService } from '../../../services/mongoloids/mongoloids.servi
 	styleUrls: ['./metric-group-form.component.scss']
 })
 export class MetricGroupFormComponent implements OnInit {
-	rules = MetricGroup.rules;
+	readonly rules = MetricGroup.rules;
 
-	initialMetrics: FormControl[] = [];
-
-	metrics: FormControl[] = [];
+	initialMetrics: Metric[] = [];
+	metrics: Metric[] = [];
+	chosenMetrics: Metric[] = [];
 
 	form: FormGroup;
 
@@ -79,28 +80,23 @@ export class MetricGroupFormComponent implements OnInit {
 				(this.data.resource) ? this.data.resource.description : '',
 				Validators.maxLength(MetricGroup.rules.descriptionMaxLength)
 			),
-			'xxMetrics': new FormArray([])
+			'xxMetrics': new FormControl(
+				this.data.resource ? [...this.data.resource.metrics] : []
+			)
 		});
 	}
 
 	private initxxMetrics() {
-		const xxMetrics: FormArray = < FormArray > this.form.get('xxMetrics');
 		if (this.data.resource) {
-			this.data.resource.metrics.forEach(item => {
-				xxMetrics.controls.push(new FormControl(item));
-			});
+			this.chosenMetrics = [...this.data.resource.metrics];
 		}
 
 		this.metricCrud.getMany<Metric>(undefined, 'name isRequired description dataType')
 			.subscribe(data => {
-				xxMetrics.controls.forEach(item => {
-					data = data.filter(obj => obj._id !== item.value._id);
-				});
-				data.forEach(item => {
-					this.initialMetrics.push(new FormControl(item));
-				});
-
-				this.initialMetrics.forEach(item => this.metrics.push(item));
+				const mapped = this.chosenMetrics.map(item => item._id);
+				data = data.filter(item => !mapped.includes(item._id));
+				this.metrics = [...data];
+				this.initialMetrics = [...data];
 			});
 	}
 
@@ -142,17 +138,10 @@ export class MetricGroupFormComponent implements OnInit {
 		desc.reset((this.data.resource) ? this.data.resource.description : '');
 		desc.updateValueAndValidity();
 
-		const xxMetrics: FormArray = < FormArray > this.form.get('xxMetrics');
-		xxMetrics.controls.splice(0, xxMetrics.controls.length);
-		if (this.data.resource) {
-			this.data.resource.metrics.forEach(item => {
-				xxMetrics.controls.push(new FormControl(item));
-			});
-		}
+		const xxMetrics = this.form.get('xxMetrics');
+		xxMetrics.reset((this.data.resource) ? [...this.chosenMetrics] : []);
 		xxMetrics.updateValueAndValidity();
-		xxMetrics.markAsPristine();
-		this.metrics.splice(0, this.metrics.length);
-		this.initialMetrics.forEach(item => this.metrics.push(item));
+		this.metrics = [...this.initialMetrics];
 	}
 
 	/**
@@ -213,7 +202,7 @@ export class MetricGroupFormComponent implements OnInit {
 			(this.data.isEdit) ? this.data.resource._id : undefined,
 			this.form.get('tfName').value,
 			// this.form.get('cbMandatory').value,
-			( < FormArray > this.form.get('xxMetrics')).controls.map(item => item.value),
+			this.form.get('xxMetrics').value,
 			this.form.get('taDescription').value,
 			(this.data.isEdit) ? this.data.resource.position : undefined
 		);
@@ -227,44 +216,5 @@ export class MetricGroupFormComponent implements OnInit {
 			'you must enter a group name!' :
 			(field.hasError('minlength')) ?
 			'too short!' : '';
-	}
-
-	addMetric(ctrl: FormControl) {
-		const xxMetrics = < FormArray > this.form.get('xxMetrics');
-		xxMetrics.controls.push(ctrl);
-		this.metrics.splice(this.metrics.indexOf(ctrl), 1);
-		this.onMetricDragSuccessful();
-	}
-
-	removeMetric(ctrl: FormControl) {
-		const xxMetrics = < FormArray > this.form.get('xxMetrics');
-		this.metrics.push(ctrl);
-		xxMetrics.controls.splice(xxMetrics.controls.indexOf(ctrl), 1);
-		this.onMetricDragSuccessful();
-	}
-
-	onMetricDragSuccessful() {
-		const xxMetrics = < FormArray > this.form.get('xxMetrics');
-		xxMetrics.updateValueAndValidity();
-
-		let dirty = true;
-		if (this.data.resource) {
-			dirty = !this.mongoloids.sameValuesAndOrder(
-				this.data.resource.metrics.map(item => item),
-				xxMetrics.controls.map(item => item.value));
-		}
-
-		if (dirty) {
-			xxMetrics.markAsDirty();
-		} else {
-			xxMetrics.markAsPristine();
-		}
-	}
-
-	/**
-	 *
-	 */
-	getxxMetricsControls(): AbstractControl[] {
-		return (<FormArray>this.form.get('xxMetrics')).controls;
 	}
 }

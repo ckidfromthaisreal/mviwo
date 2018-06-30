@@ -53,53 +53,9 @@
 		<!-- general info tab -->
 		<mat-tab mat-dialog-content label="Metrics">
 			<div mat-dialog-content>
-				<div class="row newL">
-					<div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
-						<div class="panel panel-info" dnd-sortable-container [sortableData]="metrics">
-							<div class="panel-heading">Available Metrics</div>
-							<div class="scroll-div-sm panel-body" dnd-draggable dnd-droppable [dropZones]="['zone0']">
-								<ul class="list-group">
-									<li *ngIf="!metrics || !metrics.length" class="empty-list-item list-group-item">
-										drag here to deselect..
-									</li>
-									<li *ngFor="let ctrl of metrics; let i = index" class="list-group-item" dnd-sortable [sortableIndex]="i" [dragEnabled]="true"
-									    [dragData]="ctrl" (onDropSuccess)="onMetricDragSuccessful()">
-										<span dnd-draggable-handle style="padding-right: 5px">
-											<i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-										</span>
-										<i matTooltip="{{ ctrl.value.isRequired ? 'required field during form filling.' : '' }}" class="fa fa-exclamation-circle {{ (ctrl.value.isRequired ? 'important' : 'not-important') }}-item-indicator"
-										    aria-hidden="true"></i> {{ ctrl.value.name }}
-										<button type="button" class="btn btn-success btn-circle btn-sm pull-right" (click)="addMetric(ctrl)">
-											<i class="fa fa-plus" aria-hidden="true"></i>
-										</button>
-									</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-					<div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
-						<div class="panel panel-info" dnd-sortable-container [sortableData]="getxxMetricsControls()">
-							<div class="panel-heading">Selected Metrics</div>
-							<div class="scroll-div-sm panel-body" dnd-draggable dnd-droppable [dropZones]="['zone0']">
-								<ul class="list-group">
-									<li *ngIf="!getxxMetricsControls().length" class="empty-list-item list-group-item">
-										drag here to select..
-									</li>
-									<li *ngFor="let ctrl of getxxMetricsControls(); let i = index" dnd-sortable [sortableIndex]="i" [dragEnabled]="true"
-									    [dragData]="ctrl" class="list-group-item" (onDropSuccess)="onMetricDragSuccessful()" (onDragSuccess)="onMetricDragSuccessful()">
-										<span dnd-draggable-handle style="padding-right: 5px">
-											<i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-										</span>
-										{{ i+1 }}.
-										<i matTooltip="{{ ctrl.value.isRequired ? 'required field during form filling.' : '' }}" class="fa fa-exclamation-circle {{ (ctrl.value.isRequired ? 'important' : 'not-important') }}-item-indicator"
-										    aria-hidden="true"></i> {{ ctrl.value.name }}
-										<button type="button" class="btn btn-danger btn-circle btn-sm pull-right" (click)="removeMetric(ctrl)">
-											<i class="fa fa-minus" aria-hidden="true"></i>
-										</button>
-									</li>
-								</ul>
-							</div>
-						</div>
+				<div class="row newL" style="max-height: 500px; min-height: 300px">
+					<div class="col-md-12">
+						<mviwo-list-select [dataSource]="metrics" [showFields]="['name','dataType','isRequired']" [showTargetItemNumber]="true" [sortableTarget]="true" sourceLabel="metrics" targetLabel="selected metrics" formControlName="xxMetrics"></mviwo-list-select>
 					</div>
 				</div>
 			</div>

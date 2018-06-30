@@ -5,9 +5,6 @@ metric model.
 /** server config file. */
 const config = require('../../server.json');
 
-/** protected keys file. */
-const restricted = require('./restricted-edit.json');
-
 /** http://mongoosejs.com/
   mongoose provides a straight-forward, schema-based solution to model your application data.
   it includes built-in type casting, validation, query building, business logic hooks and more,
@@ -143,7 +140,6 @@ const metricGroupEmbeddedSchema = new mongoose.Schema({
 
 /** main metric schema. */
 const metricSchema = new mongoose.Schema({
-	// _id: {type: Schema.Types.ObjectId},
 	name: {
 		type: String,
 		required: true,
@@ -175,17 +171,9 @@ const metricSchema = new mongoose.Schema({
 	enumParams: {
 		type: enumParamsSchema
 	},
-	// blobParams: {
-	// 	type: blobParamsSchema
-	// },
 	dateParams: {
 		type: dateParamsSchema
 	},
-	// updatedAt: {
-	// 	type: Number,
-	// 	default: new Date().getTime(),
-	// 	required: true
-	// },
 	updatedBy: {
 		_id: {
 			type: mongoose.Schema.Types.ObjectId,
@@ -197,15 +185,6 @@ const metricSchema = new mongoose.Schema({
 			required: true
 		}
 	},
-	// createdAt: {
-	// 	type: Number,
-	// 	default: new Date().getTime(),
-	// 	required: true,
-	// 	set: function(time) {
-	// 		this._createdAt = this.createdAt;
-	// 		return time;
-	// 	}
-	// },
 	createdBy: {
 		_id: {
 			type: mongoose.Schema.Types.ObjectId,
@@ -234,40 +213,8 @@ const metricSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 metricSchema.pre('save', function (next) {
-	// this.updatedAt = new Date().getTime();
-
 	return next();
 });
-
-/** pre-validation hook */
-// metricSchema.pre('validate', function (next) {
-// 	if (this.isModified('createdAt') && this._createdAt) {
-// 		this.invalidate('createdAt');
-// 	}
-
-// 	if (this.isModified('createdBy') && (this._createdBy_id || this._createdByUsername)) {
-// 		this.invalidate('createdBy');
-// 	}
-
-// 	if (!this.isModified('editMode')) {
-// 		console.log(this.editMode);
-// 		console.log(restricted);
-// 		if (this.editMode === 'restricted' && restricted.some(key => this.isModified(key))) {
-// 			restricted.forEach(key => this.invalidate(key));
-// 		}
-
-// 		if (this.editMode === 'blocked' && Object.keys(this).some(key => this.isModified(key))) {
-// 			Object.keys(this).forEach(key => this.invalidate(key));
-// 		}
-// 	}
-
-// 	return next();
-// });
-
-/* virtual for metric's URL */
-// metricSchema.virtual('url').get(() => {
-//     return `/metric/${this._id}`;
-// });
 
 /* export model. */
 module.exports = mongoose.model('Metric', metricSchema);

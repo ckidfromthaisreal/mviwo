@@ -23,45 +23,45 @@ const axios = require('../axios-runner');
 /** metric api url. */
 const url = 'http://localhost:4200/api/user';
 
-describe('user.controller.js', () => {
-	const user = {
-		username: 'test000',
-		email: 'igalklebanov@gmail.com',
-		password: 'comeatmebruh'
-	};
+// describe('user.controller.js', () => {
+// 	const user = {
+// 		username: 'test000',
+// 		email: 'igalklebanov@gmail.com',
+// 		password: 'comeatmebruh'
+// 	};
 
-	let tokenObj;
+// 	let tokenObj;
 
-	it('register', () => {
-		return axios.insertMany(`${url}/register`, user).then(response => {
-			expect(response).to.be.an('object');
-			expect(response).to.haveOwnProperty('token');
-		});
-	});
+// 	it('register', () => {
+// 		return axios.insertMany(`${url}/register`, user).then(response => {
+// 			expect(response).to.be.an('object');
+// 			expect(response).to.haveOwnProperty('token');
+// 		});
+// 	});
 
-	it('login', () => {
-		return axios.insertMany(`${url}/login`, {
-			login: user.username,
-			password: user.password
-		}).then(response => {
-			expect(response).to.be.an('object');
-			expect(response).to.haveOwnProperty('token');
-			tokenObj = response;
-		});
-	});
+// 	it('login', () => {
+// 		return axios.insertMany(`${url}/login`, {
+// 			login: user.username,
+// 			password: user.password
+// 		}).then(response => {
+// 			expect(response).to.be.an('object');
+// 			expect(response).to.haveOwnProperty('token');
+// 			tokenObj = response;
+// 		});
+// 	});
 
-	it('delete', () => {
-		return axios.deleteMany(url, {
-			data: {
-				username: user.username
-			},
-			headers: {
-				Authorization: `Bearer ${tokenObj.token}`
-			}
-		}).then(response => {
-			expect(response).to.be.an('object');
-			expect(response).to.haveOwnProperty('n');
-			expect(response.n).to.be.equal(1);
-		});
-	});
-});
+// 	it('delete', () => {
+// 		return axios.deleteMany(url, {
+// 			data: {
+// 				username: user.username
+// 			},
+// 			headers: {
+// 				Authorization: `Bearer ${tokenObj.token}`
+// 			}
+// 		}).then(response => {
+// 			expect(response).to.be.an('object');
+// 			expect(response).to.haveOwnProperty('n');
+// 			expect(response.n).to.be.equal(1);
+// 		});
+// 	});
+// });

@@ -81,11 +81,11 @@ export class Metric implements Mongoloid {
 	};
 
 	constructor(
-		public _id
+		public _id: string
 		, public name: string
 		, public isRequired: boolean
 		, public dataType: string
-		, public groups: {
+		, public groups?: {
 			_id: string,
 			name: string,
 			description?: string
@@ -112,10 +112,6 @@ export class Metric implements Mongoloid {
 			isMultiple: boolean,
 			values: String[]
 		}
-		// , public blobParams?: {
-		// 	maxSize?: number,
-		// 	extensions?: String[]
-		// }
 		, public dateParams?: {
 			minDate?: Date,
 			maxDate?: Date,

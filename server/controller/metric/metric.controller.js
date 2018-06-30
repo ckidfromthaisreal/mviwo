@@ -263,7 +263,8 @@ exports.updateMany = async (req, res, next) => {
 	}
 
 	if (err) {
-		logger.error('API', operationName, err, req.user);
+		logger.error('API', operationName, err.message, req.user._id);
+		logger.verbose('API', operationName, err, req.user);
 		return next(err);
 	}
 
@@ -363,6 +364,10 @@ exports.updateOne = async (req, res, next) => {
 		try {
 			result = await updateMetricGroups({
 				_id: req.params.id,
+				name: metric.name,
+				description: metric.description,
+				isRequired: metric.isRequired,
+				dataType: metric.dataType,
 				groups: req.body.groups
 			}, {
 				_id: req.params.id,
@@ -533,12 +538,12 @@ function updateMetricGroups(addObj, removeObj, user) {
 						_id: element.group
 					},
 					update: {
-						$addToSet: {
-							metrics: {
-								$each: element.metrics
-							}
-						},
-						// updatedAt: time,
+						// $addToSet: {
+						// 	metrics: {
+						// 		$each: element.metrics
+						// 	}
+						// },
+						metrics: element.metrics,
 						updatedBy: by
 					}
 				}
@@ -556,10 +561,16 @@ function updateMetricGroups(addObj, removeObj, user) {
 						_id: element.group
 					},
 					update: {
-						$pullAll: {
-							metrics: element.metrics
+						// $pullAll: {
+						// 	metrics: element.metrics
+						// },
+						$pull: {
+							metrics: {
+								'_id': {
+									$in: element.metrics.map(metric => metric._id)
+								}
+							}
 						},
-						// updatedAt: time,
 						updatedBy: by
 					}
 				}
@@ -596,19 +607,25 @@ function pivotToGroups(metricsObj) {
 
 	metricsObj.map(metric => {
 		return {
-			_id: mongoose.Types.ObjectId(metric._id),
+			metric: {
+				_id: mongoose.Types.ObjectId(metric._id),
+				name: metric.name,
+				description: metric.description,
+				isRequired: metric.isRequired,
+				dataType: metric.dataType,
+			},
 			groups: metric.groups || []
 		};
-	}).forEach(metric => {
-		metric.groups.map(group => mongoose.Types.ObjectId(group._id || group)).forEach(groupId => {
+	}).forEach(metrication => {
+		metrication.groups.map(group => mongoose.Types.ObjectId(group._id || group)).forEach(groupId => {
 			const indexOf = groups.findIndex(e => e.group.equals(groupId));
 			if (indexOf === -1) {
 				groups.push({
 					group: mongoose.Types.ObjectId(groupId),
-					metrics: [metric._id]
+					metrics: [metrication.metric]
 				});
 			} else {
-				groups[indexOf].metrics.push(metric._id);
+				groups[indexOf].metrics.push(metrication.metric);
 			}
 		});
 	});

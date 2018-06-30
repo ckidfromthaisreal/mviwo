@@ -12,32 +12,86 @@ const config = require('../../server.json');
 */
 const mongoose = require('mongoose').set('debug', config.DEBUG_MONGOOSE);
 
+const metricEmbeddedSchema = new mongoose.Schema({
+	_id: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Metric',
+		auto: false,
+		required: true,
+	},
+	name: {
+		type: String,
+		required: true
+	},
+	isRequired: {
+		type: Boolean,
+		required: true
+	},
+	dataType: {
+		type: String,
+		required: true
+	},
+	description: {
+		type: String
+	},
+});
+
 /** main metric-group schema. */
 const metricGroupSchema = new mongoose.Schema({
 	// _id: Schema.Types.ObjectId,
 	name: {
 		type: String,
-		required: true,
-		unique: true
+		required: true
 	},
 	description: {
 		type: String
 	},
-	// isMandatory: {type: Boolean, required: true},
-	metrics: [{
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'Metric'
-	}],
-	lastUpdate: {
-		type: Date,
-		default: Date.now
+	metrics: {
+		type: [{
+			type: metricEmbeddedSchema
+		}]
+	},
+	updatedBy: {
+		_id: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+			ref: 'User'
+		},
+		username: {
+			type: String,
+			required: true
+		}
+	},
+	createdBy: {
+		_id: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+			ref: 'User',
+			set: function (id) {
+				this._createdBy_id = this.createdBy._id;
+				return id;
+			}
+		},
+		username: {
+			type: String,
+			required: true,
+			set: function (username) {
+				this._createdByUsername = this.createdBy.username;
+				return username;
+			}
+		},
+	},
+	editMode: {
+		type: String,
+		required: true,
+		enum: ['free', 'restricted', 'blocked'],
+		default: 'free'
 	}
-});
+}, { timestamps: true });
 
-/* virtual for metric's URL */
-// metricGroupSchema.virtual('url').get(() => {
-//     return `/metric-groups/${this._id}`;
-// });
+metricGroupSchema.pre('save', function (next) {
+	return next();
+});
 
 /* export model. */
 module.exports = mongoose.model('MetricGroup', metricGroupSchema);

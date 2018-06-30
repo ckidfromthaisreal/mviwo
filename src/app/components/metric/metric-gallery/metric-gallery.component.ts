@@ -74,18 +74,6 @@ export class MetricGalleryComponent implements OnInit {
 		});
 	}
 
-	renderGroups(element): string {
-		if (!element.groups || element.groups.length === 0) {
-			return '';
-		}
-
-		if (element.groups.length === 1) {
-			return element.groups[0].name;
-		}
-
-		return `${element.groups.length} groups`;
-	}
-
 	renderGroupsTooltip(element: Metric): string {
 			return element.groups.map(grp => grp.name).join();
 	}
@@ -112,30 +100,35 @@ export class MetricGalleryComponent implements OnInit {
 
 	deleteOneOnClick(event, element): void {
 		this.crud.deleteOne(element).subscribe((result) => {
+			const page = this.paginator.pageIndex;
+
 			this.selection.deselect(element);
 			for (let i = element.position; i < this.dataSource.data.length; i++) {
 				this.data[i].position -= 1;
 			}
 			this.data.splice(element.position - 1, 1);
 			this.dataSource.data = this.data = [...this.data];
-			if (element.position === this.data.length + 1) {
-				this.paginator.previousPage();
-			}
+			setTimeout(() => {
+				if (Math.ceil(this.data.length / this.paginator.pageSize) < (page + 1)) {
+					this.paginator._changePageSize(this.paginator.pageSize);
+				}
+			});
 			this.notification.openCustomSnackbar(`metric deleted successfully!`);
 		});
 	}
 
 	deleteManyOnClick(): void {
 		const total = this.selection.selected.length;
-		const page = this.paginator.pageIndex;
 		this.crud.deleteMany(this.selection.selected).subscribe((result) => {
+			const page = this.paginator.pageIndex;
+
 			this.dataSource.data = this.data = this.data.filter(item => !this.selection.selected.includes(item));
 			for (let i = 0; i < this.data.length; i++) {
 				this.data[i].position = i + 1;
 			}
 			this.selection.clear();
 			setTimeout(() => {
-				if (Math.floor(this.data.length / this.paginator.pageSize) < page) {
+				if (Math.ceil(this.data.length / this.paginator.pageSize) < (page + 1)) {
 					this.dataSource.paginator.lastPage();
 				}
 			});

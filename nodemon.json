@@ -1,11 +1,11 @@
 {
     "ignore": [
-        ".git",
+        ".git/**/.git",
 		"node_modules/**/node_modules",
-		"test",
-		"src",
-		"public",
-		"dist",
+		"test/**/test",
+		"src/**/src",
+		"public/**/public",
+		"dist/**/dist",
 		"angular.json",
 		".editorconfig",
 		".eslintrc.json",

@@ -320,7 +320,7 @@ export class MetricFormComponent implements OnInit {
 			this.chosenMetricGroups = [...this.data.resource.groups];
 		}
 
-		this.groupsCrud.getMany < MetricGroup > (undefined, 'name description').subscribe(data => {
+		this.groupsCrud.getMany < MetricGroup > (undefined, 'name description metrics').subscribe(data => {
 			this.chosenMetricGroups.forEach(group => {
 				group.metrics = (data.find(grp => grp._id === group._id)).metrics;
 			});

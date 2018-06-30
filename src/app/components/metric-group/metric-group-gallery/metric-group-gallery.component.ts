@@ -53,6 +53,10 @@ export class MetricGroupGalleryComponent implements OnInit {
 		});
 	}
 
+	renderMetricsTooltip(element: MetricGroup): string {
+		return element.metrics.map(mtr => mtr.name).join();
+	}
+
 	isAllSelected() {
 		return this.selection.selected.length === this.dataSource.data.length;
 	}
@@ -124,7 +128,7 @@ export class MetricGroupGalleryComponent implements OnInit {
 				isEdit: isEdit
 			},
 			width: !this.browser.isMobile() ?
-				`${Math.min(this.browser.width() * 0.60, 650)}px` : `${this.browser.width()}px`
+				`${Math.min(this.browser.width() * 0.60, 1000)}px` : `${this.browser.width()}px`
 		});
 
 		let optimismApplied = false;

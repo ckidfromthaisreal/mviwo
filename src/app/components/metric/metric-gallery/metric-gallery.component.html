@@ -71,7 +71,7 @@
 					<th mat-header-cell *matHeaderCellDef mat-sort-header> Group/s </th>
 					<td mat-cell *matCellDef="let element" >
 						<div *ngIf="element.groups.length" [matTooltip]="renderGroupsTooltip(element)">
-							{{ element.groups.length }} <mat-icon>timeline</mat-icon>
+							<small>{{ element.groups.length < 99 ? element.groups.length : '+99' }}</small> <mat-icon>timeline</mat-icon>
 						</div>
 					</td>
 				</ng-container>
