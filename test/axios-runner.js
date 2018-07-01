@@ -11,7 +11,8 @@ const axios = require('axios');
 module.exports.getMany = (url, config) => {
 	return axios.get(url, config)
 		.then(res => res.data)
-		.catch(error => console.log(error));
+		// .catch(error => console.log(error));
+		.catch(error => console.log(error.data));
 };
 
 /**
@@ -23,7 +24,8 @@ module.exports.getMany = (url, config) => {
 module.exports.getOne = (url, id, config) => {
 	return axios.get(`${url}/${id}`, config)
 		.then(res => res.data)
-		.catch(error => console.log(error));
+		// .catch(error => console.log(error));
+		.catch(error => console.log(error.data));
 };
 
 /**
@@ -34,7 +36,8 @@ module.exports.getOne = (url, id, config) => {
 module.exports.insertMany = (url, data, config) => {
 	return axios.post(url, data, config)
 		.then(res => res.data)
-		.catch(error => console.log(error));
+		// .catch(error => console.log(error));
+		.catch(error => console.log(error.data));
 };
 
 /**
@@ -45,7 +48,8 @@ module.exports.insertMany = (url, data, config) => {
 module.exports.insertOne = (url, data, config) => {
 	return axios.post(`${url}/1`, data, config)
 		.then(res => res.data)
-		.catch(error => console.log(error));
+		// .catch(error => console.log(error));
+		.catch(error => console.log(error.data));
 };
 
 /**
@@ -56,7 +60,8 @@ module.exports.insertOne = (url, data, config) => {
 module.exports.deleteOne = (url, id, config) => {
 	return axios.delete(`${url}/${id}`, config)
 		.then(res => res.data)
-		.catch(error => console.log(error));
+		// .catch(error => console.log(error));
+		.catch(error => console.log(error.data));
 };
 
 /**
@@ -67,7 +72,8 @@ module.exports.deleteOne = (url, id, config) => {
 module.exports.deleteMany = (url, config) => {
 	return axios.delete(url, config)
 		.then(res => res.data)
-		.catch(error => console.log(error));
+		// .catch(error => console.log(error));
+		.catch(error => console.log(error.data));
 };
 
 /**
@@ -78,7 +84,8 @@ module.exports.deleteMany = (url, config) => {
 module.exports.updateOne = (url, id, data, config) => {
 	return axios.patch(`${url}/${id}`, data, config)
 		.then(res => res.data)
-		.catch(error => console.log(error));
+		// .catch(error => console.log(error));
+		.catch(error => console.log(error.data));
 };
 
 /**
@@ -88,5 +95,6 @@ module.exports.updateOne = (url, id, data, config) => {
 module.exports.updateMany = (url, data, config) => {
 	return axios.patch(url, data, config)
 		.then(res => res.data)
-		.catch(error => console.log(error));
+		// .catch(error => console.log(error));
+		.catch(error => console.log(error.data));
 };

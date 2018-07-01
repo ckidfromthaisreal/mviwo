@@ -165,7 +165,7 @@ describe('metric.controller.js', () => {
 			expect(response).to.have.lengthOf(2);
 			expect(response[0]).to.be.an('object');
 			expect(response[0]).to.haveOwnProperty('nModified');
-			expect(response[0].nModified).to.be.equal(metrics.length);
+			expect(response[0].nModified).to.be.equal(changes.length);
 			expect(response[1]).to.be.an('object');
 			expect(response[1]).to.haveOwnProperty('nModified');
 			expect(response[1].nModified).to.be.equal(uniqueGroups(changes,
@@ -432,14 +432,18 @@ function generateMetrics(num) {
  * @returns amount of unique group id's.
  */
 function uniqueGroups(metrics, removedGroups) {
-	let uniques = {};
-	metrics.map(metric => metric.groups.map(group => group._id))
-		.forEach(idSet => {
-			idSet.forEach(id => {
-				uniques[id] = true;
-			});
-		});
+	let count = 0;
 
+	let uniques = {};
+	metrics.map(metric => metric.groups.map(group => group._id)).forEach(idSet => {
+		idSet.forEach(id => {
+			uniques[id] = true;
+		});
+	});
+
+	count += Object.keys(uniques).length;
+
+	uniques = {};
 	if (removedGroups) {
 		removedGroups.forEach(idSet => {
 			idSet.forEach(id => {
@@ -448,7 +452,9 @@ function uniqueGroups(metrics, removedGroups) {
 		});
 	}
 
-	return Object.keys(uniques).length;
+	count += Object.keys(uniques).length;
+
+	return count;
 }
 
 /**

@@ -201,7 +201,6 @@ export class MetricGroupFormComponent implements OnInit {
 		const tempMetricGroup = new MetricGroup(
 			(this.data.isEdit) ? this.data.resource._id : undefined,
 			this.form.get('tfName').value,
-			// this.form.get('cbMandatory').value,
 			this.form.get('xxMetrics').value,
 			this.form.get('taDescription').value,
 			(this.data.isEdit) ? this.data.resource.position : undefined

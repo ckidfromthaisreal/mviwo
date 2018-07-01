@@ -526,20 +526,40 @@ function updateMetrics(addObj, removeObj, user) {
 
 	if (addObj) {
 		addObj = pivotToMetrics(addObj);
-
 		addObj.forEach(element => {
+			// update existing groups.
+			element.groups.forEach(group => {
+				ops.push({
+					updateOne: {
+						filter: {
+							_id: element.metric,
+							'groups._id': group._id
+						},
+						update: {
+							$set: {
+								'groups.$': {
+									_id: group._id,
+									name: group.name,
+									description: group.description
+								}
+							}
+						}
+					}
+				});
+			});
+
+			// add non existing groups.
 			ops.push({
 				updateOne: {
 					filter: {
 						_id: element.metric
 					},
 					update: {
-						// $addToSet: {
-						// 	groups: {
-						// 		$each: element.groups
-						// 	}
-						// },
-						groups: element.groups,
+						$addToSet: {
+							groups: {
+								$each: element.groups
+							}
+						},
 						updatedBy: by
 					}
 				}
@@ -549,7 +569,6 @@ function updateMetrics(addObj, removeObj, user) {
 
 	if (removeObj) {
 		removeObj = pivotToMetrics(removeObj);
-
 		removeObj.forEach(element => {
 			ops.push({
 				updateOne: {
@@ -557,7 +576,6 @@ function updateMetrics(addObj, removeObj, user) {
 						_id: element.metric
 					},
 					update: {
-						// $pullAll: {
 						$pull: {
 							groups: {
 								'_id': {

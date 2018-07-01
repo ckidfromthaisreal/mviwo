@@ -532,18 +532,41 @@ function updateMetricGroups(addObj, removeObj, user) {
 		addObj = pivotToGroups(addObj);
 
 		addObj.forEach(element => {
+			element.metrics.forEach(metric => {
+				// update existing metrics.
+				ops.push({
+					updateOne: {
+						filter: {
+							_id: element.group,
+							'metrics._id': metric._id
+						},
+						update: {
+							$set: {
+								'metrics.$': {
+									_id: metric._id,
+									name: metric.name,
+									description: metric.description,
+									isRequired: metric.isRequired,
+									dataType: metric.dataType,
+								}
+							}
+						}
+					}
+				});
+			});
+
+			// add non-existing metrics.
 			ops.push({
 				updateOne: {
 					filter: {
 						_id: element.group
 					},
 					update: {
-						// $addToSet: {
-						// 	metrics: {
-						// 		$each: element.metrics
-						// 	}
-						// },
-						metrics: element.metrics,
+						$addToSet: {
+							metrics: {
+								$each: element.metrics
+							}
+						},
 						updatedBy: by
 					}
 				}
@@ -561,9 +584,6 @@ function updateMetricGroups(addObj, removeObj, user) {
 						_id: element.group
 					},
 					update: {
-						// $pullAll: {
-						// 	metrics: element.metrics
-						// },
 						$pull: {
 							metrics: {
 								'_id': {
