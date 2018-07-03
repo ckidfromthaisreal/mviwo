@@ -1,7 +1,6 @@
 import { DatesService } from './services/dates/dates.service';
 import { ArraysService } from './services/arrays/arrays.service';
 import { MetricGroupCrudService } from './services/crud/metric-group-crud.service';
-import { MviwoCardModule } from './components/material/mviwo-card/mviwo-card.module';
 import { NotificationService } from './services/notification/notification.service';
 import { BrowserService } from './services/browser/browser.service';
 import { HttpClientModule } from '@angular/common/http';
@@ -18,14 +17,13 @@ import { NavigationModule } from './components/navigation/navigation.module';
 import { AuthenticationService } from './services/authentication/authentication.service';
 import { AuthGuardService } from './services/auth-guard/auth-guard.service';
 import { MetricCrudService } from './services/crud/metric-crud.service';
+import { MongoloidsService } from './services/mongoloids/mongoloids.service';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
 import { MviwoSnackbarComponent } from './components/material/mviwo-snackbar/mviwo-snackbar.component';
 import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-snackbar.module';
 
-import { DndModule } from 'ng2-dnd';
-import { MongoloidsService } from './services/mongoloids/mongoloids.service';
 
 @NgModule({
 	declarations: [
@@ -42,9 +40,6 @@ import { MongoloidsService } from './services/mongoloids/mongoloids.service';
 
 		MatSnackBarModule,
 		MviwoSnackbarModule,
-		MviwoCardModule,
-
-		DndModule.forRoot(),
 	],
 	providers: [
 		ArraysService,

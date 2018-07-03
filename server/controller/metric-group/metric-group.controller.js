@@ -25,9 +25,11 @@ const logger = require('../../util/logger');
  * fetches metric-groups from db.
  * @param {*} req http request.
  *
+ * req.user - object including user credentials.
+ *
  * req.headers.filter - filter object. if not provided, fetches all metric-groups in db.
  *
- * req.headers.fields - specifies which fields should be included in returned metric.
+ * req.headers.fields - specifies which fields should be included in returned metric-group.
  *
  * req.headers.metricsPopulate = if true, populates metric-group's metrics array with metric objects.
  *
@@ -76,7 +78,7 @@ exports.getMany = async (req, res, next) => {
  *
  * req.user - object including user credentials.
  *
- * req.headers.fields - specifies which fields should be included in returned metric.
+ * req.headers.fields - specifies which fields should be included in returned metric-group.
  *
  * req.headers.metricspopulate = if true, populates metric-group's metrics array with metric objects.
  *
@@ -248,7 +250,7 @@ exports.insertOne = async (req, res, next) => {
  * req.body = object with key : nuValue pairs,
  * also includes _id field for finding.
  *
- * @param {*} res http response. expected to return successfully updated groups as
+ * @param {*} res http response. expected to return successfully updated metric-groups as
  * a JSON object.
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
@@ -327,7 +329,7 @@ exports.updateMany = async (req, res, next) => {
  * @param {*} next callback used to pass errors (or requests) to next handlers.
  */
 exports.updateOne = async (req, res, next) => {
-	const operationName = 'metric.controller:updateOne';
+	const operationName = 'metric-group.controller:updateOne';
 	let err = null;
 
 	if (!req.body || typeof req.body !== 'object' ||
@@ -470,8 +472,8 @@ exports.deleteOne = async (req, res, next) => {
 			metrics: req.body.metrics
 		}, req.user);
 	} catch (err) {
-		logger.error('API', operationName, `metric ${req.params.id} deleted with errors: ${err.message},`, req.user._id);
-		logger.error('API', operationName, `metric ${req.params.id} deleted with errors: ${err},`, req.user);
+		logger.error('API', operationName, `metric-group ${req.params.id} deleted with errors: ${err.message},`, req.user._id);
+		logger.error('API', operationName, `metric-group ${req.params.id} deleted with errors: ${err},`, req.user);
 		return next(err);
 	}
 
