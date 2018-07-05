@@ -19,5 +19,9 @@ export class DatesService {
 		return dat;
 	}
 
+	public now(): Date {
+		return new Date();
+	}
+
 	constructor() {}
 }

@@ -22,6 +22,8 @@ export const ROUTES: RouteInfo[] = [
 	{ path: '/dashboard', title: 'Dashboard', icon: 'dashboard', class: '' },
 	{ path: '/metrics', title: 'Metrics', icon: 'scatter_plot', class: '' },
 	{ path: '/metric-groups', title: 'Metric Groups', icon: 'timeline', class: '' },
+	{ path: '/patients', title: 'Patients', icon: 'airline_seat_recline_extra', class: '' },
+	{ path: '/locations', title: 'Locations', icon: 'location_on', class: '' },
 	{ path: '/sessions', title: 'Sessions', icon: 'event', class: '' },
 	{ path: '/records', title: 'Records', icon: 'how_to_vote', class: '' },
 	{ path: '/users', title: 'Users', icon: 'group', class: '' },

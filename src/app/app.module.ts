@@ -1,3 +1,6 @@
+import { PipesModule } from './pipes/pipes.module';
+import { PatientCrudService } from './services/crud/patient-crud.service';
+import { LocationCrudService } from './services/crud/location-crud.service';
 import { DatesService } from './services/dates/dates.service';
 import { ArraysService } from './services/arrays/arrays.service';
 import { MetricGroupCrudService } from './services/crud/metric-group-crud.service';
@@ -23,6 +26,7 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
 import { MviwoSnackbarComponent } from './components/material/mviwo-snackbar/mviwo-snackbar.component';
 import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-snackbar.module';
+import { StringsService } from './services/strings/strings.service';
 
 
 @NgModule({
@@ -40,6 +44,8 @@ import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-
 
 		MatSnackBarModule,
 		MviwoSnackbarModule,
+
+		PipesModule,
 	],
 	providers: [
 		ArraysService,
@@ -51,10 +57,15 @@ import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-
 			useClass: GestureConfig
 		},
 		DatesService,
-		NotificationService,
+		LocationCrudService,
 		MetricCrudService,
 		MetricGroupCrudService,
 		MongoloidsService,
+		NotificationService,
+		PatientCrudService,
+		StringsService,
+	],
+	exports: [
 	],
 	entryComponents: [
 		MviwoSnackbarComponent

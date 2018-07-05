@@ -32,4 +32,25 @@ export class BrowserService {
 			document.documentElement['offsetWidth']
 		);
 	}
+
+	copyTextToClipboard(input: string): void {
+		const selBox = document.createElement('textarea');
+		selBox.style.position = 'fixed';
+		selBox.style.left = '0';
+		selBox.style.top = '0';
+		selBox.style.opacity = '0';
+		selBox.value = input;
+		document.body.appendChild(selBox);
+		selBox.focus();
+		selBox.select();
+		document.execCommand('copy');
+		document.body.removeChild(selBox);
+	}
+
+	copyInputToClipboard(input: any): void {
+		input.focus();
+		input.select();
+		document.execCommand('copy');
+		input.setSelectionRange(0, 0);
+	}
 }

@@ -3,7 +3,8 @@
 		<div class="logo-img">
 			<img src="/assets/img/logo.png" />
 		</div>
-		+ mviwo.<span style="font-size: 0.5em; font-variant-caps: small-caps"> v0.5</span>
+		+ mviwo.
+		<span style="font-size: 0.5em; font-variant-caps: small-caps"> v0.5</span>
 	</a>
 </div>
 <div class="sidebar-wrapper">
@@ -56,7 +57,7 @@
 	</div>
 	<ul class="nav">
 		<li routerLinkActive="active" *ngFor="let menuItem of menuItems" class="{{menuItem.class}} nav-item">
-			<mat-divider *ngIf="menuItem.title === 'Users'"></mat-divider>
+			<mat-divider *ngIf="['Users','Metrics','Sessions'].includes(menuItem.title)"></mat-divider>
 			<a class="nav-link" [routerLink]="[menuItem.path]">
 				<i class="material-icons">{{menuItem.icon}}</i>
 				<p>{{menuItem.title}}</p>

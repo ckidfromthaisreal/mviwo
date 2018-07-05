@@ -5,6 +5,8 @@ import { HomeComponent } from './home.component';
 import { Routes, RouterModule } from '@angular/router';
 import { ModuleWithProviders } from '@angular/core';
 import { MetricGroupGalleryComponent } from '../metric-group/metric-group-gallery/metric-group-gallery.component';
+import { LocationGalleryComponent } from '../location/location-gallery/location-gallery.component';
+import { PatientGalleryComponent } from '../patient/patient-gallery/patient-gallery.component';
 
 const routes: Routes = [
 	// {
@@ -47,6 +49,20 @@ const routes: Routes = [
 	{
 		path: 'metric-groups',
 		component: MetricGroupGalleryComponent, // <<<--------
+		canActivate: [
+			AuthGuardService
+		]
+	},
+	{
+		path: 'locations',
+		component: LocationGalleryComponent,
+		canActivate: [
+			AuthGuardService
+		]
+	},
+	{
+		path: 'patients',
+		component: PatientGalleryComponent,
 		canActivate: [
 			AuthGuardService
 		]

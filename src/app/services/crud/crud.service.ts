@@ -236,7 +236,9 @@ export abstract class CrudService {
 			body.push({
 				_id: d._id,
 				groups: d.groups ? d.groups.map(g => g._id) : undefined,
-				metrics: d.metrics ? d.metrics.map(m => m._id) : undefined
+				metrics: d.metrics ? d.metrics.map(m => m._id) : undefined,
+				locations: d.locations ? d.locations.map(l => l._id) : undefined,
+				patients: d.patients ? d.patients.map(p => p._id) : undefined
 			});
 		});
 
@@ -270,7 +272,9 @@ export abstract class CrudService {
 
 		const body = {
 			groups: deleteable.groups ? deleteable.groups.map(g => g._id) : undefined,
-			metrics: deleteable.metrics ? deleteable.metrics.map(m => m._id) : undefined
+			metrics: deleteable.metrics ? deleteable.metrics.map(m => m._id) : undefined,
+			locations: deleteable.locations ? deleteable.locations.map(l => l._id) : undefined,
+			patients: deleteable.patients ? deleteable.patients.map(p => p._id) : undefined,
 		};
 
 		let req = new HttpRequest('DELETE', `${this.url}/${deleteable._id}`);
@@ -341,6 +345,8 @@ export interface Mongoloid {
 export interface Deleteable extends Mongoloid {
 	groups?: Mongoloid[];
 	metrics?: Mongoloid[];
+	locations?: Mongoloid[];
+	patients?: Mongoloid[];
 }
 
 /**
@@ -349,4 +355,6 @@ export interface Deleteable extends Mongoloid {
 export interface Updateable extends Mongoloid {
 	removedGroups?: string[];
 	removedMetrics?: string[];
+	removedLocations?: string[];
+	removedPatients?: string[];
 }

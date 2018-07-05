@@ -1,4 +1,4 @@
-import { MviwoCardModule } from './../material/mviwo-card/mviwo-card.module';
+import { PatientModule } from './../patient/patient.module';
 import { NgModule } from '@angular/core';
 import { routing } from './home.routing';
 import { CommonModule } from '@angular/common';
@@ -8,9 +8,9 @@ import { MatButtonModule, MatInputModule, MatRippleModule, MatTooltipModule, Mat
 import { NavigationModule } from './../navigation/navigation.module';
 import { MetricModule } from '../metric/metric.module';
 import { MetricGroupModule } from '../metric-group/metric-group.module';
+import { LocationModule } from '../location/location.module';
 
 import { DashboardComponent } from './../dashboard/dashboard.component';
-import { D3Module } from '../d3/d3.module';
 import { MviwoListSelectModule } from '../material/mviwo-list-select/mviwo-list-select.module';
 
 @NgModule({
@@ -30,12 +30,12 @@ import { MviwoListSelectModule } from '../material/mviwo-list-select/mviwo-list-
 		MatRippleModule,
 		MatTooltipModule,
 
-		NavigationModule,
+		LocationModule,
 		MetricModule,
 		MetricGroupModule,
+		NavigationModule,
+		PatientModule,
 
-		D3Module,
-		MviwoCardModule,
 		MviwoListSelectModule,
 	],
 	exports: [
