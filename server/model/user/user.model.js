@@ -72,28 +72,8 @@ const userSchema = new mongoose.Schema({
 	},
 	profile: {
 		type: profileSchema
-	},
-	createdAt: {
-		type: Number,
-		required: true,
-		default: new Date().getTime(),
-		max: new Date().getTime()
-	},
-	createdBy: {
-		_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-		username: { type: String }
-	},
-	updatedAt: {
-		type: Number,
-		required: true,
-		default: new Date().getTime(),
-		max: new Date().getTime()
-	},
-	updatedBy: {
-		_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-		username: { type: String }
 	}
-});
+}, { timestamps: true });
 
 /* runs before saving document to collection and saves a crypted password. */
 userSchema.pre('save', function (next) {

@@ -9,28 +9,6 @@ import { LocationGalleryComponent } from '../location/location-gallery/location-
 import { PatientGalleryComponent } from '../patient/patient-gallery/patient-gallery.component';
 
 const routes: Routes = [
-	// {
-	// 	path: '',
-	// 	pathMatch: 'full',
-	// 	redirectTo: 'metrics',
-	// 	// canActivate: [
-	// 	// 	AuthGuardService
-	// 	// ],
-	// },
-	// {
-	// 	path: '',
-	// 	component: HomeComponent,
-	// 	// canActivate: [
-	// 	// 	AuthGuardService
-	// 	// ],
-	// },
-	{
-		path: 'news',
-		component: DashboardComponent, // <<<---------
-		canActivate: [
-			AuthGuardService
-		]
-	},
 	{
 		path: 'dashboard',
 		component: DashboardComponent,

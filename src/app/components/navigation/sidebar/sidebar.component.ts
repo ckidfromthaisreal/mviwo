@@ -18,7 +18,6 @@ declare interface RouteInfo {
 }
 
 export const ROUTES: RouteInfo[] = [
-	{ path: '/news', title: 'News', icon: 'track_changes', class: ''},
 	{ path: '/dashboard', title: 'Dashboard', icon: 'dashboard', class: '' },
 	{ path: '/metrics', title: 'Metrics', icon: 'scatter_plot', class: '' },
 	{ path: '/metric-groups', title: 'Metric Groups', icon: 'timeline', class: '' },
@@ -48,7 +47,7 @@ export class SidebarComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
-		this.menuItems = ROUTES.filter(menuItem => menuItem.title === 'News' || this.hasPermission(menuItem.title));
+		this.menuItems = ROUTES.filter(menuItem => this.hasPermission(menuItem.title));
 
 		// if (!this.menuItems.length) {
 		// 	this.notification.openCustomSnackbar('Oops! you\'re unauthurized to proceed.');

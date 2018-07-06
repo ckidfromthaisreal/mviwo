@@ -5,9 +5,9 @@ import { AuthenticationService } from '../authentication/authentication.service'
 
 @Injectable()
 export class AuthGuardService implements CanActivate, CanLoad {
-	constructor(private auth: AuthenticationService, private router: Router) {}
+	constructor(protected auth: AuthenticationService, protected router: Router) {}
 
-	canActivate() {
+	canActivate(): boolean {
 		if (!this.auth.isLoggedIn()) {
 			this.router.navigateByUrl('/login');
 			return false;
@@ -16,12 +16,16 @@ export class AuthGuardService implements CanActivate, CanLoad {
 		return true;
 	}
 
-	canLoad() {
+	canLoad(): boolean {
 		if (!this.auth.isLoggedIn()) {
 			this.router.navigateByUrl('/login');
 			return false;
 		}
 
 		return true;
+	}
+
+	defaultPage(): string {
+		return this.auth.hasPermission('dashboard') ? 'dashboard' : 'records';
 	}
 }

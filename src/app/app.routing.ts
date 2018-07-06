@@ -1,4 +1,5 @@
-import { NgModule } from '@angular/core';
+import { RedirectAuthGuardService } from './services/auth-guard/redirect-auth-guard.service';
+import { NgModule, Inject } from '@angular/core';
 import { RouterModule, Routes, PreloadAllModules } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { BrowserModule } from '@angular/platform-browser';
@@ -7,14 +8,16 @@ import { AuthGuardService } from './services/auth-guard/auth-guard.service';
 
 import { HomeComponent } from './components/home/home.component';
 
+const authguard = AuthGuardService;
+
 const routes: Routes = [
 	{
 		path: '',
 		pathMatch: 'full',
-		redirectTo: 'news',
 		canActivate: [
-			AuthGuardService
+			RedirectAuthGuardService
 		],
+		children: []
 	}
 	,
 	{
@@ -64,4 +67,12 @@ const routes: Routes = [
 
 	],
 })
-export class RoutingModule {}
+export class RoutingModule {
+	@Inject(AuthGuardService) static authGuard;
+
+	constructor() {}
+
+	static defaultPage() {
+		return RoutingModule.authGuard.defaultPage();
+	}
+}

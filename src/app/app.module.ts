@@ -1,3 +1,4 @@
+import { RedirectAuthGuardService } from './services/auth-guard/redirect-auth-guard.service';
 import { PipesModule } from './pipes/pipes.module';
 import { PatientCrudService } from './services/crud/patient-crud.service';
 import { LocationCrudService } from './services/crud/location-crud.service';
@@ -51,6 +52,7 @@ import { StringsService } from './services/strings/strings.service';
 		ArraysService,
 		AuthenticationService,
 		AuthGuardService,
+		RedirectAuthGuardService,
 		BrowserService,
 		{
 			provide: HAMMER_GESTURE_CONFIG,
