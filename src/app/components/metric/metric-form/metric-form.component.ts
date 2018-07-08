@@ -1,4 +1,7 @@
 import {
+	StringValidators
+} from './../../../validators/string.directive';
+import {
 	DatesService
 } from './../../../services/dates/dates.service';
 import {
@@ -22,7 +25,8 @@ import {
 	FormControl,
 	FormArray,
 	Validators,
-	AbstractControl
+	AbstractControl,
+	ValidatorFn
 } from '@angular/forms';
 import {
 	MAT_DIALOG_DATA,
@@ -97,13 +101,21 @@ export class MetricFormComponent implements OnInit {
 		tickInterval: 1
 	}];
 
+	private initialDefaultValueValidators: ValidatorFn[] = [
+		NumericValidators.greaterThanEqualValidator(() => this.getControlValue('tfMinValue', 'grpNumberParams')),
+		NumericValidators.lessThanEqualValidator(() => this.getControlValue('tfMaxValue', 'grpNumberParams')),
+		StringValidators.longerThanEqualLengthValidator(() => this.getControlValue('tfMinLength', 'grpStringParams')),
+		StringValidators.shorterThanEqualLengthValidator(() => this.getControlValue('tfMaxLength', 'grpStringParams')),
+		StringValidators.pattern(() => this.getControlValue('tfPattern', 'grpStringParams'))
+	];
+
 	constructor(
 		private crud: MetricCrudService,
 		private groupsCrud: MetricGroupCrudService,
 		private arrays: ArraysService,
 		public dates: DatesService,
-		protected dialogRef: MatDialogRef<MetricFormComponent>,
-		@Inject(MAT_DIALOG_DATA) public data: ElementFormInput<Metric>
+		protected dialogRef: MatDialogRef < MetricFormComponent > ,
+		@Inject(MAT_DIALOG_DATA) public data: ElementFormInput < Metric >
 	) {}
 
 	ngOnInit(): void {
@@ -114,7 +126,7 @@ export class MetricFormComponent implements OnInit {
 		this.xxValuesInput = new FormControl(
 			'', [
 				AbstractControlValidators.dependancyValidator(this.form.get('grpEnumParams').get('xxValues')),
-				AbstractControlValidators.valueNotExistsValidator(<FormArray>this.form.get('grpEnumParams').get('xxValues'))
+				AbstractControlValidators.valueNotExistsValidator( < FormArray > this.form.get('grpEnumParams').get('xxValues'))
 			]
 		);
 	}
@@ -125,10 +137,18 @@ export class MetricFormComponent implements OnInit {
 	 * initializes form.
 	 */
 	private initForm(): void {
+		let defValidators = this.initialDefaultValueValidators;
+
+		if (this.data.resource && this.data.resource.stringParams && this.data.resource.stringParams.isEmail === true) {
+			defValidators = [...defValidators, Validators.email];
+		}
+
 		this.form = new FormGroup({
 			'tfName': new FormControl(
 				(this.data.resource) ? this.data.resource.name : '', [
-					Validators.required, Validators.minLength(this.rules.nameMinLength), Validators.maxLength(this.rules.nameMaxLength)
+					Validators.required,
+					Validators.minLength(this.rules.nameMinLength),
+					Validators.maxLength(this.rules.nameMaxLength)
 				]
 			),
 			'cbRequired': new FormControl(
@@ -139,6 +159,9 @@ export class MetricFormComponent implements OnInit {
 			),
 			'slDataType': new FormControl(
 				(this.data.resource) ? this.data.resource.dataType : '', Validators.required
+			),
+			'defaultValue': new FormControl(
+				(this.data.resource) ? this.data.resource.defaultValue : '', defValidators
 			),
 			'grpStringParams': new FormGroup({
 				'cbEmail': new FormControl(
@@ -158,9 +181,8 @@ export class MetricFormComponent implements OnInit {
 						this.data.resource.stringParams.minLength) ?
 					this.data.resource.stringParams.minLength : 0, [
 						Validators.min(0),
-						NumericValidators.discreteValidator(), NumericValidators.lessThanEqualValidator(
-							() => this.getControlValue('tfMaxLength', 'grpStringParams')
-						)
+						NumericValidators.discreteValidator(),
+						NumericValidators.lessThanEqualValidator(() => this.getControlValue('tfMaxLength', 'grpStringParams'))
 					]
 				),
 				'tfMaxLength': new FormControl(
@@ -169,9 +191,8 @@ export class MetricFormComponent implements OnInit {
 						this.data.resource.stringParams.maxLength) ?
 					this.data.resource.stringParams.maxLength : '', [
 						Validators.min(1),
-						NumericValidators.discreteValidator(), NumericValidators.greaterThanEqualValidator(
-							() => this.getControlValue('tfMinLength', 'grpStringParams')
-						)
+						NumericValidators.discreteValidator(),
+						NumericValidators.greaterThanEqualValidator(() => this.getControlValue('tfMinLength', 'grpStringParams'))
 					]
 				),
 				'tfPattern': new FormControl(
@@ -289,6 +310,20 @@ export class MetricFormComponent implements OnInit {
 				this.data.resource ? [...this.data.resource.groups] : [],
 			)
 		});
+
+		// if (this.data.resource) {
+		// 	let validators;
+
+		// 	if (this.data.resource.dataType === 'string') {
+		// 		const grp = this.form.get('grpStringParams');
+
+		// 		validators = [
+		// 			Validators.minLength(grp.get('tfMinLength').value || 0)
+		// 			, Validators.maxLength(grp.get('tfMaxLength').value)
+		// 			,
+		// 		];
+		// 	}
+		// }
 	}
 
 	/**
@@ -375,6 +410,10 @@ export class MetricFormComponent implements OnInit {
 		const dType = this.form.get('slDataType');
 		dType.reset((this.data.resource) ? this.data.resource.dataType : '');
 		dType.updateValueAndValidity();
+
+		const defVal = this.form.get('defaultValue');
+		defVal.reset((this.data.resource) ? this.data.resource.defaultValue : '');
+		defVal.updateValueAndValidity();
 
 		const grpString = this.form.get('grpStringParams');
 		const email = grpString.get('cbEmail');
@@ -553,6 +592,14 @@ export class MetricFormComponent implements OnInit {
 			this.data.resource.stringParams.isEmail === email.value) {
 			email.markAsPristine();
 		}
+
+		const defVal = this.form.get('defaultValue');
+		if (email.value) {
+			defVal.setValidators([...this.initialDefaultValueValidators, Validators.email]);
+		} else {
+			defVal.setValidators(this.initialDefaultValueValidators);
+		}
+		defVal.updateValueAndValidity();
 	}
 
 	/**
@@ -589,37 +636,16 @@ export class MetricFormComponent implements OnInit {
 		const grp = this.form.get('grpNumberParams');
 		const max = grp.get('tfMaxValue');
 		const min = grp.get('tfMinValue');
-		const maxVal = (typeof max.value === 'string') ? Number.parseInt(max.value) : max.value;
-		const minVal = (typeof min.value === 'string') ? Number.parseInt(min.value) : min.value;
-
-		if (maxVal <= minVal) {
-			if (source === 'max') {
-				min.markAsTouched();
-				min.setErrors({
-					'lessThan': {
-						value: minVal
-					}
-				});
-			} else {
-				max.markAsTouched();
-				max.setErrors({
-					'greaterThan': {
-						value: maxVal
-					}
-				});
-			}
-		} else {
-			if (source === 'max') {
-				min.setErrors(null);
-			} else {
-				max.setErrors(null);
-			}
-		}
+		min.updateValueAndValidity();
+		max.updateValueAndValidity();
 
 		this.sliderPrev = min.value && this.sliderPrev < min.value ? min.value :
 			!min.value && this.sliderPrev < 0 ? 0 :
 			max.value && this.sliderPrev > max.value ? max.value :
 			!max.value && this.sliderPrev > 100 ? 100 : this.sliderPrev;
+
+		const defVal = this.form.get('defaultValue');
+		defVal.updateValueAndValidity();
 	}
 
 	/**
@@ -630,32 +656,11 @@ export class MetricFormComponent implements OnInit {
 		const grp = this.form.get('grpStringParams');
 		const max = grp.get('tfMaxLength');
 		const min = grp.get('tfMinLength');
-		const maxVal = (typeof max.value === 'string') ? Number.parseInt(max.value) : max.value;
-		const minVal = (typeof min.value === 'string') ? Number.parseInt(min.value) : min.value;
+		max.updateValueAndValidity();
+		min.updateValueAndValidity();
 
-		if (maxVal <= minVal) {
-			if (source === 'max') {
-				min.markAsTouched();
-				min.setErrors({
-					'lessThanEqual': {
-						value: minVal
-					}
-				});
-			} else {
-				max.markAsTouched();
-				max.setErrors({
-					'greaterThanEqual': {
-						value: maxVal
-					}
-				});
-			}
-		} else {
-			if (source === 'max') {
-				min.setErrors(null);
-			} else {
-				max.setErrors(null);
-			}
-		}
+		const defVal = this.form.get('defaultValue');
+		defVal.updateValueAndValidity();
 	}
 
 	/**
@@ -667,6 +672,11 @@ export class MetricFormComponent implements OnInit {
 		const xxValues = this.form.get('grpEnumParams').get('xxValues');
 		xxValues.setValidators(current === 'enum' ? ArrayValidators.minLengthValidator(2) : null);
 		xxValues.updateValueAndValidity();
+
+		const defVal = this.form.get('defaultValue');
+		defVal.reset();
+		defVal.setValidators(this.initialDefaultValueValidators);
+		defVal.updateValueAndValidity();
 
 		if (current !== 'string') {
 			const strGrp = this.form.get('grpStringParams');
@@ -816,8 +826,12 @@ export class MetricFormComponent implements OnInit {
 
 
 		const othertf = grp.get(`tf${minOrMax === 'min' ? 'Max' : 'Min'}DateOffset`);
-		othertf.setErrors(null);
 		othertf.updateValueAndValidity();
+	}
+
+	onPatternChange(): void {
+		const defVal = this.form.get('defaultValue');
+		defVal.updateValueAndValidity();
 	}
 
 	// MANIPULATION
@@ -981,6 +995,17 @@ export class MetricFormComponent implements OnInit {
 	}
 
 	/**
+	 *
+	 */
+	getDefaultValueErrors(): string {
+		if (this.form.get('defaultValue').errors) {
+			return Object.keys(this.form.get('defaultValue').errors).join(', ');
+		}
+
+		return '';
+	}
+
+	/**
 	 * returns new metric model obj based on form value.
 	 * @param metric
 	 */
@@ -1019,6 +1044,7 @@ export class MetricFormComponent implements OnInit {
 			dType,
 			this.form.get('xxGroups').value,
 			this.form.get('taDescription').value,
+			this.form.get('defaultValue').value,
 			undefined,
 			undefined,
 			undefined,
@@ -1081,5 +1107,16 @@ export class MetricFormComponent implements OnInit {
 	 */
 	getxxValuesControls(): AbstractControl[] {
 		return ( < FormArray > this.form.get('grpEnumParams').get('xxValues')).controls;
+	}
+
+	fixNumberInput(value) {
+		return typeof value === 'undefined' ? '' : this.form.get('grpNumberParams').get('tfMinValue').value &&
+			value < this.form.get('grpNumberParams').get('tfMinValue').value ?
+			this.form.get('grpNumberParams').get('tfMinValue').value :
+			!this.form.get('grpNumberParams').get('tfMinValue').value && value < 0 ? 0 :
+			this.form.get('grpNumberParams').get('tfMaxValue').value &&
+			this.form.get('grpNumberParams').get('tfMaxValue').value < value ?
+			this.form.get('grpNumberParams').get('tfMaxValue').value :
+			!this.form.get('grpNumberParams').get('tfMaxValue').value && 100 < value ? 100 : value;
 	}
 }

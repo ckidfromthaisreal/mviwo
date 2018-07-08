@@ -91,6 +91,7 @@ export class Metric implements Mongoloid {
 			description?: string
 		}[]
 		, public description?: string
+		, public defaultValue?: any
 		, public stringParams?: {
 			isEmail: boolean,
 			lineBreaks?: boolean
@@ -131,6 +132,7 @@ export class Metric implements Mongoloid {
 			metric.dataType,
 			[],
 			metric.description,
+			metric.defaultValue,
 			metric.stringParams,
 			metric.numberParams,
 			metric.enumParams,
@@ -146,6 +148,7 @@ export class Metric implements Mongoloid {
 			metric.dataType,
 			[...metric.groups],
 			metric.description,
+			metric.defaultValue,
 			metric.stringParams,
 			metric.numberParams,
 			metric.enumParams,

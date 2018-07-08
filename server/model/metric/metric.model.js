@@ -162,6 +162,9 @@ const metricSchema = new mongoose.Schema({
 			type: metricGroupEmbeddedSchema
 		}]
 	},
+	defaultValue: {
+		type: mongoose.Schema.Types.Mixed
+	},
 	numberParams: {
 		type: numberParamsSchema
 	},
