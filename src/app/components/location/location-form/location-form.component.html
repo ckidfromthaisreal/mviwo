@@ -21,7 +21,7 @@
 							<mat-hint align="end">
 								characters left: {{ rules.nameMaxLength - form.get('tfName').value.length }}
 							</mat-hint>
-							<mat-error *ngIf="form.get('tfName').invalid">
+							<mat-error>
 								{{ getNameErrorMessage('tfName') }}
 							</mat-error>
 						</mat-form-field>
@@ -30,10 +30,9 @@
 						<mat-form-field floatLabel="auto">
 							<input matInput type="text" placeholder="Country" formControlName="tfCountry" [maxLength]="rules.nameMaxLength" required>
 							<mat-hint align="end">
-								characters left: {{ (form.get('tfCountry').value) ? rules.nameMaxLength - form.get('tfCountry').value.length : rules.nameMaxLength
-								}}
+								characters left: {{ rules.nameMaxLength - form.get('tfCountry').value.length }}
 							</mat-hint>
-							<mat-error *ngIf="form.get('tfCountry').invalid">
+							<mat-error>
 								{{ getNameErrorMessage('tfCountry') }}
 							</mat-error>
 						</mat-form-field>
@@ -45,12 +44,8 @@
 						<mat-form-field floatLabel="auto">
 							<input matInput type="text" placeholder="Address" formControlName="tfAddress" [maxLength]="rules.nameMaxLength">
 							<mat-hint align="end">
-								characters left: {{ (form.get('tfAddress').value) ? rules.nameMaxLength - form.get('tfAddress').value.length : rules.nameMaxLength
-								}}
+								characters left: {{ rules.nameMaxLength - form.get('tfAddress').value.length }}
 							</mat-hint>
-							<mat-error *ngIf="form.get('tfAddress').invalid">
-								{{ getNameErrorMessage('tfAddress') }}
-							</mat-error>
 						</mat-form-field>
 					</div>
 				</div>

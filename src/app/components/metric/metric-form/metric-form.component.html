@@ -9,20 +9,22 @@
 	</ng-template>
 	<button mat-dialog-close mat-icon-button class="pull-right" style="font-size: 150%" (click)="onCancelClick()">&times;</button>
 </h1>
-<form [formGroup]="form">
+<form [formGroup]="form" *ngIf="getControl('slDataType'); let dataType">
 	<mat-tab-group dynamicHeight>
 		<mat-tab label="General" class="mviwo-unselectable">
 			<div mat-dialog-content>
 				<div class="row newL">
 					<div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
-						<mat-form-field floatLabel="auto">
+						<mat-form-field floatLabel="auto" *ngIf="getControl('tfName'); let ctrl">
 							<input matInput type="text" placeholder="Metric Name" formControlName="tfName" required [maxLength]="rules.nameMaxLength"
 							    cdkFocusInitial>
-							<button *ngIf="form.get('tfName').value.length" mat-icon-button matSuffix (click)="form.get('tfName').setValue('')"><mat-icon>cancel</mat-icon></button>
+							<button *ngIf="hasValue(ctrl.value)" mat-icon-button matSuffix (click)="onEraseClick($event, ctrl)">
+								<mat-icon>cancel</mat-icon>
+							</button>
 							<mat-hint align="end">
-								characters left: {{ rules.nameMaxLength - form.get('tfName').value.length }}
+								characters left: {{ rules.nameMaxLength - ctrl.value.length }}
 							</mat-hint>
-							<mat-error *ngIf="form.get('tfName').invalid">
+							<mat-error>
 								{{ getNameErrorMessage() }}
 							</mat-error>
 						</mat-form-field>
@@ -38,12 +40,13 @@
 				<!-- row 1 -->
 				<div class="row newL">
 					<div class="col-lg-12-col-md-12 col-sm-12 col-xs-12">
-						<mat-form-field floatLabel="auto">
+						<mat-form-field floatLabel="auto" *ngIf="getControl('taDescription'); let desc">
 							<textarea matInput placeholder="Description" formControlName="taDescription" matTextareaAutosize [maxLength]="rules.descriptionMaxLength"></textarea>
-							<button *ngIf="form.get('taDescription').value.length" mat-icon-button matSuffix (click)="form.get('taDescription').setValue('')"><mat-icon>cancel</mat-icon></button>
+							<button *ngIf="hasValue(desc.value)" mat-icon-button matSuffix (click)="onEraseClick($event, desc)">
+								<mat-icon>cancel</mat-icon>
+							</button>
 							<mat-hint align="end">
-								characters left: {{ (form.get('taDescription').value) ? rules.descriptionMaxLength - form.get('taDescription').value.length
-								: rules.descriptionMaxLength }}
+								characters left: {{ hasValue(desc.value) ? rules.descriptionMaxLength - desc.value.length : rules.descriptionMaxLength }}
 							</mat-hint>
 						</mat-form-field>
 					</div>
@@ -52,30 +55,32 @@
 			</div>
 		</mat-tab>
 		<!-- general info tab -->
-		<mat-tab label="Input" class="mviwo-unselectable">
+		<mat-tab label="Input" class="mviwo-unselectable" *ngIf="{ name: getControl('tfName'), required: getControl('cbRequired'), default: getControl('defaultValue') }; let prop">
 			<div mat-dialog-content>
 				<div class="row newL">
 					<div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
 						<mat-form-field floatLabel="auto" style="padding: 10px; border-radius: 5px; border:1px solid lightgrey">
 							<mat-select placeholder="Date Type" required formControlName="slDataType" style="width:100%" (selectionChange)="onDataTypeChange()">
-								<mat-option *ngIf="!data.isEdit && !form.get('slDataType').value">Select a datatype..</mat-option>
+								<mat-option *ngIf="!data.isEdit && !hasValue(dataType)">Select a datatype..</mat-option>
 								<mat-option *ngFor="let dType of dataTypes" [matTooltip]="dType.desc" [matTooltipShowDelay]="500" [value]="dType.name">
 									{{ dType.simpleName }}
 								</mat-option>
 							</mat-select>
-							<mat-error *ngIf="form.get('slDataType').invalid">
+							<mat-error>
 								must select a data type!
 							</mat-error>
 						</mat-form-field>
 					</div>
 					<!-- col 1 -->
 					<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-						<div formGroupName="grpEnumParams" *ngIf="form.get('slDataType').value === 'enum'">
-							<mat-slide-toggle formControlName="cbMultiple">
-								Multiple Choice
-							</mat-slide-toggle>
+						<div formGroupName="grpEnumParams" *ngIf="dataType.value === 'enum'">
+							<div class="row" style="padding: 10px">
+								<mat-slide-toggle formControlName="cbMultiple">
+									Multiple Choice
+								</mat-slide-toggle>
+							</div>
 						</div>
-						<div *ngIf="form.get('slDataType').value === 'number'">
+						<div *ngIf="dataType.value === 'number'">
 							<div class="row" style="padding: 10px">
 								<mat-select placeholder="Apply preset..">
 									<mat-option *ngFor="let preset of numberPresets" (click)="onPresetPicked(preset)">
@@ -91,7 +96,7 @@
 								</div>
 							</div>
 						</div>
-						<div *ngIf="form.get('slDataType').value === 'string'">
+						<div *ngIf="dataType.value === 'string'">
 							<div class="row" style="padding: 10px">
 								<div class="col-lg-12">
 									<div formGroupName="grpStringParams">
@@ -111,7 +116,7 @@
 								</div>
 							</div>
 						</div>
-						<div *ngIf="form.get('slDataType').value === 'date'">
+						<div *ngIf="dataType.value === 'date'">
 							<div class="row" style="padding: 10px">
 								<div class="col-lg-12">
 									<div formGroupName="grpDateParams">
@@ -131,7 +136,7 @@
 								</div>
 							</div>
 						</div>
-						<div *ngIf="form.get('slDataType').value === 'boolean'">
+						<div *ngIf="dataType.value === 'boolean'">
 							<div class="row" style="padding: 10px">
 								<div class="col-lg-12">
 									<mat-checkbox formControlName="defaultValue">Default Value</mat-checkbox>
@@ -142,38 +147,45 @@
 					<!-- col 2 -->
 				</div>
 				<!-- row 1-->
-				<div class="row newL" *ngIf="form.get('slDataType').value">
+				<div class="row newL" *ngIf="hasValue(dataType.value)">
 					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-						<div *ngIf="form.get('slDataType').value === 'boolean'">
+						<div *ngIf="dataType.value === 'boolean'">
 							<hr>
 							<div class="form-group">
 								<label class="text-muted">Preview</label>
 								<br>
-								<mat-checkbox style="padding-left: 20px !important" color="primary" [indeterminate]="!form.get('cbRequired').value">{{ form.get('tfName').value || '{METRIC_NAME}' }}</mat-checkbox>
+								<mat-checkbox style="padding-left: 20px !important" color="primary" [indeterminate]="prop.required.value === false">{{ prop.name.value || '{METRIC_NAME}' }}</mat-checkbox>
 							</div>
 						</div>
 					</div>
-					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="form.get('slDataType').value !== 'boolean'">
-						<mat-form-field *ngIf="form.get('slDataType').value === 'string'" floatLabel="auto" formGroupName="grpStringParams">
-							<input matInput type="text" placeholder="Hint" formControlName="tfHint" [maxlength]="rules.hintMaxLength">
-							<button *ngIf="form.get('grpStringParams').get('tfHint').value.length" mat-icon-button matSuffix (click)="form.get('grpStringParams').get('tfHint').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<mat-hint align="start">shown under input control</mat-hint>
-							<mat-hint align="end">
-								characters left: {{ (form.get('grpStringParams').get('tfHint').value) ? rules.hintMaxLength - form.get('grpStringParams').get('tfHint').value.length
-								: rules.hintMaxLength }}
-							</mat-hint>
-						</mat-form-field>
-						<mat-form-field *ngIf="form.get('slDataType').value === 'number'" floatLabel="auto" formGroupName="grpNumberParams">
-							<input matInput type="number" placeholder="Minimum Value" formControlName="tfMinValue" (change)="onMinMaxValueChange('min')">
-							<button *ngIf="form.get('grpNumberParams').get('tfMinValue').value || form.get('grpNumberParams').get('tfMinValue').value === 0" mat-icon-button matSuffix (click)="form.get('grpNumberParams').get('tfMinValue').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<mat-hint align="end">default to 0</mat-hint>
-							<mat-error *ngIf="form.get('grpNumberParams').get('tfMinValue').invalid">
-								{{ getMinValueErrorMessage() }}
-							</mat-error>
-						</mat-form-field>
-						<mat-form-field floatLabel="auto" *ngIf="form.get('slDataType').value === 'enum'">
+					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="dataType.value !== 'boolean'">
+						<div *ngIf="dataType.value === 'string'">
+							<mat-form-field *ngIf="getControl('tfHint', 'grpStringParams'); let hint" floatLabel="auto" formGroupName="grpStringParams">
+								<input matInput type="text" placeholder="Hint" formControlName="tfHint" [maxlength]="rules.hintMaxLength">
+								<button *ngIf="hasValue(hint.value)" mat-icon-button matSuffix (click)="onEraseClick($event, hint)">
+									<mat-icon>cancel</mat-icon>
+								</button>
+								<mat-hint align="start">shown under input control</mat-hint>
+								<mat-hint align="end">
+									characters left: {{ (hint.value) ? rules.hintMaxLength - hint.value.length : rules.hintMaxLength }}
+								</mat-hint>
+							</mat-form-field>
+						</div>
+						<div *ngIf="dataType.value === 'number'">
+							<mat-form-field *ngIf="getControl('tfMinValue', 'grpNumberParams'); let minVal" floatLabel="auto" formGroupName="grpNumberParams">
+								<input matInput type="number" placeholder="Minimum Value" formControlName="tfMinValue" (change)="onMinMaxValueChange('min')">
+								<button *ngIf="hasValue(minVal.value)" mat-icon-button matSuffix (click)="onEraseClick($event, minVal)">
+									<mat-icon>cancel</mat-icon>
+								</button>
+								<mat-hint align="end">default to 0</mat-hint>
+								<mat-error>
+									{{ getMinValueErrorMessage() }}
+								</mat-error>
+							</mat-form-field>
+						</div>
+						<mat-form-field floatLabel="auto" *ngIf="dataType.value === 'enum'">
 							<input matInput type="text" placeholder="add list values.." [pattern]="rules.enumValuePattern" [formControl]="xxValuesInput">
-							<mat-error *ngIf="xxValuesInput.invalid">
+							<mat-error>
 								{{ xxValuesInput.hasError('pattern') ? 'letters only!' : xxValuesInput.hasError('valueNotExists') ? 'value already in list!'
 								: xxValuesInput.hasError('dependancy') ? 'minimum 2 values!' : '' }}
 							</mat-error>
@@ -184,52 +196,72 @@
 								</button>
 							</mat-icon>
 						</mat-form-field>
-						<mat-form-field class="newL" floatLabel="auto" *ngIf="form.get('slDataType').value === 'enum'">
+						<mat-form-field class="newL" floatLabel="auto" *ngIf="dataType.value === 'enum'">
 							<mat-select placeholder="Default Value" formControlName="defaultValue">
 								<mat-option>Select a value..</mat-option>
 								<mat-option *ngFor="let ctrl of getxxValuesControls()" [value]="ctrl.value">{{ ctrl.value }}</mat-option>
 							</mat-select>
 							<mat-error></mat-error>
 						</mat-form-field>
-						<mat-form-field *ngIf="form.get('slDataType').value === 'date' && !form.get('grpDateParams').get('cbIsMinDateCurrent').value"
-						    floatLabel="auto" formGroupName="grpDateParams">
-							<input matInput readonly (click)="dp.open()" [matDatepicker]="dp" placeholder="Minimum Date" formControlName="dpMinDate"
-								[max]="form.get('grpDateParams').get('dpMaxDate').value">
-							<button *ngIf="form.get('grpDateParams').get('dpMinDate').value" mat-icon-button matSuffix (click)="form.get('grpDateParams').get('dpMinDate').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
-							<mat-datepicker #dp></mat-datepicker>
-						</mat-form-field>
-						<mat-form-field *ngIf="form.get('slDataType').value === 'date' && form.get('grpDateParams').get('cbIsMinDateCurrent').value === true"
-						    floatLabel="auto" formGroupName="grpDateParams">
-							<span matPrefix *ngIf="form.get('grpDateParams').get('tfMinDateOffset').value > 0">+</span>
-							<input type="number" matInput placeholder="Min Date Offset" formControlName="tfMinDateOffset" [step]="1">
-							<span matSuffix> days</span>
-							<button *ngIf="form.get('grpDateParams').get('tfMinDateOffset').value || form.get('grpDateParams').get('tfMinDateOffset').value === 0" mat-icon-button matSuffix (click)="form.get('grpDateParams').get('tfMinDateOffset').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<mat-error *ngIf="form.get('grpDateParams').get('tfMinDateOffset').invalid">cannot be greater than max offset!</mat-error>
-						</mat-form-field>
+						<div *ngIf="dataType.value === 'date'">
+							<div *ngIf="!getControlValue('cbIsMinDateCurrent', 'grpDateParams'); else minoffset">
+								<mat-form-field *ngIf="getControl('dpMinDate', 'grpDateParams'); let minDate" floatLabel="auto" formGroupName="grpDateParams">
+									<input matInput readonly (click)="dp.open()" [matDatepicker]="dp" placeholder="Minimum Date" formControlName="dpMinDate"
+									    [max]="getControlValue('dpMaxDate', 'grpDateParams')">
+									<button *ngIf="hasValue(minDate.value)" mat-icon-button matSuffix (click)="onEraseClick($event, minDate)">
+										<mat-icon>cancel</mat-icon>
+									</button>
+									<mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+									<mat-datepicker #dp></mat-datepicker>
+								</mat-form-field>
+							</div>
+							<ng-template #minoffset>
+								<mat-form-field floatLabel="auto" formGroupName="grpDateParams" *ngIf="getControl('tfMinDateOffset', 'grpDateParams'); let minDateOffset">
+									<span matPrefix *ngIf="minDateOffset.value > 0">+</span>
+									<input type="number" matInput placeholder="Min Date Offset" formControlName="tfMinDateOffset" [step]="1">
+									<span matSuffix> days</span>
+									<button *ngIf="hasValue(minDateOffset.value)" mat-icon-button matSuffix (click)="onEraseClick($event, minDateOffset)">
+										<mat-icon>cancel</mat-icon>
+									</button>
+									<mat-hint align="end">
+										defaults to 0
+									</mat-hint>
+									<mat-error>
+										cannot be greater than max offset!
+									</mat-error>
+								</mat-form-field>
+							</ng-template>
+						</div>
 					</div>
 					<!-- col 1 -->
-					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="form.get('slDataType').value !== 'boolean'">
-						<div *ngIf="form.get('slDataType').value === 'string'" style="min-height: 70px">
-							<mat-form-field *ngIf="!form.get('grpStringParams').get('cbLineBreaks').value && !form.get('grpStringParams').get('cbEmail').value"
-							    floatLabel="auto" formGroupName="grpStringParams">
-								<input matInput type="text" placeholder="Pattern" formControlName="tfPattern" (change)="onPatternChange()">
-								<button *ngIf="form.get('grpStringParams').get('tfPattern').value.length" mat-icon-button matSuffix (click)="form.get('grpStringParams').get('tfPattern').setValue('')"><mat-icon>cancel</mat-icon></button>
-								<mat-hint>enter a regular expression</mat-hint>
-								<mat-error *ngIf="form.get('grpStringParams').get('tfPattern').invalid">
-									{{ getPatternErrorMessage() }}
+					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="dataType.value !== 'boolean'">
+						<div *ngIf="dataType.value === 'string'" style="min-height: 70px">
+							<div *ngIf="!getControlValue('cbLineBreaks', 'grpStringParams') && !getControlValue('cbEmail', 'grpStringParams')">
+								<mat-form-field *ngIf="getControl('tfPattern', 'grpStringParams'); let pattern" floatLabel="auto" formGroupName="grpStringParams">
+									<input matInput type="text" placeholder="Pattern" formControlName="tfPattern" (change)="onPatternChange()">
+									<button *ngIf="hasValue(pattern.value)" mat-icon-button matSuffix (click)="onEraseClick($event, pattern)">
+										<mat-icon>cancel</mat-icon>
+									</button>
+									<mat-hint>enter a regular expression</mat-hint>
+									<mat-error>
+										{{ getPatternErrorMessage() }}
+									</mat-error>
+								</mat-form-field>
+							</div>
+						</div>
+						<div *ngIf="dataType.value === 'number'">
+							<mat-form-field *ngIf="getControl('tfMaxValue', 'grpNumberParams'); let maxVal" floatLabel="auto" formGroupName="grpNumberParams">
+								<input matInput type="number" placeholder="Maximum Value" formControlName="tfMaxValue" (change)="onMinMaxValueChange('max')">
+								<button *ngIf="hasValue(maxVal.value)" mat-icon-button matSuffix (click)="onEraseClick($event, maxVal)">
+									<mat-icon>cancel</mat-icon>
+								</button>
+								<mat-hint align="end">default to 100</mat-hint>
+								<mat-error>
+									{{ getMaxValueErrorMessage() }}
 								</mat-error>
 							</mat-form-field>
 						</div>
-						<mat-form-field *ngIf="form.get('slDataType').value === 'number'" floatLabel="auto" formGroupName="grpNumberParams">
-							<input matInput type="number" placeholder="Maximum Value" formControlName="tfMaxValue" (change)="onMinMaxValueChange('max')">
-							<button *ngIf="form.get('grpNumberParams').get('tfMaxValue').value || form.get('grpNumberParams').get('tfMaxValue').value === 0" mat-icon-button matSuffix (click)="form.get('grpNumberParams').get('tfMaxValue').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<mat-hint align="end">default to 100</mat-hint>
-							<mat-error *ngIf="form.get('grpNumberParams').get('tfMaxValue').invalid">
-								{{ getMaxValueErrorMessage() }}
-							</mat-error>
-						</mat-form-field>
-						<div *ngIf="form.get('slDataType').value === 'enum'">
+						<div *ngIf="dataType.value === 'enum'">
 							<mat-label>Value List</mat-label>
 							<mat-list class="xxValuesList">
 								<mat-list-item style="padding-bottom: 15px; background-color: rgb(70,70,70)" *ngIf="!getxxValuesControls().length">
@@ -243,200 +275,254 @@
 								</mat-list-item>
 							</mat-list>
 						</div>
-						<mat-form-field *ngIf="form.get('slDataType').value === 'date' && !form.get('grpDateParams').get('cbIsMaxDateCurrent').value"
-						    floatLabel="auto" formGroupName="grpDateParams">
-							<input matInput readonly (click)="dp.open()" [matDatepicker]="dp" placeholder="Maximum Date" formControlName="dpMaxDate"
-								[min]="form.get('grpDateParams').get('dpMinDate').value">
-							<button *ngIf="form.get('grpDateParams').get('dpMaxDate').value" mat-icon-button matSuffix (click)="form.get('grpDateParams').get('dpMaxDate').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
-							<mat-datepicker #dp></mat-datepicker>
-						</mat-form-field>
-						<mat-form-field *ngIf="form.get('slDataType').value === 'date' && form.get('grpDateParams').get('cbIsMaxDateCurrent').value === true"
-						    floatLabel="auto" formGroupName="grpDateParams">
-							<span matPrefix *ngIf="form.get('grpDateParams').get('tfMaxDateOffset').value > 0">+</span>
-							<input type="number" matInput placeholder="Max Date Offset" formControlName="tfMaxDateOffset" [step]="1">
-							<button *ngIf="form.get('grpDateParams').get('tfMaxDateOffset').value || form.get('grpDateParams').get('tfMaxDateOffset').value === 0" mat-icon-button matSuffix (click)="form.get('grpDateParams').get('tfMaxDateOffset').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<span matSuffix> days</span>
-							<mat-error *ngIf="form.get('grpDateParams').get('tfMaxDateOffset').invalid">cannot be less than min offset!</mat-error>
-						</mat-form-field>
+						<div *ngIf="dataType.value === 'date'">
+							<div *ngIf="!getControlValue('cbIsMaxDateCurrent', 'grpDateParams'); then maxdate; else maxoffset"></div>
+							<ng-template #maxdate>
+								<mat-form-field *ngIf="getControl('dpMaxDate', 'grpDateParams'); let maxDate" floatLabel="auto" formGroupName="grpDateParams">
+									<input matInput readonly (click)="dp.open()" [matDatepicker]="dp" placeholder="Maximum Date" formControlName="dpMaxDate"
+									    [min]="getControlValue('dpMinDate', 'grpDateParams')">
+									<button *ngIf="hasValue(maxDate.value)" mat-icon-button matSuffix (click)="onEraseClick($event, maxDate)">
+										<mat-icon>cancel</mat-icon>
+									</button>
+									<mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+									<mat-datepicker #dp></mat-datepicker>
+								</mat-form-field>
+							</ng-template>
+							<ng-template #maxoffset>
+								<mat-form-field *ngIf="getControl('tfMaxDateOffset', 'grpDateParams'); let maxDateOffset" floatLabel="auto" formGroupName="grpDateParams">
+									<span matPrefix *ngIf="maxDateOffset.value > 0">+</span>
+									<input type="number" matInput placeholder="Max Date Offset" formControlName="tfMaxDateOffset" [step]="1">
+									<button *ngIf="hasValue(maxDateOffset.value)" mat-icon-button matSuffix (click)="onEraseClick($event, maxDateOffset)">
+										<mat-icon>cancel</mat-icon>
+									</button>
+									<span matSuffix> days</span>
+									<mat-hint>
+										defaults to 0
+									</mat-hint>
+									<mat-error>
+										cannot be less than min offset!
+									</mat-error>
+								</mat-form-field>
+							</ng-template>
+						</div>
 					</div>
 					<!-- col 2 -->
 				</div>
 				<!-- row 2 -->
-				<div class="row newL" *ngIf="form.get('slDataType').value && !['boolean'].includes(form.get('slDataType').value)">
-					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-						<form *ngIf="form.get('slDataType').value === 'enum'" ngForm>
+				<div class="row newL" *ngIf="hasValue(dataType.value) && !['boolean'].includes(dataType.value)">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" *ngIf="dataType.value === 'enum'">
+						<form ngForm>
 							<hr>
 							<div class="form-group">
 								<label class="text-muted">Preview</label>
 								<br>
-								<div *ngIf="form.get('grpEnumParams').get('cbMultiple').value; then multipleChoice; else singleChoice"></div>
+								<div *ngIf="!getControlValue('cbMultiple', 'grpEnumParams'); then singleChoice; else multipleChoice"></div>
 								<ng-template #singleChoice>
 									<mat-form-field labelfloat="auto">
-										<mat-select ngModel #enumPrev1="ngModel" name="enumPrev1" [placeholder]="form.get('tfName').value || '{METRIC_NAME}'" [required]="form.get('cbRequired').value === true">
-											<mat-option *ngIf="form.get('cbRequired').value === false">Select a {{ form.get('tfName').value || '{METRIC_NAME}' | lowercase }}..</mat-option>
+										<mat-select ngModel #enumPrev1="ngModel" name="enumPrev1" [placeholder]="prop.name.value || '{METRIC_NAME}'" [required]="prop.required.value === true">
+											<mat-option *ngIf="!prop.required.value">Select a {{ prop.name.value || '{METRIC_NAME}' | lowercase }}..</mat-option>
 											<mat-option *ngFor="let ctrl of getxxValuesControls()" [value]="ctrl.value">
 												{{ ctrl.value }}
 											</mat-option>
 										</mat-select>
-										<mat-error *ngIf="enumPrev1.invalid">
-											you must select a {{ form.get('tfName').value || '{METRIC_NAME}' | lowercase }}!
+										<mat-error>
+											you must select a {{ prop.name.value || '{METRIC_NAME}' | lowercase }}!
 										</mat-error>
 									</mat-form-field>
 								</ng-template>
 								<ng-template #multipleChoice>
 									<mat-form-field labelfloat="auto">
-										<mat-select ngModel #enumPrev2="ngModel" name="enumPrev2" [placeholder]="form.get('tfName').value || '{METRIC_NAME}'" multiple
-										    [required]="form.get('cbRequired').value === true">
+										<mat-select ngModel #enumPrev2="ngModel" name="enumPrev2" [placeholder]="prop.name.value || '{METRIC_NAME}'" multiple [required]="prop.required.value === true">
 											<mat-option *ngFor="let ctrl of getxxValuesControls()" [value]="ctrl.value">
 												{{ ctrl.value }}
 											</mat-option>
 										</mat-select>
-										<button *ngIf="enumPrev2.value" mat-icon-button matSuffix (click)="$event.stopPropagation(); enumPrev2.control.setValue('')"><mat-icon>cancel</mat-icon></button>
-										<mat-error *ngIf="enumPrev2.invalid">
-											you must select {{ form.get('tfName').value || '{METRIC_NAME}' | lowercase }}\s!
+										<button *ngIf="hasValue(enumPrev2.value)" mat-icon-button matSuffix (click)="onEraseClick($event, enumPrev2.control)">
+											<mat-icon>cancel</mat-icon>
+										</button>
+										<mat-error>
+											you must select {{ prop.name.value || '{METRIC_NAME}' | lowercase }}\s!
 										</mat-error>
 									</mat-form-field>
 								</ng-template>
 							</div>
 						</form>
 					</div>
-					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-						<mat-form-field *ngIf="form.get('slDataType').value === 'string'" floatLabel="auto" formGroupName="grpStringParams">
-							<input matInput type="number" placeholder="Minimum Length" formControlName="tfMinLength" min="0" (change)="onMinMaxLengthChange('min')">
-							<button *ngIf="form.get('grpStringParams').get('tfMinLength').value || form.get('grpStringParams').get('tfMinLength').value === 0" mat-icon-button matSuffix (click)="form.get('grpStringParams').get('tfMinLength').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<mat-hint align="end">defaults to 0</mat-hint>
-							<mat-error *ngIf="form.get('grpStringParams').get('tfMinLength').invalid">
-								{{ getMinLengthErrorMessage() }}
-							</mat-error>
-						</mat-form-field>
-						<mat-form-field *ngIf="form.get('slDataType').value === 'number'" floatLabel="auto" formGroupName="grpNumberParams">
-							<input matInput type="number" placeholder="Step" formControlName="tfStep">
-							<button *ngIf="form.get('grpNumberParams').get('tfStep').value" mat-icon-button matSuffix (click)="form.get('grpNumberParams').get('tfStep').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<mat-hint align="start">gap between values</mat-hint>
-							<mat-hint align="end">defaults to 1</mat-hint>
-							<mat-error *ngIf="form.get('grpNumberParams').get('tfStep').invalid">
-								{{ getStepErrorMessage() }}
-							</mat-error>
-						</mat-form-field>
-						<mat-form-field *ngIf="form.get('slDataType').value === 'date' && !form.get('grpDateParams').get('cbIsMinDateCurrent').value &&
-							!form.get('grpDateParams').get('cbIsMaxDateCurrent').value">
-							<input matInput readonly (click)="dp.open()" [matDatepicker]="dp" placeholder="Default Value" formControlName="defaultValue"
-								[min]="form.get('grpDateParams').get('dpMinDate').value"
-								[max]="form.get('grpDateParams').get('dpMaxDate').value">
-							<button *ngIf="form.get('defaultValue').value" mat-icon-button matSuffix (click)="form.get('defaultValue').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
-							<mat-datepicker #dp></mat-datepicker>
-							<mat-error>value is out of bounds!</mat-error>
-						</mat-form-field>
+					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="['string', 'number', 'date'].includes(dataType.value)">
+						<div *ngIf="dataType.value === 'string'">
+							<mat-form-field *ngIf="getControl('tfMinLength', 'grpStringParams'); let minLength" floatLabel="auto" formGroupName="grpStringParams">
+								<input matInput type="number" placeholder="Minimum Length" formControlName="tfMinLength" min="0" (change)="onMinMaxLengthChange('min')">
+								<button *ngIf="hasValue(minLength.value)" mat-icon-button matSuffix (click)="onEraseClick($event, minLength)">
+									<mat-icon>cancel</mat-icon>
+								</button>
+								<mat-hint align="end">defaults to 0</mat-hint>
+								<mat-error>
+									{{ getMinLengthErrorMessage() }}
+								</mat-error>
+							</mat-form-field>
+						</div>
+						<div *ngIf="dataType.value === 'number'">
+							<mat-form-field *ngIf="getControl('tfStep', 'grpNumberParams'); let step" floatLabel="auto" formGroupName="grpNumberParams">
+								<input matInput type="number" placeholder="Step" formControlName="tfStep">
+								<button *ngIf="hasValue(step.value)" mat-icon-button matSuffix (click)="onEraseClick($event, step)">
+									<mat-icon>cancel</mat-icon>
+								</button>
+								<mat-hint align="start">gap between values</mat-hint>
+								<mat-hint align="end">defaults to 1</mat-hint>
+								<mat-error>
+									{{ getStepErrorMessage() }}
+								</mat-error>
+							</mat-form-field>
+						</div>
+						<div *ngIf="dataType.value === 'date' && !getControlValue('cbIsMinDateCurrent', 'grpDateParams') && !getControlValue('cbIsMaxDateCurrent', 'grpDateParams')">
+							<mat-form-field>
+								<input matInput readonly (click)="dp.open()" [matDatepicker]="dp" placeholder="Default Value" formControlName="defaultValue"
+								    [min]="getControlValue('dpMinDate', 'grpDateParams')" [max]="getControlValue('dpMaxDate', 'grpDateParams')">
+								<button *ngIf="hasValue(prop.default.value)" mat-icon-button matSuffix (click)="onEraseClick($event, prop.default)">
+									<mat-icon>cancel</mat-icon>
+								</button>
+								<mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+								<mat-datepicker #dp></mat-datepicker>
+								<mat-error>value is out of bounds!</mat-error>
+							</mat-form-field>
+						</div>
 					</div>
 					<!-- col 1 -->
-					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-						<mat-form-field *ngIf="form.get('slDataType').value === 'string'" floatLabel="auto" formGroupName="grpStringParams">
-							<input matInput type="number" placeholder="Maximum Length" formControlName="tfMaxLength" min="1" (change)="onMinMaxLengthChange('max')">
-							<button *ngIf="form.get('grpStringParams').get('tfMaxLength').value || form.get('grpStringParams').get('tfMaxLength').value === 0" mat-icon-button matSuffix (click)="form.get('grpStringParams').get('tfMaxLength').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<mat-error *ngIf="form.get('grpStringParams').get('tfMaxLength').invalid">
-								{{ getMaxLengthErrorMessage() }}
-							</mat-error>
-						</mat-form-field>
-						<mat-form-field *ngIf="form.get('slDataType').value === 'number'" floatLabel="auto" formGroupName="grpNumberParams">
-							<input matInput type="number" placeholder="Tick Interval" formControlName="tfTickInterval" min="0">
-							<button *ngIf="form.get('grpNumberParams').get('tfTickInterval').value" mat-icon-button matSuffix (click)="form.get('grpNumberParams').get('tfTickInterval').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<mat-hint align="start">tick every _ values</mat-hint>
-							<mat-hint align="end">defaults to 1</mat-hint>
-							<mat-error *ngIf="form.get('grpNumberParams').get('tfTickInterval').invalid">
-								{{ getTickIntervalErrorMessage() }}
-							</mat-error>
-						</mat-form-field>
+					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="['string', 'number'].includes(dataType.value)">
+						<div *ngIf="dataType.value === 'string'">
+							<mat-form-field *ngIf="getControl('tfMaxLength', 'grpStringParams'); let maxLength" floatLabel="auto" formGroupName="grpStringParams">
+								<input matInput type="number" placeholder="Maximum Length" formControlName="tfMaxLength" min="1" (change)="onMinMaxLengthChange('max')">
+								<button *ngIf="hasValue(maxLength.value)" mat-icon-button matSuffix (click)="onEraseClick($event, maxLength)">
+									<mat-icon>cancel</mat-icon>
+								</button>
+								<mat-error>
+									{{ getMaxLengthErrorMessage() }}
+								</mat-error>
+							</mat-form-field>
+						</div>
+						<div *ngIf="dataType.value === 'number'">
+							<mat-form-field *ngIf="getControl('tfTickInterval', 'grpNumberParams'); let tickInterval" floatLabel="auto" formGroupName="grpNumberParams">
+								<input matInput type="number" placeholder="Tick Interval" formControlName="tfTickInterval" min="0">
+								<button *ngIf="hasValue(tickInterval.value)" mat-icon-button matSuffix (click)="onEraseClick($event, tickInterval)">
+									<mat-icon>cancel</mat-icon>
+								</button>
+								<mat-hint align="start">tick every _ values</mat-hint>
+								<mat-hint align="end">defaults to 1</mat-hint>
+								<mat-error>
+									{{ getTickIntervalErrorMessage() }}
+								</mat-error>
+							</mat-form-field>
+						</div>
 					</div>
 					<!-- col 2 -->
 				</div>
 				<!-- row 3 -->
-				<div class="row newL" *ngIf="form.get('slDataType').value && !['boolean'].includes(form.get('slDataType').value)">
-					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" *ngIf="['string'].includes(form.get('slDataType').value)">
-						<mat-form-field floatLabel="auto">
-							<input matInput placeholder="Default Value" [type]="form.get('grpStringParams').get('cbEmail').value === true ? 'email' : 'text'"
-								formControlName="defaultValue">
-							<button *ngIf="form.get('defaultValue').value" mat-icon-button matSuffix (click)="form.get('defaultValue').setValue('')"><mat-icon>cancel</mat-icon></button>
+				<div class="row newL" *ngIf="hasValue(dataType.value) && !['boolean', 'enum'].includes(dataType.value)">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" *ngIf="['string'].includes(dataType.value)">
+						<mat-form-field floatLabel="auto" *ngIf="getControl('cbEmail', 'grpStringParams'); let email">
+							<input matInput placeholder="Default Value" [email]="email.value"
+								[pattern]="!email.value && !getControlValue('cbLineBreaks', 'grpStringParams') ? getControlValue('tfPattern', 'grpStringParams') : ''"
+							    formControlName="defaultValue">
+							<button *ngIf="hasValue(prop.default.value)" mat-icon-button matSuffix (click)="onEraseClick($event, prop.default)">
+								<mat-icon>cancel</mat-icon>
+							</button>
 							<mat-error>value does not abide by rules: {{ getDefaultValueErrors() }}</mat-error>
 						</mat-form-field>
 					</div>
-					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="['number','date'].includes(form.get('slDataType').value)">
-						<mat-form-field floatLabel="auto" formGroupName="grpNumberParams" *ngIf="form.get('slDataType').value === 'number'">
-							<input matInput placeholder="Prefix" type="text" formControlName="tfPrefix">
-							<button *ngIf="form.get('grpNumberParams').get('tfPrefix').value" mat-icon-button matSuffix (click)="form.get('grpNumberParams').get('tfPrefix').setValue('')"><mat-icon>cancel</mat-icon></button>
-							<mat-hint align="right">displayed before value</mat-hint>
-						</mat-form-field>
-						<form *ngIf="form.get('slDataType').value === 'date'">
-								<hr>
-								<label class="text-muted">Preview</label>
-								<br>
-								<mat-form-field>
-									<input matInput readonly (click)="picker.open()" #pickertf="ngModel" ngModel name="pickertf" [required]="form.get('cbRequired').value"
-										[min]="form.get('grpDateParams').get('cbIsMinDateCurrent').value ?
-												dates.offsetDate(form.get('grpDateParams').get('tfMinDateOffset').value) :
-												form.get('grpDateParams').get('dpMinDate').value" [max]="form.get('grpDateParams').get('cbIsMaxDateCurrent').value ?
-												dates.offsetDate(form.get('grpDateParams').get('tfMaxDateOffset').value) :
-												form.get('grpDateParams').get('dpMaxDate').value" [matDatepicker]="picker" [placeholder]="form.get('tfName').value || '{METRIC_NAME}'">
-									<button *ngIf="pickertf.value" mat-icon-button matSuffix (click)="pickertf.control.setValue('')"><mat-icon>cancel</mat-icon></button>
-									<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-									<mat-datepicker #picker></mat-datepicker>
-									<mat-error>{{ pickertf.hasError('required') ? 'you must enter a ' + (form.get('tfName').value || '{METRIC_NAME}' | lowercase)
-										+ '!' : 'invalid date!' }}</mat-error>
-								</mat-form-field>
-							</form>
+					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="['number','date'].includes(dataType.value)">
+						<div *ngIf="dataType.value === 'number'">
+							<mat-form-field floatLabel="auto" formGroupName="grpNumberParams" *ngIf="getControl('tfPrefix', 'grpNumberParams'); let prefix">
+								<input matInput placeholder="Prefix" type="text" formControlName="tfPrefix">
+								<button *ngIf="hasValue(prefix.value)" mat-icon-button matSuffix (click)="onEraseClick($event, prefix)">
+									<mat-icon>cancel</mat-icon>
+								</button>
+								<mat-hint align="right">displayed before value</mat-hint>
+							</mat-form-field>
+						</div>
+						<form *ngIf="dataType.value === 'date'">
+							<hr>
+							<label class="text-muted">Preview</label>
+							<br>
+							<mat-form-field>
+								<input matInput readonly (click)="picker.open()" #pickertf="ngModel" ngModel name="pickertf" [required]="prop.required.value"
+								    [min]="getControlValue('cbIsMinDateCurrent', 'grpDateParams') ?
+												dates.offsetDate(getControlValue('tfMinDateOffset', 'grpDateParams')) :
+												getControlValue('dpMinDate', 'grpDateParams')" [max]="getControlValue('cbIsMaxDateCurrent', 'grpDateParams') ?
+												dates.offsetDate(getControlValue('tfMaxDateOffset', 'grpDateParams')) :
+												getControlValue('dpMaxDate', 'grpDateParams')" [matDatepicker]="picker" [placeholder]="prop.name.value || '{METRIC_NAME}'">
+								<button *ngIf="hasValue(pickertf.value)" mat-icon-button matSuffix (click)="onEraseClick($event, pickertf.control)">
+									<mat-icon>cancel</mat-icon>
+								</button>
+								<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+								<mat-datepicker #picker></mat-datepicker>
+								<mat-error>{{ pickertf.hasError('required') ? 'you must enter a ' + (prop.name.value || '{METRIC_NAME}' | lowercase) + '!' :
+									'invalid date!' }}</mat-error>
+							</mat-form-field>
+						</form>
 					</div>
-					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="form.get('slDataType').value === 'number'">
-						<mat-form-field floatLabel="auto" formGroupName="grpNumberParams">
+					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="dataType.value === 'number'">
+						<mat-form-field floatLabel="auto" formGroupName="grpNumberParams" *ngIf="getControl('tfPostfix', 'grpNumberParams'); let postfix">
 							<input matInput placeholder="Postfix" type="text" formControlName="tfPostfix">
-							<button *ngIf="form.get('grpNumberParams').get('tfPostfix').value" mat-icon-button matSuffix (click)="form.get('grpNumberParams').get('tfPostfix').setValue('')"><mat-icon>cancel</mat-icon></button>
+							<button *ngIf="hasValue(postfix.value)" mat-icon-button matSuffix (click)="onEraseClick($event, postfix)">
+								<mat-icon>cancel</mat-icon>
+							</button>
 							<mat-hint align="right">displayed after value</mat-hint>
 						</mat-form-field>
 					</div>
 				</div>
 				<!-- row 4 -->
-				<div class="row newL" *ngIf="form.get('slDataType').value && !['boolean', 'date'].includes(form.get('slDataType').value)">
-					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="form.get('slDataType').value === 'number'">
+				<div class="row newL" *ngIf="hasValue(dataType.value) && !['boolean', 'date', 'enum'].includes(dataType.value)">
+					<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" *ngIf="dataType.value === 'number'">
 						<mat-form-field floatLabel="auto">
-							<input matInput type="number" placeholder="Default Value" formControlName="defaultValue" [min]="form.get('grpNumberParams').get('tfMinValue').value"
-							    [max]="form.get('grpNumberParams').get('tfMaxValue').value" [step]="form.get('grpNumberParams').get('tfStep').value"
-								(keyup)="form.get('defaultValue').setValue(fixNumberInput(form.get('defaultValue').value))">
-							<button *ngIf="form.get('defaultValue').value || form.get('defaultValue').value === 0" mat-icon-button matSuffix (click)="form.get('defaultValue').setValue('')"><mat-icon>cancel</mat-icon></button>
+							<input matInput type="number" placeholder="Default Value" formControlName="defaultValue" [min]="getControlValue('tfMinValue', 'grpNumberParams')"
+							    [max]="getControlValue('tfMaxValue', 'grpNumberParams')" [step]="getControlValue('tfStep', 'grpNumberParams')" (keyup)="prop.default.setValue(fixNumberInput(prop.default.value))">
+							<button *ngIf="hasValue(prop.default.value)" mat-icon-button matSuffix (click)="onEraseClick($event, prop.default)">
+								<mat-icon>cancel</mat-icon>
+							</button>
+							<mat-hint align="end">defaults to Minimum Value</mat-hint>
 							<mat-error>value out of bounds!</mat-error>
 						</mat-form-field>
 					</div>
-					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-						<form ngForm *ngIf="form.get('slDataType').value === 'string'">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" *ngIf="dataType.value === 'string'">
+						<form ngForm>
 							<hr>
-							<div class="form-group">
+							<div class="form-group" *ngIf="{ maxLength: getControl('tfMaxLength', 'grpStringParams'), hint: getControl('tfHint', 'grpStringParams') }; let local">
 								<label class="text-muted">Preview</label>
-								<div *ngIf="form.get('grpStringParams').get('cbLineBreaks').value; then textarea; else inputfield"></div>
+								<div *ngIf="getControlValue('cbLineBreaks', 'grpStringParams'); then textarea; else inputfield"></div>
 								<ng-template #inputfield>
-									<mat-form-field floatLabel="auto">
-										<input matInput ngModel #textfieldPrev="ngModel" name="textfieldPrev" type="text" [placeholder]="form.get('tfName').value || '{METRIC_NAME}'"
-										    [required]="form.get('cbRequired').value" [minlength]="form.get('grpStringParams').get('tfMinLength').value" [maxlength]="form.get('grpStringParams').get('tfMaxLength').value"
-										    [email]="form.get('grpStringParams').get('cbEmail').value" [pattern]="(form.get('grpStringParams').get('cbEmail').value) ? '' : form.get('grpStringParams').get('tfPattern').value">
-										<mat-hint align="start">{{ form.get('grpStringParams').get('tfHint').value }}</mat-hint>
-										<mat-hint align="end" *ngIf="form.get('grpStringParams').get('tfMaxLength').value">
-											characters left: {{ (textfieldPrev.value) ? form.get('grpStringParams').get('tfMaxLength').value - textfieldPrev.value.length
-											: form.get('grpStringParams').get('tfMaxLength').value }}
+									<mat-form-field floatLabel="auto" *ngIf="getControl('cbEmail', 'grpStringParams'); let email">
+										<input matInput ngModel #textfieldPrev="ngModel" name="textfieldPrev" type="text" [placeholder]="prop.name.value || '{METRIC_NAME}'"
+										    [required]="prop.required.value" [minlength]="getControlValue('tfMinLength', 'grpStringParams')" [maxlength]="getControlValue('tfMaxLength','grpStringParams')"
+										    [email]="email.value" [pattern]="(email.value) ? '' : getControlValue('tfPattern', 'grpStringParams')">
+										<button mat-icon-button matSuffix *ngIf="hasValue(textfieldPrev.control.value)" (click)="onEraseClick($event, textfieldPrev.control)">
+											<mat-icon>cancel</mat-icon>
+										</button>
+										<mat-hint align="start">{{ local.hint.value || '{HINT}' }}</mat-hint>
+										<mat-hint align="end" *ngIf="hasValue(local.maxLength.value)">
+											characters left: {{ (textfieldPrev.value) ? local.maxLength.value - textfieldPrev.value.length : local.maxLength.value }}
 										</mat-hint>
-										<mat-error *ngIf="textfieldPrev.invalid">
-											{{ textfieldPrev.hasError('required') ? 'you must enter ' + (form.get('tfName').value || '{METRIC_NAME}' | lowercase) + '!'
-											: textfieldPrev.hasError('email') ? 'invalid email address!' : textfieldPrev.hasError('pattern') ? 'invalid value!'
-											: textfieldPrev.hasError('minlength') ? 'too short!' : '' }}
+										<mat-error>
+											{{ textfieldPrev.hasError('required') ? 'you must enter ' + (prop.name.value || '{METRIC_NAME}' | lowercase) + '!' : textfieldPrev.hasError('email')
+											? 'invalid email address!' : textfieldPrev.hasError('pattern') ? 'invalid value!' : textfieldPrev.hasError('minlength')
+											? 'too short!' : '' }}
 										</mat-error>
 									</mat-form-field>
 								</ng-template>
 								<ng-template #textarea>
 									<mat-form-field floatLabel="auto">
-										<textarea matInput matTextareaAutosize ngModel #textareaPrev="ngModel" [placeholder]="form.get('tfName').value" name="textareaPrev"
-										    [required]="form.get('cbRequired').value" [maxlength]="form.get('grpStringParams').get('tfMaxLength').value"></textarea>
-										<mat-hint align="start">{{ form.get('grpStringParams').get('tfHint').value }}</mat-hint>
-										<mat-hint align="end" *ngIf="form.get('grpStringParams').get('tfMaxLength').value">
-											characters left: {{ (textareaPrev.value) ? form.get('grpStringParams').get('tfMaxLength').value - textareaPrev.value.length
-											: form.get('grpStringParams').get('tfMaxLength').value }}
+										<textarea matInput matTextareaAutosize ngModel #textareaPrev="ngModel" [placeholder]="prop.name.value || '{METRIC_NAME}'" name="textareaPrev"
+										    [required]="prop.required.value" [maxlength]="local.maxLength.value"></textarea>
+										<button mat-icon-button matSuffix *ngIf="hasValue(textareaPrev.control.value)" (click)="onEraseClick($event, textareaPrev.control)">
+											<mat-icon>cancel</mat-icon>
+										</button>
+										<mat-hint align="start">{{ local.hint.value || '{HINT}' }}</mat-hint>
+										<mat-hint align="end" *ngIf="hasValue(local.maxLength.value)">
+											characters left: {{ (textareaPrev.value) ? local.maxLength.value - textareaPrev.value.length : local.maxLength.value }}
 										</mat-hint>
+										<mat-error>
+											{{ textareaPrev.hasError('required') ? 'you must enter ' + (prop.name.value || '{METRIC_NAME}' | lowercase) + '!' : textareaPrev.hasError('minlength')
+											? 'too short!' : '' }}
+										</mat-error>
 									</mat-form-field>
 								</ng-template>
 							</div>
@@ -444,34 +530,37 @@
 					</div>
 				</div>
 				<!-- row 5 -->
-				<div class="row">
+				<div class="row newL" *ngIf="dataType.value === 'number'">
 					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-						<form ngForm *ngIf="form.get('slDataType').value === 'number'">
+						<form ngForm>
 							<hr>
 							<div form-group>
 								<label for="sliderPrev" class="text-muted">Preview</label>
 								<br>
-								<mat-label>{{ form.get('tfName').value || '{METRIC_NAME}' }}</mat-label>
-								<div class="row">
+								<div class="row" *ngIf="{ maxVal: getControl('tfMaxValue', 'grpNumberParams'), minVal: getControl('tfMinValue', 'grpNumberParams'), step: getControl('tfStep', 'grpNumberParams') }; let local">
 									<div class="col-md-8 col-sm-8 col-xs-8">
-										<mat-slider style="width: 100%" [(ngModel)]="sliderPrev" [min]="form.get('grpNumberParams').get('tfMinValue').value" [max]="form.get('grpNumberParams').get('tfMaxValue').value"
-										    [step]="form.get('grpNumberParams').get('tfStep').value" [tickInterval]="form.get('grpNumberParams').get('tfTickInterval').value || 1"
-										    thumbLabel="true" name="sliderPrev">
+										<mat-label>{{ prop.name.value || '{METRIC_NAME}' }}</mat-label>
+										<mat-slider style="width: 100%" [(ngModel)]="sliderPrev" [min]="local.minVal.value" [max]="local.maxVal.value" [step]="local.step.value"
+										    [tickInterval]="getControlValue('tfTickInterval', 'grpNumberParams') || 1" thumbLabel="true" name="sliderPrev">
 										</mat-slider>
 									</div>
-									<div class="col-md-4 col-sm-4 col-xs-4">
-										<mat-label *ngIf="!form.get('grpNumberParams').get('cbFreeInput').value">
-											{{ ((form.get('grpNumberParams').get('tfPrefix').value) ? (form.get('grpNumberParams').get('tfPrefix').value + ' ') : '')
-											+ sliderPrev + ((form.get('grpNumberParams').get('tfPostfix').value) ? (' ' + form.get('grpNumberParams').get('tfPostfix').value)
-											: '') }}
-										</mat-label>
-										<mat-form-field class="freeInput" *ngIf="form.get('grpNumberParams').get('cbFreeInput').value === true" style="width: 100%">
-											<span matPrefix>{{ form.get('grpNumberParams').get('tfPrefix').value }} </span>
-											<input matInput type="number" [(ngModel)]="sliderPrev" name="sliderPrevInput" min="{{form.get('grpNumberParams').get('tfMinValue').value || 0}}"
-											    max="{{form.get('grpNumberParams').get('tfMaxValue').value || 100}}" [step]="form.get('grpNumberParams').get('tfStep').value || 1"
-											    (keyup)="sliderPrev = fixNumberInput(sliderPrev)">
-											<span matSuffix>{{ form.get('grpNumberParams').get('tfPostfix').value }}</span>
-										</mat-form-field>
+									<div class="col-md-4 col-sm-4 col-xs-4" *ngIf="{ prefix: getControl('tfPrefix', 'grpNumberParams'), postfix: getControl('tfPostfix', 'grpNumberParams') }; let pronto">
+										<div *ngIf="!getControlValue('cbFreeInput', 'grpNumberParams'); then label; else freeInput"></div>
+										<ng-template #label>
+											<br>
+											<mat-label>
+												{{ ((hasValue(pronto.prefix.value)) ? (pronto.prefix.value + ' ') : '')
+												+ sliderPrev + ((hasValue(pronto.postfix.value)) ? (' ' + pronto.postfix.value) : '') }}
+											</mat-label>
+										</ng-template>
+										<ng-template #freeInput>
+											<mat-form-field class="freeInput">
+												<span matPrefix>{{ pronto.prefix.value }} </span>
+												<input matInput type="number" [(ngModel)]="sliderPrev" name="sliderPrevInput" [min]="local.minVal.value || 0"
+													[max]="local.maxVal.value || 100" [step]="local.step.value || 1" (keyup)="sliderPrev = fixNumberInput(sliderPrev)">
+												<span matSuffix>{{ pronto.postfix.value }}</span>
+											</mat-form-field>
+										</ng-template>
 									</div>
 								</div>
 							</div>

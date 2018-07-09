@@ -106,7 +106,7 @@ export class MetricFormComponent implements OnInit {
 		NumericValidators.lessThanEqualValidator(() => this.getControlValue('tfMaxValue', 'grpNumberParams')),
 		StringValidators.longerThanEqualLengthValidator(() => this.getControlValue('tfMinLength', 'grpStringParams')),
 		StringValidators.shorterThanEqualLengthValidator(() => this.getControlValue('tfMaxLength', 'grpStringParams')),
-		StringValidators.pattern(() => this.getControlValue('tfPattern', 'grpStringParams'))
+		// StringValidators.pattern(() => this.getControlValue('tfPattern', 'grpStringParams'))
 	];
 
 	constructor(
@@ -137,11 +137,11 @@ export class MetricFormComponent implements OnInit {
 	 * initializes form.
 	 */
 	private initForm(): void {
-		let defValidators = this.initialDefaultValueValidators;
+		// let defValidators = this.initialDefaultValueValidators;
 
-		if (this.data.resource && this.data.resource.stringParams && this.data.resource.stringParams.isEmail === true) {
-			defValidators = [...defValidators, Validators.email];
-		}
+		// if (this.data.resource && this.data.resource.stringParams && this.data.resource.stringParams.isEmail === true) {
+		// 	defValidators = [...defValidators, Validators.email];
+		// }
 
 		this.form = new FormGroup({
 			'tfName': new FormControl(
@@ -161,7 +161,7 @@ export class MetricFormComponent implements OnInit {
 				(this.data.resource) ? this.data.resource.dataType : '', Validators.required
 			),
 			'defaultValue': new FormControl(
-				(this.data.resource) ? this.data.resource.defaultValue : '', defValidators
+				(this.data.resource) ? this.data.resource.defaultValue : '', /*defValidators*/ this.initialDefaultValueValidators
 			),
 			'grpStringParams': new FormGroup({
 				'cbEmail': new FormControl(
@@ -310,20 +310,6 @@ export class MetricFormComponent implements OnInit {
 				this.data.resource ? [...this.data.resource.groups] : [],
 			)
 		});
-
-		// if (this.data.resource) {
-		// 	let validators;
-
-		// 	if (this.data.resource.dataType === 'string') {
-		// 		const grp = this.form.get('grpStringParams');
-
-		// 		validators = [
-		// 			Validators.minLength(grp.get('tfMinLength').value || 0)
-		// 			, Validators.maxLength(grp.get('tfMaxLength').value)
-		// 			,
-		// 		];
-		// 	}
-		// }
 	}
 
 	/**
@@ -593,13 +579,13 @@ export class MetricFormComponent implements OnInit {
 			email.markAsPristine();
 		}
 
-		const defVal = this.form.get('defaultValue');
-		if (email.value) {
-			defVal.setValidators([...this.initialDefaultValueValidators, Validators.email]);
-		} else {
-			defVal.setValidators(this.initialDefaultValueValidators);
-		}
-		defVal.updateValueAndValidity();
+		// const defVal = this.form.get('defaultValue');
+		// if (email.value) {
+		// 	defVal.setValidators([...this.initialDefaultValueValidators, Validators.email]);
+		// } else {
+		// 	defVal.setValidators(this.initialDefaultValueValidators);
+		// }
+		// defVal.updateValueAndValidity();
 	}
 
 	/**
@@ -675,7 +661,7 @@ export class MetricFormComponent implements OnInit {
 
 		const defVal = this.form.get('defaultValue');
 		defVal.reset();
-		defVal.setValidators(this.initialDefaultValueValidators);
+		// defVal.setValidators(this.initialDefaultValueValidators);
 		defVal.updateValueAndValidity();
 
 		if (current !== 'string') {
@@ -834,6 +820,13 @@ export class MetricFormComponent implements OnInit {
 		defVal.updateValueAndValidity();
 	}
 
+	onEraseClick(event, control): void {
+		event.stopPropagation();
+		control.setValue('');
+		control.markAsDirty();
+		control.updateValueAndValidity();
+	}
+
 	// MANIPULATION
 
 	/**
@@ -891,11 +884,20 @@ export class MetricFormComponent implements OnInit {
 	 * @param controlName
 	 * @param groupName
 	 */
-	private getControlValue(controlName: string, groupName?: string): any {
+	getControlValue(controlName: string, groupName?: string): any {
+		let ctrl;
+		if ((ctrl = this.getControl(controlName, groupName)) === null) {
+			return null;
+		}
+
+		return ctrl.value;
+	}
+
+	getControl(controlName: string, groupName?: string): any {
 		return this.form ?
 			(groupName ?
-				this.form.get(groupName).get(controlName).value :
-				this.form.get(controlName).value) :
+				this.form.get(groupName).get(controlName) :
+				this.form.get(controlName)) :
 			null;
 	}
 
@@ -1118,5 +1120,9 @@ export class MetricFormComponent implements OnInit {
 			this.form.get('grpNumberParams').get('tfMaxValue').value < value ?
 			this.form.get('grpNumberParams').get('tfMaxValue').value :
 			!this.form.get('grpNumberParams').get('tfMaxValue').value && 100 < value ? 100 : value;
+	}
+
+	hasValue(value): boolean {
+		return !['', null, undefined].includes(value);
 	}
 }
