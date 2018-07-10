@@ -1,4 +1,3 @@
-import { PatientModule } from './../patient/patient.module';
 import { NgModule } from '@angular/core';
 import { routing } from './home.routing';
 import { CommonModule } from '@angular/common';
@@ -9,6 +8,9 @@ import { NavigationModule } from './../navigation/navigation.module';
 import { MetricModule } from '../metric/metric.module';
 import { MetricGroupModule } from '../metric-group/metric-group.module';
 import { LocationModule } from '../location/location.module';
+import { PatientModule } from './../patient/patient.module';
+import { SessionModule } from './../session/session.module';
+import { RecordModule } from './../record/record.module';
 
 import { DashboardComponent } from './../dashboard/dashboard.component';
 import { MviwoListSelectModule } from '../material/mviwo-list-select/mviwo-list-select.module';
@@ -35,6 +37,8 @@ import { MviwoListSelectModule } from '../material/mviwo-list-select/mviwo-list-
 		MetricGroupModule,
 		NavigationModule,
 		PatientModule,
+		SessionModule,
+		RecordModule,
 
 		MviwoListSelectModule,
 	],

@@ -12,8 +12,8 @@
 				<mat-list-item class="disabled" *ngIf="!dataSource.length">
 					<small>No Unselected Items</small>
 				</mat-list-item>
-				<mat-list-item class="mat-elevation-z2" *ngFor="let item of dataSource; let i = index" (click)="chkSrc.toggle(); sourceSelectionOnChange(null, chkSrc, item)">
-					<mat-checkbox #chkSrc (click)="$event.stopPropagation()" (change)="sourceSelectionOnChange($event, chkSrc, item)"></mat-checkbox>
+				<mat-list-item class="mat-elevation-z2" *ngFor="let item of dataSource; let i = index" (click)="selectSourceItem(chkSrc, item)">
+					<mat-checkbox #chkSrc (click)="$event.stopPropagation()" (change)="sourceSelectionOnChange($event, chkSrc, item)" [disabled]="immovableFunction(item)"></mat-checkbox>
 					<small class="item-number mviwo-unselectable" *ngIf="showSourceItemNumber">{{ (i + 1) }}. </small>
 					<span *ngFor="let field of showFields; let j = index">
 						<div *ngIf="[true, false].includes(item[field]); then boolean; else other"></div>
@@ -26,7 +26,7 @@
 						<strong class="item-divider" *ngIf="j < (showFields.length - 1)"> | </strong>
 					</span>
 					<span class="item-actions">
-						<button class="item-button" mat-icon-button [disabled]="dataTarget.length >= maxItemsTarget" (click)="addOnClick($event, item)">
+						<button class="item-button" mat-icon-button [disabled]="dataTarget.length >= maxItemsTarget || immovableFunction(item)" (click)="addOnClick($event, item)">
 							<mat-icon style="color: greenyellow">add</mat-icon>
 						</button>
 					</span>
@@ -44,8 +44,8 @@
 				<mat-list-item class="disabled" *ngIf="!dataTarget.length">
 					<small>No Selected Items</small>
 				</mat-list-item>
-				<mat-list-item class="mat-elevation-z2" *ngFor="let item of dataTarget; let i = index" (click)="chkTrg.toggle(); targetSelectionOnChange(null, chkTrg, item)">
-					<mat-checkbox #chkTrg (click)="$event.stopPropagation()" (change)="targetSelectionOnChange($event, chkTrg, item)"></mat-checkbox>
+				<mat-list-item class="mat-elevation-z2" *ngFor="let item of dataTarget; let i = index" (click)="selectTargetItem(chkTrg, item)">
+					<mat-checkbox #chkTrg (click)="$event.stopPropagation()" (change)="targetSelectionOnChange($event, chkTrg, item)" [disabled]="immovableFunction(item)"></mat-checkbox>
 					<small class="item-number mviwo-unselectable" *ngIf="showTargetItemNumber">{{ (i + 1) }}. </small>
 					<span *ngFor="let field of showFields; let j = index">
 						<div *ngIf="[true, false].includes(item[field]); then boolean; else other"></div>
@@ -58,13 +58,13 @@
 						<strong class="item-divider" *ngIf="j < (showFields.length - 1)"> | </strong>
 					</span>
 					<span class="item-actions">
-						<button class="item-button" mat-icon-button *ngIf="sortableTarget" [disabled]="dataTarget.indexOf(item) === 0" (click)="targetUpOnClick($event, item)">
+						<button class="item-button" mat-icon-button *ngIf="sortableTarget" [disabled]="dataTarget.indexOf(item) === 0 || immovableFunction(item)" (click)="targetUpOnClick($event, item)">
 							<mat-icon>keyboard_arrow_up</mat-icon>
 						</button>
-						<button class="item-button" mat-icon-button *ngIf="sortableTarget" [disabled]="dataTarget.indexOf(item) === dataTarget.length - 1" (click)="targetDownOnClick($event, item)">
+						<button class="item-button" mat-icon-button *ngIf="sortableTarget" [disabled]="dataTarget.indexOf(item) === dataTarget.length - 1 || immovableFunction(item)" (click)="targetDownOnClick($event, item)">
 							<mat-icon>keyboard_arrow_down</mat-icon>
 						</button>
-						<button class="item-button" mat-icon-button color="warn" (click)="removeOnClick($event, item)">
+						<button class="item-button" mat-icon-button color="warn" (click)="removeOnClick($event, item)" [disabled]="immovableFunction(item)">
 							<mat-icon>remove</mat-icon>
 						</button>
 					</span>

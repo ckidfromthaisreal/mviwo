@@ -1,3 +1,4 @@
+import { SessionCrudService } from './services/crud/session-crud.service';
 import { RedirectAuthGuardService } from './services/auth-guard/redirect-auth-guard.service';
 import { PipesModule } from './pipes/pipes.module';
 import { PatientCrudService } from './services/crud/patient-crud.service';
@@ -33,7 +34,7 @@ import { StringsService } from './services/strings/strings.service';
 @NgModule({
 	declarations: [
 		AppComponent,
-		HomeComponent,
+		HomeComponent
 	],
 	imports: [
 		BrowserAnimationsModule,
@@ -65,6 +66,7 @@ import { StringsService } from './services/strings/strings.service';
 		MongoloidsService,
 		NotificationService,
 		PatientCrudService,
+		SessionCrudService,
 		StringsService,
 	],
 	exports: [

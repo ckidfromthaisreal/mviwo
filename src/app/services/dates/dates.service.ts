@@ -23,5 +23,29 @@ export class DatesService {
 		return new Date();
 	}
 
+	public before(d0: Date, d1: Date) {
+		const d0Str = new Date(d0).toString().substring(0, 15);
+		const d1Str = new Date(d1).toString().substring(0, 15);
+		return d0Str < d1Str;
+	}
+
+	public upTo(d0: Date, d1: Date) {
+		const d0Str = new Date(d0).toString().substring(0, 15);
+		const d1Str = new Date(d1).toString().substring(0, 15);
+		return d0Str <= d1Str;
+	}
+
+	public after(d0: Date, d1: Date) {
+		const d0Str = new Date(d0).toString().substring(0, 15);
+		const d1Str = new Date(d1).toString().substring(0, 15);
+		return d0Str > d1Str;
+	}
+
+	public from(d0: Date, d1: Date) {
+		const d0Str = new Date(d0).toString().substring(0, 15);
+		const d1Str = new Date(d1).toString().substring(0, 15);
+		return d0Str >= d1Str;
+	}
+
 	constructor() {}
 }

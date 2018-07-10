@@ -13,6 +13,9 @@ const metricGroupRouter = require('./metric-group/metric-group.router');
 /** patient router. */
 const patientRouter = require('./patient/patient.router');
 
+/** session router. */
+const sessionRouter = require('./session/session.router');
+
 /** user router. */
 const userRouter = require('./user/user.router');
 
@@ -38,6 +41,9 @@ router.use('/metric-group', metricGroupRouter);
 
 /* bind '/patient/' route to patient router. */
 router.use('/patient', patientRouter);
+
+/* bind '/session/' route to session router. */
+router.use('/session', sessionRouter);
 
 /* bind '/user/' route to user router. */
 router.use('/user', cors(), userRouter);

@@ -1,0 +1,52 @@
+.optionalLabel {
+    font-size: 80%;
+}
+
+textarea {
+    resize: none;
+}
+
+.modal-modal {
+    margin-top: 50px;
+    /* width: 50%; */
+    /* min-width: 500px; */
+    /* max-width: 700px; */
+    margin: auto;
+}
+
+select {
+    font-family: 'FontAwesome', 'arial';
+}
+
+mat-form-field {
+    width: 100%;
+}
+
+.newL {
+	margin-top: 10px
+}
+
+@media only screen and (min-width: 992px) {
+	.mat-dialog-content {
+		max-height: 90vh;
+		overflow-y: auto;
+	}
+
+	.xxMetricsList {
+		max-height: 160px;
+		overflow-y: auto;
+	}
+}
+
+.mat-radio-button:first-of-type {
+	// padding-right: 30px;
+	padding-right: 15px;
+}
+
+.mat-label {
+	padding-top: 10px;
+}
+
+.mat-radio-button {
+	padding-top: 5px;
+}

@@ -1,13 +1,15 @@
-import { AgePipe } from './dates.pipe';
+import { AgePipe, DurationPipe } from './dates.pipe';
 import { NgModule } from '@angular/core';
 
 @NgModule({
 	declarations: [
-		AgePipe
+		AgePipe,
+		DurationPipe,
 	],
 	imports: [],
 	exports: [
-		AgePipe
+		AgePipe,
+		DurationPipe
 	],
 	entryComponents: [],
 	providers: []

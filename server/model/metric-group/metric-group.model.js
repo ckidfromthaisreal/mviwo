@@ -81,11 +81,10 @@ const metricGroupSchema = new mongoose.Schema({
 			}
 		},
 	},
-	editMode: {
-		type: String,
-		required: true,
-		enum: ['free', 'restricted', 'blocked'],
-		default: 'free'
+	sessions: {
+		type: Number,
+		default: 0,
+		min: 0
 	}
 }, { timestamps: true });
 

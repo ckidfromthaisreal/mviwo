@@ -18,6 +18,7 @@ export class MetricGroup implements Mongoloid {
 			isRequired: boolean,
 			description?: string
 		}[]
+		, public sessions?: number
 		, public description?: string
 		, public position?: number
 	) {}

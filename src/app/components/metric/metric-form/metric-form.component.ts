@@ -78,6 +78,9 @@ export class MetricFormComponent implements OnInit {
 	// metricGroups: FormControl[] = [];
 	metricGroups: MetricGroup[] = [];
 
+	groupsLoaded = false;
+
+
 	chosenMetricGroups: MetricGroup[] = [];
 
 	/** enum values control. */
@@ -101,6 +104,7 @@ export class MetricFormComponent implements OnInit {
 		tickInterval: 1
 	}];
 
+
 	private initialDefaultValueValidators: ValidatorFn[] = [
 		NumericValidators.greaterThanEqualValidator(() => this.getControlValue('tfMinValue', 'grpNumberParams')),
 		NumericValidators.lessThanEqualValidator(() => this.getControlValue('tfMaxValue', 'grpNumberParams')),
@@ -108,6 +112,10 @@ export class MetricFormComponent implements OnInit {
 		StringValidators.shorterThanEqualLengthValidator(() => this.getControlValue('tfMaxLength', 'grpStringParams')),
 		// StringValidators.pattern(() => this.getControlValue('tfPattern', 'grpStringParams'))
 	];
+
+	groupsImmovableFunction = (item: MetricGroup) => {
+		return item.sessions > 0;
+	}
 
 	constructor(
 		private crud: MetricCrudService,
@@ -341,17 +349,21 @@ export class MetricFormComponent implements OnInit {
 			this.chosenMetricGroups = [...this.data.resource.groups];
 		}
 
-		this.groupsCrud.getMany < MetricGroup > (undefined, 'name description metrics').subscribe(data => {
+		this.groupsCrud.getMany < MetricGroup > (undefined, 'name description metrics sessions').subscribe(data => {
 			this.chosenMetricGroups.forEach(group => {
-				group.metrics = (data.find(grp => grp._id === group._id)).metrics;
+				const grp = data.find(grep => grep._id === group._id);
+				group.metrics = grp.metrics;
+				group.sessions = grp.sessions;
 			});
 
 			const mapped = this.chosenMetricGroups.map(elem => elem._id);
-			data = data.filter(item => !mapped.includes(item._id));
+			data = data.filter(item => !mapped.includes(item._id) && [undefined, null, 0].includes(item.sessions));
 			this.metricGroups = [...data];
 			this.initialGroups = [...data];
 
 			this.form.get('xxGroups').reset([...this.chosenMetricGroups]);
+
+			this.groupsLoaded = true;
 		});
 	}
 

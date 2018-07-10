@@ -1,0 +1,62 @@
+@import '~@angular/material/theming';
+
+table {
+	width: 100%;
+}
+
+.mat-column-action {
+	text-align: right;
+}
+
+th.mat-sort-header-sorted {
+	color: black;
+}
+
+/* ripple effect to not be cutoff. */
+.mat-column-select, .mat-column-action, .mat-column-createdAt, .mat-column-updatedAt {
+	overflow: initial;
+}
+
+.mat-row:hover {
+	background-color: rgb(60,60,60);
+}
+
+.mat-form-field {
+	font-size: 14px;
+	width: 100%;
+}
+
+mat-form-field {
+	padding-top: 10px;
+}
+
+.table-container {
+	height: 65vh;
+	overflow: auto;
+	background-color: rgb(45,45,45);
+}
+
+.container-fluid {
+	padding-bottom: 15px;
+	margin: 0;
+}
+
+.explorer-buttons {
+	margin-top: 15px;
+}
+
+mat-paginator {
+	margin-top: 1px;
+}
+
+.empty-table {
+	height: 58vh;
+	line-height: 58vh;
+	text-align: center;
+}
+
+.empty-table > span {
+	display: inline-block;
+	vertical-align: middle;
+	line-height: normal;
+}

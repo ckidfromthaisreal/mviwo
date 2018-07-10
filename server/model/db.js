@@ -48,7 +48,11 @@ let attempts = 0;
 /* on successful connection, log a message. */
 connection.once('open', () => {
 	logger.info('DB', 'db.js:mongoose.connect', `successfully connected to: ${currentDB}`);
-	initUsers();
+	try {
+		initUsers();
+	} catch (err) {
+		logger.error('DB', 'db.js:mongoose.connect', 'failed to upsert users!');
+	}
 
 	connection.on('connected', () => {
 		logger.info('DB', 'db.js:mongoose.connect', `successfully connected to: ${currentDB}`);
@@ -101,22 +105,22 @@ function initUsers() {
 	const bcrypt = require('bcryptjs');
 
 	User.updateOne({
-		username: 'superuser'
+		username: 'admin'
 	}, {
-		username: 'superuser',
-		email: 'mviwo.hq@gmail.com',
-		password: bcrypt.hashSync(require('../secret').superpassword || 'superuser123'),
+		username: 'admin',
+		email: 'admin@mviwo.com',
+		password: bcrypt.hashSync(require('../secret').superpassword || 'admin123'),
 		power: 999
 	}, {
 		upsert: true
 	}).exec();
 
 	User.updateOne({
-		username: 'student'
+		username: 'user'
 	}, {
-		username: 'student',
-		email: 'student@mviwo.com',
-		password: bcrypt.hashSync('student123'),
+		username: 'user',
+		email: 'user@mviwo.com',
+		password: bcrypt.hashSync('user123'),
 		power: 200
 	}, {
 		upsert: true

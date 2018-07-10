@@ -1,12 +1,13 @@
 import { DashboardComponent } from './../dashboard/dashboard.component';
 import { MetricGalleryComponent } from './../metric/metric-gallery/metric-gallery.component';
 import { AuthGuardService } from './../../services/auth-guard/auth-guard.service';
-import { HomeComponent } from './home.component';
 import { Routes, RouterModule } from '@angular/router';
 import { ModuleWithProviders } from '@angular/core';
 import { MetricGroupGalleryComponent } from '../metric-group/metric-group-gallery/metric-group-gallery.component';
 import { LocationGalleryComponent } from '../location/location-gallery/location-gallery.component';
 import { PatientGalleryComponent } from '../patient/patient-gallery/patient-gallery.component';
+import { SessionGalleryComponent } from '../session/session-gallery/session-gallery.component';
+import { RecordGalleryComponent } from '../record/record-gallery/record-gallery.component';
 
 const routes: Routes = [
 	{
@@ -26,7 +27,7 @@ const routes: Routes = [
 	},
 	{
 		path: 'metric-groups',
-		component: MetricGroupGalleryComponent, // <<<--------
+		component: MetricGroupGalleryComponent,
 		canActivate: [
 			AuthGuardService
 		]
@@ -47,21 +48,21 @@ const routes: Routes = [
 	},
 	{
 		path: 'sessions',
-		component: MetricGroupGalleryComponent, // <<<--------
+		component: SessionGalleryComponent,
 		canActivate: [
 			AuthGuardService
 		]
 	},
 	{
 		path: 'records',
-		component: MetricGalleryComponent, // <<<--------
+		component: RecordGalleryComponent,
 		canActivate: [
 			AuthGuardService
 		]
 	},
 	{
 		path: 'users',
-		component: MetricGalleryComponent, // <<<-------
+		component: MetricGalleryComponent,
 		canActivate: [
 			AuthGuardService
 		]

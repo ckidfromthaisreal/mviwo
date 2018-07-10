@@ -24,3 +24,31 @@ export class AgePipe implements PipeTransform {
 				`${d} day${d > 1 || d === 0 ? 's' : ''}`;
 	}
 }
+
+@Pipe({
+	name: 'duration'
+})
+export class DurationPipe implements PipeTransform {
+	transform(from: Date, to: Date, type: 'days' | 'months' | 'years' ): string {
+		if (!from) {
+			return '';
+		}
+
+		if (!to) {
+			to = new Date();
+		}
+
+		from = new Date(from);
+
+		let years = to.getFullYear() - from.getFullYear();
+		const months = to.getMonth() - from.getMonth();
+		const days = to.getDate() - from.getDate();
+		if (months < 0 || (months === 0 && days < 0)) {
+			years--;
+		}
+
+		return (!type && years > 0) || type === 'years' ? `${years} year${years > 1 ? 's' : ''}` :
+			(!type && months > 0) || type === 'months' ? `${months} month${months > 1 ? 's' : ''}` :
+			`${days} day${days > 1 ? 's' : ''}`;
+	}
+}

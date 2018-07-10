@@ -570,12 +570,12 @@
 				<!-- row 6 -->
 			</div>
 		</mat-tab>
-		<mat-tab label="Group/s" class="mviwo-unselectable">
+		<mat-tab label="Group/s" class="mviwo-unselectable" [disabled]="!groupsLoaded">
 			<div mat-dialog-content>
 				<div class="row newL" style="max-height: 500px; min-height: 300px">
 					<div class="col-md-12">
 						<mviwo-list-select [dataSource]="metricGroups" sourceLabel="groups" targetLabel="selected groups" [showFields]="['name','metrics']"
-						    formControlName="xxGroups"></mviwo-list-select>
+						    formControlName="xxGroups" [immovableFunction]="groupsImmovableFunction"></mviwo-list-select>
 					</div>
 				</div>
 			</div>
@@ -583,7 +583,7 @@
 	</mat-tab-group>
 </form>
 <div mat-dialog-actions class="modal-footer newL">
-	<button mat-raised-button color="primary" matTooltip="save changes" type="button" [disabled]="form.invalid || form.pristine"
+	<button mat-raised-button color="primary" matTooltip="save changes" type="button" [disabled]="!groupsLoaded || form.invalid || form.pristine"
 	    (click)="onSaveClick()">
 		<i class="fa fa-floppy-o" aria-hidden="true"></i>
 	</button>

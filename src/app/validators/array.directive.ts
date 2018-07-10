@@ -23,4 +23,23 @@ export class ArrayValidators {
 			};
 		};
 	}
+
+	/**
+	 * checks if control's value is not empty.
+	 */
+	public static notEmpty(): ValidatorFn {
+		return (control: AbstractControl): {
+			[key: string]: any
+		} => {
+			if (control.value === null || control.value === undefined || control.value.length) {
+				return null;
+			}
+
+			return {
+				'notEmpty': {
+					value: control.value
+				}
+			};
+		};
+	}
 }

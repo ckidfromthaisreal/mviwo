@@ -4,7 +4,10 @@ import {
 	Input,
 	forwardRef,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import {
+	ControlValueAccessor,
+	NG_VALUE_ACCESSOR
+} from '@angular/forms';
 
 @Component({
 	// tslint:disable-next-line:component-selector
@@ -27,12 +30,12 @@ export class MviwoListSelectComponent implements OnInit, ControlValueAccessor {
 	@Input() showFields: string[];
 	@Input() showSourceItemNumber = false;
 	@Input() showTargetItemNumber = false;
-
 	private propagateChange: (_: any) => {};
 	dataTarget: any[] = [];
-
 	selectedSource: any[] = [];
 	selectedTarget: any[] = [];
+
+	@Input() immovableFunction: (item: any) => boolean = (item) => false;
 
 	constructor() {}
 
@@ -82,6 +85,20 @@ export class MviwoListSelectComponent implements OnInit, ControlValueAccessor {
 		}
 
 		this.propagateChange(this.dataTarget);
+	}
+
+	selectSourceItem(checkbox, item) {
+		if (!this.immovableFunction(item)) {
+			checkbox.toggle();
+			this.sourceSelectionOnChange(null, checkbox, item);
+		}
+	}
+
+	selectTargetItem(checkbox, item) {
+		if (!this.immovableFunction(item)) {
+			checkbox.toggle();
+			this.targetSelectionOnChange(null, checkbox, item);
+		}
 	}
 
 	sourceSelectionOnChange(event, control, item) {
@@ -145,4 +162,3 @@ export class MviwoListSelectComponent implements OnInit, ControlValueAccessor {
 
 	registerOnTouched(fn: any) {}
 }
-

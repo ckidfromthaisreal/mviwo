@@ -12,6 +12,34 @@ const config = require('../../server.json');
 */
 const mongoose = require('mongoose').set('debug', config.DEBUG_MONGOOSE);
 
+// const patientEmbeddedSchema = new mongoose.Schema({
+// 	_id: {
+// 		type: mongoose.Schema.Types.ObjectId,
+// 		ref: 'Patient',
+// 		auto: false,
+// 		required: true
+// 	},
+// 	uid: {
+// 		type: String,
+// 		required: true
+// 	},
+// 	firstName: {
+// 		type: String,
+// 		required: true
+// 	},
+// 	lastName: {
+// 		type: String,
+// 		required: true
+// 	},
+// 	isFemale: {
+// 		type: Boolean,
+// 		required: true
+// 	},
+// 	dateOfBirth: {
+// 		type: Date
+// 	}
+// });
+
 const locationEmbeddedSchema = new mongoose.Schema({
 	_id: {
 		type: mongoose.Schema.Types.ObjectId,
@@ -24,6 +52,34 @@ const locationEmbeddedSchema = new mongoose.Schema({
 		required: true
 	},
 	country: {
+		type: String,
+		required: true
+	}
+	// , patients: {
+	// 	type: [patientEmbeddedSchema],
+	// 	required: true
+	// }
+});
+
+const metricEmbeddedSchema = new mongoose.Schema({
+	_id: {
+		type: mongoose.Schema.Types.ObjectId,
+		required: true,
+		auto: false,
+		ref: 'Metric'
+	},
+	name: {
+		type: String,
+		required: true
+	},
+	description: {
+		type: String
+	},
+	isRequired: {
+		type: Boolean,
+		required: true
+	},
+	dataType: {
 		type: String,
 		required: true
 	}
@@ -40,12 +96,12 @@ const metricGroupEmbeddedSchema = new mongoose.Schema({
 		type: String,
 		required: true
 	},
+	metrics: {
+		type: [metricEmbeddedSchema],
+		required: true
+	},
 	description: {
 		type: String
-	},
-	metrics: {
-		type: [mongoose.Schema.Types.Mixed],
-		required: true
 	}
 });
 
@@ -58,19 +114,41 @@ const sessionSchema = new mongoose.Schema({
 		type: Date,
 		required: true
 	},
-	location: {
+	locations: {
 		type: [locationEmbeddedSchema],
 		required: true
 	},
-	metricGroups: {
+	groups: {
 		type: [metricGroupEmbeddedSchema],
 		required: true
 	},
-	isFinal: {
-		type: Boolean,
-		default: false
+	createdBy: {
+		_id: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'User',
+			required: true,
+			auto: false
+		},
+		username: {
+			type: String,
+			required: true
+		}
+	},
+	updatedBy: {
+		_id: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'User',
+			required: true,
+			auto: false
+		},
+		username: {
+			type: String,
+			required: true
+		}
 	}
-}, { timestamps: true });
+}, {
+	timestamps: true
+});
 
 /* export model. */
 module.exports = mongoose.model('Session', sessionSchema);
