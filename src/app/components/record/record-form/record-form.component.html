@@ -1,3 +1,32 @@
-<p>
-  record-form works!
-</p>
+<h1 mat-dialog-title>
+	<div *ngIf="data.isEdit; then editTitle else createTitle"></div>
+	<ng-template #editTitle>
+		Editing Record:
+		<span style="font-size: 70%;"> {{ data.resource._id }}</span>
+	</ng-template>
+	<ng-template #createTitle>
+		Creating New Record
+	</ng-template>
+	<button mat-dialog-close mat-icon-button class="pull-right" style="font-size: 150%" (click)="onCancelClick()">&times;</button>
+</h1>
+<!-- <form [formGroup]="form"> -->
+<form>
+	<mat-tab-group dynamicHeight>
+		<mat-tab label="General" class="mviwo-unselectable">
+		</mat-tab>
+	</mat-tab-group>
+</form>
+<div mat-dialog-actions class="modal-footer newL">
+	<button mat-raised-button color="primary" matTooltip="save changes" type="button"
+	    (click)="onSaveClick()">
+		<i class="fa fa-floppy-o" aria-hidden="true"></i>
+		<!-- [disabled]="form.invalid || form.pristine" -->
+	</button>
+	<button mat-raised-button color="accent" matTooltip="undo changes" type="button" (click)="onResetClick()">
+			<!-- [disabled]="form.pristine" -->
+		<i class="fa fa-undo" aria-hidden="true"></i>
+	</button>
+	<button mat-raised-button matTooltip="cancel" type="button" (click)="onCancelClick()">
+		<i class="fa fa-times" aria-hidden="true"></i>
+	</button>
+</div>

@@ -40,9 +40,11 @@ import {
 })
 export class MetricGalleryComponent implements OnInit {
 	data: Metric[] = [];
+	selectableData: Metric[] = [];
+
 	dataTypes = Metric.dataTypes;
 
-	displayedColumns = ['select', 'type', 'name', 'group', 'createdAt', 'updatedAt', 'action'];
+	displayedColumns = ['select', 'type', 'name', 'group', 'session', 'createdAt', 'updatedAt', 'action'];
 	dataSource = new MatTableDataSource < Metric > (this.data);
 	selection = new SelectionModel < Metric > (true);
 
@@ -69,6 +71,7 @@ export class MetricGalleryComponent implements OnInit {
 				return (item.name.toLowerCase().indexOf(filter.trim().toLowerCase()) > -1);
 			};
 			this.dataSource.data.unshift(...data);
+			this.selectableData = data.filter(metric => [undefined, null, 0].includes(metric.sessions));
 			this.dataSource.sort = this.sort;
 			this.dataSource.paginator = this.paginator; // ALSO REFRESHES RENDERED ROWS!
 		});
@@ -79,11 +82,11 @@ export class MetricGalleryComponent implements OnInit {
 	}
 
 	isAllSelected() {
-		return this.selection.selected.length === this.dataSource.data.length;
+		return this.selection.selected.length === this.selectableData.length;
 	}
 
 	toggleAll() {
-		this.isAllSelected() ? this.selection.clear() : this.dataSource.data.forEach(row => this.selection.select(row));
+		this.isAllSelected() ? this.selection.clear() : this.selectableData.forEach(row => this.selection.select(row));
 	}
 
 	highlight(rowId): void {
@@ -93,6 +96,12 @@ export class MetricGalleryComponent implements OnInit {
 	editOnClick(event, element): void {
 		this.openForm(true, element, (result) => {
 			this.data[element.position - 1] = result[0];
+
+			const ind = this.selectableData.indexOf(element);
+			if (ind > -1) {
+				this.selectableData[ind] = result[0];
+			}
+
 			this.dataSource.data = this.data = [...this.data];
 			this.notification.openCustomSnackbar(`metric edited successfully!`);
 		});
@@ -101,6 +110,11 @@ export class MetricGalleryComponent implements OnInit {
 	deleteOneOnClick(event, element): void {
 		this.crud.deleteOne(element).subscribe((result) => {
 			const page = this.paginator.pageIndex;
+
+			const ind = this.selectableData.indexOf(element);
+			if (ind > -1) {
+				this.selectableData.splice(ind, 1);
+			}
 
 			this.selection.deselect(element);
 			for (let i = element.position; i < this.dataSource.data.length; i++) {
@@ -122,6 +136,8 @@ export class MetricGalleryComponent implements OnInit {
 		this.crud.deleteMany(this.selection.selected).subscribe((result) => {
 			const page = this.paginator.pageIndex;
 
+			this.selectableData = this.selectableData.filter(item => !this.selection.selected.includes(item));
+
 			this.dataSource.data = this.data = this.data.filter(item => !this.selection.selected.includes(item));
 			for (let i = 0; i < this.data.length; i++) {
 				this.data[i].position = i + 1;
@@ -140,6 +156,9 @@ export class MetricGalleryComponent implements OnInit {
 		this.openForm(false, null, (result) => {
 			result[0].position = this.data.length + 1;
 			this.dataSource.data = this.data = [...this.data, result[0]];
+
+			this.selectableData = [...this.selectableData, result[0]];
+
 			setTimeout(() => {
 				this.dataSource.paginator.lastPage();
 			});
@@ -151,6 +170,9 @@ export class MetricGalleryComponent implements OnInit {
 		this.crud.insertOne<Metric>(Metric.shallowClone(element)).subscribe(result => {
 			result[0].position = this.data.length + 1;
 			this.dataSource.data = this.data = [...this.data, result[0]];
+
+			this.selectableData = [...this.selectableData, result[0]];
+
 			setTimeout(() => {
 				this.dataSource.paginator.lastPage();
 			});
@@ -169,10 +191,16 @@ export class MetricGalleryComponent implements OnInit {
 		});
 
 		let optimismApplied = false;
+		const ind = this.selectableData.indexOf(metric);
 
 		dialogRef.componentInstance.edited.subscribe((tempMetric: Metric) => {
 			this.data[metric.position - 1] = tempMetric;
 			this.dataSource.data = this.data = [...this.data];
+
+			if (ind > -1) {
+				this.selectableData[ind] = tempMetric;
+			}
+
 			optimismApplied = true;
 		});
 
@@ -185,6 +213,11 @@ export class MetricGalleryComponent implements OnInit {
 				if (isEdit && optimismApplied) {
 					this.data[metric.position - 1] = metric;
 					this.dataSource.data = this.data = [...this.data];
+
+					if (ind > -1) {
+						this.selectableData[ind] = metric;
+					}
+
 					this.notification.openCustomSnackbar(`failed to update metric!`);
 				}
 			}
@@ -193,5 +226,13 @@ export class MetricGalleryComponent implements OnInit {
 
 	getDataType(element): any {
 		return this.dataTypes.find(e => e.name === element.dataType);
+	}
+
+	selectRow(row: Metric) {
+		if (row.sessions > 0) {
+			return;
+		}
+
+		this.selection.toggle(row);
 	}
 }

@@ -20,9 +20,7 @@ import {
 import {
 	FormControl,
 	FormGroup,
-	Validators,
-	FormArray,
-	AbstractControl
+	Validators
 } from '@angular/forms';
 import {
 	MatDialogRef,
@@ -53,7 +51,6 @@ export class MetricGroupFormComponent implements OnInit {
 	constructor(
 		private crud: MetricGroupCrudService,
 		private metricCrud: MetricCrudService,
-		private mongoloids: MongoloidsService,
 		public dialogRef: MatDialogRef<MetricGroupFormComponent>,
 		@Inject(MAT_DIALOG_DATA) public data: ElementFormInput<MetricGroup>
 	) {}
@@ -131,9 +128,6 @@ export class MetricGroupFormComponent implements OnInit {
 		name.reset((this.data.resource) ? this.data.resource.name : '');
 		name.updateValueAndValidity();
 
-		// const mandatory = this.form.get('cbMandatory');
-		// mandatory.reset((this.data.resource) ? this.data.resource.isMandatory : this.rules.defaultIsMandatory);
-
 		const desc = this.form.get('taDescription');
 		desc.reset((this.data.resource) ? this.data.resource.description : '');
 		desc.updateValueAndValidity();
@@ -202,8 +196,9 @@ export class MetricGroupFormComponent implements OnInit {
 			(this.data.isEdit) ? this.data.resource._id : undefined,
 			this.form.get('tfName').value,
 			this.form.get('xxMetrics').value,
+			this.data.resource.sessions || 0,
 			this.form.get('taDescription').value,
-			(this.data.isEdit) ? this.data.resource.position : undefined
+			this.data.resource.position
 		);
 
 		return tempMetricGroup;

@@ -115,11 +115,11 @@
 							<mat-icon>more_vert</mat-icon>
 						</button>
 						<mat-menu #menu="matMenu">
-							<button mat-menu-item (click)="editOnClick($event, element)">
+							<button mat-menu-item (click)="editOnClick($event, element)" [disabled]="!auth.hasPermission('patient', 'updateOne')">
 								<mat-icon>create</mat-icon>
 								<span>Edit Item</span>
 							</button>
-							<button mat-menu-item (click)="deleteOneOnClick($event, element)">
+							<button mat-menu-item (click)="deleteOneOnClick($event, element)" [disabled]="!auth.hasPermission('patient', 'deleteOne')">
 								<mat-icon>delete</mat-icon>
 								<span>Delete Item</span>
 							</button>

@@ -121,6 +121,7 @@ export class Metric implements Mongoloid {
 			minDateOffset?: number,
 			maxDateOffset?: number
 		}
+		, public sessions?: number
 		, public position?: number
 	) {}
 

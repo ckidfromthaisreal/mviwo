@@ -80,7 +80,6 @@ export class MetricFormComponent implements OnInit {
 
 	groupsLoaded = false;
 
-
 	chosenMetricGroups: MetricGroup[] = [];
 
 	/** enum values control. */
@@ -91,8 +90,6 @@ export class MetricFormComponent implements OnInit {
 
 	/** used to bind both preview slider & input field */
 	sliderPrev = 0;
-
-	private groupsFetched = false;
 
 	@Output() edited: EventEmitter < Metric > = new EventEmitter();
 
@@ -166,7 +163,7 @@ export class MetricFormComponent implements OnInit {
 				(this.data.resource) ? this.data.resource.description : '', Validators.maxLength(this.rules.descriptionMaxLength)
 			),
 			'slDataType': new FormControl(
-				(this.data.resource) ? this.data.resource.dataType : '', Validators.required
+				(this.data.resource) ? { value: this.data.resource.dataType, disabled: this.data.resource.sessions > 0 } : '', Validators.required
 			),
 			'defaultValue': new FormControl(
 				(this.data.resource) ? this.data.resource.defaultValue : '', /*defValidators*/ this.initialDefaultValueValidators

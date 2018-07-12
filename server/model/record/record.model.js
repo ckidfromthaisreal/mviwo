@@ -20,7 +20,8 @@ const resultSchema = new mongoose.Schema({
 		_id: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'MetricGroup',
-			required: true
+			required: true,
+			auto: false
 		},
 		name: {
 			type: String,
@@ -31,7 +32,8 @@ const resultSchema = new mongoose.Schema({
 		_id: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Metric',
-			required: true
+			required: true,
+			auto: false
 		},
 		name: {
 			type: String,
@@ -68,6 +70,28 @@ const recordSchema = new mongoose.Schema({
 	results: {
 		type: [resultSchema],
 		required: true
+	}
+	, createdBy: {
+		_id: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'User',
+			required: true
+		},
+		username: {
+			type: String,
+			required: true
+		}
+	}
+	, updatedBy: {
+		_id: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'User',
+			required: true
+		},
+		username: {
+			type: String,
+			required: true
+		}
 	}
 }, { timestamps: true });
 

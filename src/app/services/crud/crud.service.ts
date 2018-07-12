@@ -11,11 +11,11 @@ import { tap, catchError } from 'rxjs/operators';
 
 export abstract class CrudService {
 	constructor(
-		private element: string
-		, private url: string
-		, private http: HttpClient
-		, private auth: AuthenticationService
-		, private notification: NotificationService
+		protected element: string
+		, protected url: string
+		, protected http: HttpClient
+		, protected auth: AuthenticationService
+		, protected notification: NotificationService
 	) {}
 
 	/**
@@ -290,7 +290,7 @@ export abstract class CrudService {
 	 * stores instances in localStorage.
 	 * @param data element instances fetched from server.
 	 */
-	private store<T>(data: T[]): T[] {
+	protected store<T>(data: T[]): T[] {
 		localStorage.setItem(`mviwo-${this.element}s`, JSON.stringify(data));
 		return data;
 	}
@@ -299,7 +299,7 @@ export abstract class CrudService {
 	 * handles errors.
 	 * @param error
 	 */
-	private handleError(error: Response) { // TODO: server unreachable: fetch from db with disabled editing.
+	protected handleError(error: Response) { // TODO: server unreachable: fetch from db with disabled editing.
 		// if (error.status === 400) {
 		// 	return Observable.throw(new BadInputError(error.json()));
 		// }
@@ -316,7 +316,7 @@ export abstract class CrudService {
 	 * @param fnName function name being checked.
 	 * @param activity activity attempted.
 	 */
-	private authCheck(fnName: string, activity: string): Observable<never> {
+	protected authCheck(fnName: string, activity: string): Observable<never> {
 		if (!this.auth.isLoggedIn) {
 			this.auth.logout();
 			this.notification.openCustomSnackbar(`user not logged in!`, 'OK', Number.MAX_SAFE_INTEGER);

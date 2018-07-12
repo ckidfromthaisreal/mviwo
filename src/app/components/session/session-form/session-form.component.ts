@@ -66,9 +66,7 @@ export class SessionFormComponent implements OnInit {
 		private crud: SessionCrudService,
 		private locationCrud: LocationCrudService,
 		private groupCrud: MetricGroupCrudService,
-		// private strings: StringsService,
 		public dates: DatesService,
-		// public browser: BrowserService,
 		public dialogRef: MatDialogRef < SessionFormComponent > ,
 		@Inject(MAT_DIALOG_DATA) public data: ElementFormInput < Session >
 	) {}
@@ -205,30 +203,38 @@ export class SessionFormComponent implements OnInit {
 	private prepareBody(session?: Session): Updateable {
 		const tempSession = session || this.prepareSession();
 
-		const removedLocations: string[] = [];
-		if (this.data.isEdit) {
-			const currentLocations: string[] = tempSession.locations.map(item => item._id);
-			this.data.resource.locations.forEach(location => {
-				if (!currentLocations.includes(location._id)) {
-					removedLocations.push(location._id);
-				}
-			});
-		}
+		// const removedLocations: string[] = [];
+		// if (this.data.isEdit) {
+		// 	const currentLocations: string[] = tempSession.locations.map(item => item._id);
+		// 	this.data.resource.locations.forEach(location => {
+		// 		if (!currentLocations.includes(location._id)) {
+		// 			removedLocations.push(location._id);
+		// 		}
+		// 	});
+		// }
 
 		const removedGroups: string[] = [];
+		const removedMetrics: string[] = [];
 		if (this.data.isEdit) {
 			const currentGroups: string[] = tempSession.groups.map(item => item._id);
 			this.data.resource.groups.forEach(group => {
 				if (!currentGroups.includes(group._id)) {
 					removedGroups.push(group._id);
+
+					group.metrics.forEach(metric => {
+						if (!removedMetrics.includes(metric._id)) {
+							removedMetrics.push(metric._id);
+						}
+					});
 				}
 			});
 		}
 
 		const updateable = {
 			_id: tempSession._id,
-			removedLocations: this.data.isEdit ? removedLocations : undefined,
-			removedGroups: this.data.isEdit ? removedGroups : undefined
+			// removedLocations: this.data.isEdit ? removedLocations : undefined,
+			removedGroups: this.data.isEdit ? removedGroups : undefined,
+			removedMetrics: this.data.isEdit ? removedMetrics : undefined
 		};
 
 		Object.keys(tempSession).forEach(key => {

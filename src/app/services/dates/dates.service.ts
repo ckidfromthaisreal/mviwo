@@ -24,27 +24,61 @@ export class DatesService {
 	}
 
 	public before(d0: Date, d1: Date) {
-		const d0Str = new Date(d0).toString().substring(0, 15);
-		const d1Str = new Date(d1).toString().substring(0, 15);
-		return d0Str < d1Str;
+		if (d0.constructor !== Date) {
+			d0 = new Date(d0);
+		}
+
+		if (d1.constructor !== Date) {
+			d1 = new Date(d1);
+		}
+
+		return d0.getFullYear() < d1.getFullYear() ||
+			(d0.getFullYear() === d1.getFullYear() &&
+				(d0.getMonth() < d1.getMonth() ||
+					(d0.getMonth() === d1.getMonth() && d0.getDate() < d1.getDate())));
 	}
 
 	public upTo(d0: Date, d1: Date) {
-		const d0Str = new Date(d0).toString().substring(0, 15);
-		const d1Str = new Date(d1).toString().substring(0, 15);
-		return d0Str <= d1Str;
+		if (d0.constructor !== Date) {
+			d0 = new Date(d0);
+		}
+
+		if (d1.constructor !== Date) {
+			d1 = new Date(d1);
+		}
+
+		return d0.getFullYear() < d1.getFullYear() ||
+			(d0.getFullYear() === d1.getFullYear() &&
+				(d0.getMonth() < d1.getMonth() ||
+					(d0.getMonth() === d1.getMonth() && d0.getDate() <= d1.getDate())));
 	}
 
 	public after(d0: Date, d1: Date) {
-		const d0Str = new Date(d0).toString().substring(0, 15);
-		const d1Str = new Date(d1).toString().substring(0, 15);
-		return d0Str > d1Str;
+		return this.before(d1, d0);
 	}
 
 	public from(d0: Date, d1: Date) {
-		const d0Str = new Date(d0).toString().substring(0, 15);
-		const d1Str = new Date(d1).toString().substring(0, 15);
-		return d0Str >= d1Str;
+		return this.upTo(d1, d0);
+	}
+
+	public same(d0: Date, d1: Date) {
+		if (d0.constructor !== Date) {
+			d0 = new Date(d0);
+		}
+
+		if (d1.constructor !== Date) {
+			d1 = new Date(d1);
+		}
+
+		return d0.getFullYear() === d1.getFullYear() && d0.getMonth() === d1.getMonth() && d0.getDate() === d1.getDate();
+	}
+
+	public isFuture(d0: Date) {
+		return this.after(d0, this.now());
+	}
+
+	public isPast(d0: Date) {
+		return this.before(d0, this.now());
 	}
 
 	constructor() {}
