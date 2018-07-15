@@ -186,8 +186,8 @@
 						<mat-form-field floatLabel="auto" *ngIf="dataType.value === 'enum'">
 							<input matInput type="text" placeholder="add list values.." [pattern]="rules.enumValuePattern" [formControl]="xxValuesInput">
 							<mat-error>
-								{{ xxValuesInput.hasError('pattern') ? 'letters only!' : xxValuesInput.hasError('valueNotExists') ? 'value already in list!'
-								: xxValuesInput.hasError('dependancy') ? 'minimum 2 values!' : '' }}
+								{{ xxValuesInput.hasError('pattern') ? 'numbers or valid sentences only!' : xxValuesInput.hasError('valueNotExists') ? 'value
+								already in list!' : xxValuesInput.hasError('dependancy') ? 'minimum 2 values!' : '' }}
 							</mat-error>
 							<mat-icon matSuffix *ngIf="xxValuesInput.value && xxValuesInput.value.length && !xxValuesInput.hasError('pattern') && !xxValuesInput.hasError('valueNotExists')"
 							    color="accent" (click)="addEnumValue()">
@@ -196,13 +196,25 @@
 								</button>
 							</mat-icon>
 						</mat-form-field>
-						<mat-form-field class="newL" floatLabel="auto" *ngIf="dataType.value === 'enum'">
-							<mat-select placeholder="Default Value" formControlName="defaultValue">
-								<mat-option>Select a value..</mat-option>
-								<mat-option *ngFor="let ctrl of getxxValuesControls()" [value]="ctrl.value">{{ ctrl.value }}</mat-option>
-							</mat-select>
-							<mat-error></mat-error>
-						</mat-form-field>
+						<div class="newL" *ngIf="dataType.value === 'enum'">
+							<div *ngIf="getControlValue('cbMultiple', 'grpEnumParams'); then multiDefVal; else singleDefVal"></div>
+							<ng-template #multiDefVal>
+								<mat-form-field floatLabel="auto">
+									<mat-select placeholder="Default Value" formControlName="defaultValue" multiple>
+										<mat-option *ngFor="let ctrl of getxxValuesControls()" [value]="ctrl.value">{{ ctrl.value }}</mat-option>
+									</mat-select>
+									<button matSuffix mat-icon-button *ngIf="hasValue(prop.default.value)" (click)="onEraseClick($event, prop.default)"><mat-icon>cancel</mat-icon></button>
+								</mat-form-field>
+							</ng-template>
+							<ng-template #singleDefVal>
+								<mat-form-field floatLabel="auto">
+									<mat-select placeholder="Default Value" formControlName="defaultValue">
+										<mat-option>Select a value..</mat-option>
+										<mat-option *ngFor="let ctrl of getxxValuesControls()" [value]="ctrl.value">{{ ctrl.value }}</mat-option>
+									</mat-select>
+								</mat-form-field>
+							</ng-template>
+						</div>
 						<div *ngIf="dataType.value === 'date'">
 							<div *ngIf="!getControlValue('cbIsMinDateCurrent', 'grpDateParams'); else minoffset">
 								<mat-form-field *ngIf="getControl('dpMinDate', 'grpDateParams'); let minDate" floatLabel="auto" formGroupName="grpDateParams">
@@ -420,8 +432,7 @@
 				<div class="row newL" *ngIf="hasValue(dataType.value) && !['boolean', 'enum'].includes(dataType.value)">
 					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" *ngIf="['string'].includes(dataType.value)">
 						<mat-form-field floatLabel="auto" *ngIf="getControl('cbEmail', 'grpStringParams'); let email">
-							<input matInput placeholder="Default Value" [email]="email.value"
-								[pattern]="!email.value && !getControlValue('cbLineBreaks', 'grpStringParams') ? getControlValue('tfPattern', 'grpStringParams') : ''"
+							<input matInput placeholder="Default Value" [email]="email.value" [pattern]="!email.value && !getControlValue('cbLineBreaks', 'grpStringParams') ? getControlValue('tfPattern', 'grpStringParams') : ''"
 							    formControlName="defaultValue">
 							<button *ngIf="hasValue(prop.default.value)" mat-icon-button matSuffix (click)="onEraseClick($event, prop.default)">
 								<mat-icon>cancel</mat-icon>
@@ -510,8 +521,9 @@
 								</ng-template>
 								<ng-template #textarea>
 									<mat-form-field floatLabel="auto">
-										<textarea matInput matTextareaAutosize ngModel #textareaPrev="ngModel" [placeholder]="prop.name.value || '{METRIC_NAME}'" name="textareaPrev"
-										    [required]="prop.required.value" [maxlength]="local.maxLength.value"></textarea>
+										<textarea matInput matTextareaAutosize ngModel #textareaPrev="ngModel" [placeholder]="prop.name.value || '{METRIC_NAME}'"
+										    name="textareaPrev" [minlength]="getControlValue('tfMinLength', 'grpStringParams')" [required]="prop.required.value"
+										    [maxlength]="local.maxLength.value"></textarea>
 										<button mat-icon-button matSuffix *ngIf="hasValue(textareaPrev.control.value)" (click)="onEraseClick($event, textareaPrev.control)">
 											<mat-icon>cancel</mat-icon>
 										</button>
@@ -549,15 +561,15 @@
 										<ng-template #label>
 											<br>
 											<mat-label>
-												{{ ((hasValue(pronto.prefix.value)) ? (pronto.prefix.value + ' ') : '')
-												+ sliderPrev + ((hasValue(pronto.postfix.value)) ? (' ' + pronto.postfix.value) : '') }}
+												{{ ((hasValue(pronto.prefix.value)) ? (pronto.prefix.value + ' ') : '') + sliderPrev + ((hasValue(pronto.postfix.value))
+												? (' ' + pronto.postfix.value) : '') }}
 											</mat-label>
 										</ng-template>
 										<ng-template #freeInput>
 											<mat-form-field class="freeInput">
 												<span matPrefix>{{ pronto.prefix.value }} </span>
-												<input matInput type="number" [(ngModel)]="sliderPrev" name="sliderPrevInput" [min]="local.minVal.value || 0"
-													[max]="local.maxVal.value || 100" [step]="local.step.value || 1" (keyup)="sliderPrev = fixNumberInput(sliderPrev)">
+												<input matInput type="number" [(ngModel)]="sliderPrev" name="sliderPrevInput" [min]="local.minVal.value || 0" [max]="local.maxVal.value || 100"
+												    [step]="local.step.value || 1" (keyup)="sliderPrev = fixNumberInput(sliderPrev)">
 												<span matSuffix>{{ pronto.postfix.value }}</span>
 											</mat-form-field>
 										</ng-template>

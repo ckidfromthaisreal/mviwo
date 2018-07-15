@@ -41,6 +41,12 @@ import {
 import { Updateable } from '../../../services/crud/crud.service';
 import { DatesService } from '../../../services/dates/dates.service';
 
+interface EmbeddedLocation {
+	_id: string | object;
+	name: string;
+	country: string;
+}
+
 @Component({
 	// tslint:disable-next-line:component-selector
 	selector: 'mviwo-session-form',
@@ -50,9 +56,9 @@ import { DatesService } from '../../../services/dates/dates.service';
 export class SessionFormComponent implements OnInit {
 	readonly rules = Session.rules;
 
-	initialLocations: Location[] = [];
-	locations: Location[] = [];
-	chosenLocations: Location[] = [];
+	initialLocations: EmbeddedLocation[] = [];
+	locations: EmbeddedLocation[] = [];
+	chosenLocations: EmbeddedLocation[] = [];
 
 	initialGroups: MetricGroup[] = [];
 	groups: MetricGroup[] = [];

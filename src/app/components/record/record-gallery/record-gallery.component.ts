@@ -1,3 +1,5 @@
+import { DatesService } from './../../../services/dates/dates.service';
+import { SessionCrudService } from './../../../services/crud/session-crud.service';
 import { BrowserService } from './../../../services/browser/browser.service';
 import { NotificationService } from './../../../services/notification/notification.service';
 import {
@@ -11,6 +13,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { RecordCrudService } from '../../../services/crud/record-crud.service';
 import { AuthenticationService } from '../../../services/authentication/authentication.service';
 import { RecordFormComponent } from '../record-form/record-form.component';
+import { Session } from '../../../models/session.model';
 
 @Component({
 	// tslint:disable-next-line:component-selector
@@ -20,7 +23,10 @@ import { RecordFormComponent } from '../record-form/record-form.component';
 })
 export class RecordGalleryComponent implements OnInit {
 	data: Record[] = [];
+	sessions: Session[] = [];
 	// selectableData: Record[] = [];
+
+	sessionsFetchAttempted = false;
 
 	displayedColumns = ['select', 'patient', 'session', 'results', 'createdAt', 'updatedAt', 'action'];
 	dataSource = new MatTableDataSource<Record>(this.data);
@@ -37,9 +43,11 @@ export class RecordGalleryComponent implements OnInit {
 
 	constructor(
 		private crud: RecordCrudService
+		, private sessionCrud: SessionCrudService
 		, public auth: AuthenticationService
 		, private notification: NotificationService
 		, protected browser: BrowserService
+		// , private dates: DatesService
 		, public dialog: MatDialog
 	) {}
 
@@ -55,6 +63,18 @@ export class RecordGalleryComponent implements OnInit {
 			this.dataSource.paginator = this.paginator; // ALSO REFRESHES RENDERED ROWS!
 		});
 
+		const today = new Date();
+		this.sessionCrud.getMany<Session>(
+			{ startDate: { $lte: today }, endDate: { $gte: today } },
+			undefined,
+			[
+				{ path: 'locations._id', fields: 'patients' },
+				{ path: 'groups.metrics._id', fields: 'defaultValue stringParams numberParams enumParams dateParams' }
+			]
+		).subscribe(data => {
+			this.sessions = data;
+			this.sessionsFetchAttempted = true;
+		});
 	}
 
 	isAllSelected(): boolean {
@@ -72,7 +92,7 @@ export class RecordGalleryComponent implements OnInit {
 	}
 
 	editOnClick(event, element): void {
-		this.openForm(true, element, (result) => {
+		this.openForm(true, { record: element, sessions: this.sessions }, (result) => {
 			this.data[element.position - 1] = result[0];
 
 			// const ind = this.selectableData.indexOf(element);
@@ -131,9 +151,9 @@ export class RecordGalleryComponent implements OnInit {
 	}
 
 	insertOneOnClick(): void {
-		this.openForm(false, null, (result) => {
-			result[0].position = this.data.length + 1;
-			this.dataSource.data = this.data = [...this.data, result[0]];
+		this.openForm(false, { record: null, sessions: this.sessions }, (result) => {
+			result.position = this.data.length + 1;
+			this.dataSource.data = this.data = [...this.data, result];
 
 			// this.selectableData = [...this.selectableData, result[0]];
 
@@ -144,29 +164,29 @@ export class RecordGalleryComponent implements OnInit {
 		});
 	}
 
-	private openForm(isEdit: boolean, record?: Record, callback?: (result) => void): void {
+	private openForm(isEdit: boolean, data?: { record: Record, sessions: Session[] }, callback?: (result) => void): void {
 		const dialogRef = this.dialog.open(RecordFormComponent, {
 			data: {
-				resource: record,
+				resource: data,
 				isEdit: isEdit
 			},
 			width: !this.browser.isMobile() ?
 				`${Math.min(this.browser.width() * 0.6, 1000)}px` : `${this.browser.width()}px`
 		});
 
-		// let optimismApplied = false;
+		let optimismApplied = false;
 		// const ind = this.selectableData.indexOf(metric);
 
-		// dialogRef.componentInstance.edited.subscribe((tempRecord: Record) => {
-		// 	this.data[record.position - 1] = tempRecord;
-		// 	this.dataSource.data = this.data = [...this.data];
+		dialogRef.componentInstance.edited.subscribe((tempRecord: Record) => {
+			this.data[data.record.position - 1] = tempRecord;
+			this.dataSource.data = this.data = [...this.data];
 
-		// 	// if (ind > -1) {
-		// 	// 	this.selectableData[ind] = tempMetric;
-		// 	// }
+			// if (ind > -1) {
+			// 	this.selectableData[ind] = tempMetric;
+			// }
 
-		// 	optimismApplied = true;
-		// });
+			optimismApplied = true;
+		});
 
 		dialogRef.afterClosed().subscribe(result => {
 			if (result) {
@@ -174,25 +194,21 @@ export class RecordGalleryComponent implements OnInit {
 					callback(result);
 				}
 			} else { // error or cancel.
-				// if (isEdit && optimismApplied) {
-				// 	this.data[record.position - 1] = record;
-				// 	this.dataSource.data = this.data = [...this.data];
+				if (isEdit && optimismApplied) {
+					this.data[data.record.position - 1] = data.record;
+					this.dataSource.data = this.data = [...this.data];
 
-				// 	// if (ind > -1) {
-				// 	// 	this.selectableData[ind] = metric;
-				// 	// }
+					// if (ind > -1) {
+					// 	this.selectableData[ind] = metric;
+					// }
 
-				// 	this.notification.openCustomSnackbar(`failed to update record!`);
-				// }
+					this.notification.openCustomSnackbar(`failed to update record!`);
+				}
 			}
 		});
 	}
 
 	selectRow(row: Record) {
-		// if (row.sessions > 0) {
-		// 	return;
-		// }
-
 		this.selection.toggle(row);
 	}
 }

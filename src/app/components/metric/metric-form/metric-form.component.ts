@@ -1055,11 +1055,12 @@ export class MetricFormComponent implements OnInit {
 			dType,
 			this.form.get('xxGroups').value,
 			this.form.get('taDescription').value,
-			this.form.get('defaultValue').value,
+			this.form.get('defaultValue').value || undefined,
 			undefined,
 			undefined,
 			undefined,
 			undefined,
+			(this.data.isEdit) ? this.data.resource.sessions || 0 : 0,
 			(this.data.isEdit) ? this.data.resource.position : undefined
 		);
 

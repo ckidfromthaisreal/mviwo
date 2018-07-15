@@ -49,4 +49,35 @@ export class ArraysService {
 
 		return this.sameValuesAndOrder<T> (sorted1, sorted2);
 	}
+
+	public inPairs<T>(arr: T[]): T[][] {
+		const result = [];
+
+		for (let i = 0; i < arr.length; i += 2) {
+			const subResult = [];
+
+			subResult.push(arr[i]);
+
+			if (i + 1 < arr.length) {
+				subResult.push(arr[i + 1]);
+			}
+
+			result.push(subResult);
+		}
+
+		return result;
+	}
+
+	public getEvenIndexes<T>(arr: T[]): number[] {
+		return Object.keys(arr).map(key => Number.parseInt(key)).filter(key => key % 2 === 0);
+	}
+
+	public aggregateSubarrayLengths(mainArray: any[], subArrayFn: (element) => any[], index: number): number {
+		let total = 0;
+		for (let i = 0; i < index && i < mainArray.length; i++) {
+			total += subArrayFn(mainArray[i]).length;
+		}
+
+		return total;
+	}
 }

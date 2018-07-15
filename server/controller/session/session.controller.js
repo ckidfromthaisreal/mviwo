@@ -51,6 +51,17 @@ exports.getMany = async (req, res, next) => {
 		query.select(req.headers.fields);
 	}
 
+	if (req.headers.populate) {
+		JSON.parse(req.headers.populate).forEach(pathObj => {
+			console.log(pathObj);
+
+			query.populate({
+				path: pathObj.path,
+				select: pathObj.fields
+			});
+		});
+	}
+
 	try {
 		const sessions = await query.exec();
 		logger.info('API', operationName, `fetched ${sessions.length} sessions`);

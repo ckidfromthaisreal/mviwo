@@ -196,9 +196,9 @@ export class MetricGroupFormComponent implements OnInit {
 			(this.data.isEdit) ? this.data.resource._id : undefined,
 			this.form.get('tfName').value,
 			this.form.get('xxMetrics').value,
-			this.data.resource.sessions || 0,
+			(this.data.isEdit) ? this.data.resource.sessions || 0 : 0,
 			this.form.get('taDescription').value,
-			this.data.resource.position
+			(this.data.isEdit) ? this.data.resource.position : undefined
 		);
 
 		return tempMetricGroup;

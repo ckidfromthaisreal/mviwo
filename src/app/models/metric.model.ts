@@ -25,7 +25,7 @@ export class Metric implements Mongoloid {
 		},
 		{
 			name: 'enum',
-			simpleName: 'text from list',
+			simpleName: 'predefined',
 			desc: 'enumeration. only string values from list.',
 			icon: {
 				class: 'fa fa-object-group',
@@ -76,7 +76,8 @@ export class Metric implements Mongoloid {
 		hintMaxLength: 25,
 		defaultLineBreaks: false,
 		defaultIsMultiple: false,
-		enumValuePattern: '[A-z][A-z ,\'\*\.\\/\-0-9_:]*',
+		enumValuePattern:
+		'^[A-z0-9]+([\'\-_]?[A-z0-9]+[\']?)*(([,:\.!\?]?|[ ][\-&])[ ][A-z0-9]+([\'\-_]?[A-z0-9]+[\']?)*)*[\.!\?]?',
 		defaultFreeInput: false
 	};
 

@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RecordGalleryComponent } from './record-gallery/record-gallery.component';
 import { RecordFormComponent } from './record-form/record-form.component';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 
 @NgModule({
 	imports: [
@@ -41,6 +42,8 @@ import { RecordFormComponent } from './record-form/record-form.component';
 		MatDatepickerModule,
 		MatNativeDateModule,
 		MatRadioModule,
+
+		NgxMatSelectSearchModule,
 
 		MviwoListSelectModule,
 

@@ -27,6 +27,7 @@ export abstract class CrudService {
 	getMany<T>(
 		filter?: object
 		, fields?: string
+		, populate?: { path: string, fields?: string }[]
 		, options?: object
 	): Observable<T[]> {
 		let authChk: Observable<never>;
@@ -50,6 +51,10 @@ export abstract class CrudService {
 
 		if (fields) {
 			headers = headers.set('fields', fields);
+		}
+
+		if (populate) {
+			headers = headers.set('populate', JSON.stringify(populate));
 		}
 
 		if (options) {

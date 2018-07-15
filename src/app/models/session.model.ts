@@ -1,4 +1,5 @@
 import { Mongoloid } from '../services/crud/crud.service';
+import { Location } from './location.model';
 
 export class Session implements Mongoloid {
 	public static rules = {};

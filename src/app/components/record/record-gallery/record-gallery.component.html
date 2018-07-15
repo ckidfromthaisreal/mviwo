@@ -11,8 +11,9 @@
 				</mat-form-field>
 			</div>
 			<div class="col-md-6 text-right explorer-buttons">
+				<small *ngIf="sessionsFetchAttempted && !sessions.length">no current sessions! </small>
 				<button mat-raised-button color="primary" matTooltip="create new"
-					[disabled]="!auth.hasPermission('metric', 'insertOne')"
+					[disabled]="!auth.hasPermission('metric', 'insertOne') || !sessions.length"
 					(click)="insertOneOnClick()">
 					<mat-icon>add</mat-icon>
 				</button>
