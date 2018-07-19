@@ -15,12 +15,12 @@
 			<div class="row newL">
 				<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 					<mat-form-field>
-						<mat-select ngModel name="session" placeholder="Session" required [disabled]="!data.resource.sessions.length" (selectionChange)="onSessionSelect(form.value.session)">
+						<mat-select [compareWith]="sessionCompare" #sessionSelect [ngModel]="session" name="session" placeholder="Session" required
+						    [disabled]="!data.resource.sessions.length" (selectionChange)="onSessionSelect(form.value.session)">
 							<mat-option *ngFor="let session of data.resource.sessions" [value]="{ _id: session._id, locations: session.locations, groups: session.groups }">
 								{{ session.startDate | date }} - {{ session.endDate | date }} @ {{ renderLocations(session) }}
 							</mat-option>
 						</mat-select>
-						<mat-hint></mat-hint>
 						<mat-error>must select a session!</mat-error>
 					</mat-form-field>
 				</div>
@@ -28,7 +28,7 @@
 			<div class="row newL">
 				<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 					<mat-form-field>
-						<mat-select #patientSelect ngModel name="patient" placeholder="Patient" [disabled]="!form.value.session || !patients.length"
+						<mat-select [compareWith]="patientCompare" #patientSelect [ngModel]="patient" name="patient" placeholder="Patient" [disabled]="!form.value.session || !patients.length"
 						    required>
 							<div *ngIf="form.value.session">
 								<ngx-mat-select-search [formControl]="patientFilterCtrl" placeholderLabel="Search patient.." noEntriesFoundLabel="No patients found"
@@ -64,103 +64,154 @@
 					<div *ngFor="let k of [0,1]" [ngClass]="(j + k < group.metrics.length && group.metrics[j + k].dataType === 'number') ||
 							(k === 0 && j + 1 < group.metrics.length && group.metrics[j + 1].dataType === 'number') ||
 							(k === 1 && group.metrics[j].dataType === 'number') ? 'row newL' : 'col-lg-6'">
-						<div *ngIf="group.metrics[j + k]; let metric" [ngClass]="metric.dataType === 'number' ? 'col-lg-12' :
+						<div *ngIf="j + k + getPreviousLengths(form.value.session.groups, i) + 1; let ind" [ngClass]="j + k < group.metrics.length && group.metrics[j + k].dataType === 'number' ? 'col-lg-12 col-md-12 col-sm-12 col-xs-12' :
 								(k === 0 && j + 1 < group.metrics.length && group.metrics[j + 1].dataType === 'number') ||
-								(k === 1 && group.metrics[j].dataType === 'number') ? 'col-lg-6' : ''" ngModelGroup="{{ j + k + getPreviousLengths(form.value.session.groups, i) }}">
-							<div ngModelGroup="group">
-								<input type="text" hidden [ngModel]="group._id" name="_id">
-								<input type="text" hidden [ngModel]="group.name" name="name">
-							</div>
-							<div ngModelGroup="metric">
-								<input type="text" hidden [ngModel]="metric._id._id" name="_id">
-								<input type="text" hidden [ngModel]="metric.name" name="name">
-							</div>
-							<div [ngSwitch]="metric.dataType">
-								<div *ngSwitchCase="'string'">
-									<div *ngIf="metric._id.stringParams.lineBreaks; then textarea; else inputfield"></div>
-									<ng-template #inputfield>
-										<mat-form-field floatLabel="auto">
-											<input matInput [matTooltip]="metric.description" matTooltipShowDelay="500" [ngModel]="metric._id.defaultValue" #val="ngModel"
-											    name="value" type="text" [placeholder]="metric.name" [required]="metric.isRequired" [minlength]="metric._id.stringParams.minLength"
-											    [maxlength]="metric._id.stringParams.maxLength" [email]="metric._id.stringParams.isEmail" [pattern]="(metric._id.stringParams.isEmail) ? '' : metric._id.stringParams.pattern">
+								(k === 1 && group.metrics[j].dataType === 'number') ? 'col-lg-6' : ''">
+							<div *ngIf="group.metrics[j + k]; let metric" ngModelGroup="{{ ind - 1 }}">
+								<div ngModelGroup="group">
+									<input type="text" hidden [ngModel]="group._id" name="_id">
+									<input type="text" hidden [ngModel]="group.name" name="name">
+								</div>
+								<div ngModelGroup="metric">
+									<input type="text" hidden [ngModel]="metric._id._id" name="_id">
+									<input type="text" hidden [ngModel]="metric.name" name="name">
+								</div>
+								<div [ngSwitch]="metric.dataType">
+									<div *ngSwitchCase="'string'">
+										<div *ngIf="metric._id.stringParams.lineBreaks; then textarea; else inputfield"></div>
+										<ng-template #inputfield>
+											<mat-form-field floatLabel="auto">
+												<input matInput [matTooltip]="metric.description" matTooltipShowDelay="500" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
+												    #val="ngModel" name="value" type="text" [placeholder]="metric.name" [required]="metric.isRequired" [minlength]="metric._id.stringParams.minLength"
+												    [maxlength]="metric._id.stringParams.maxLength" [email]="metric._id.stringParams.isEmail" [pattern]="(metric._id.stringParams.isEmail) ? '' : metric._id.stringParams.pattern">
+												<button mat-icon-button matSuffix *ngIf="val.value && val.value.length" (click)="onEraseClick($event, val.control)">
+													<mat-icon>cancel</mat-icon>
+												</button>
+												<mat-hint align="start">{{ metric._id.stringParams.hint }}</mat-hint>
+												<mat-hint align="end" *ngIf="metric._id.stringParams.maxLength">
+													characters left: {{ (val.value) ? metric._id.stringParams.maxLength - val.value.length : metric._id.stringParams.maxLength
+													}}
+												</mat-hint>
+												<mat-error>
+													{{ val.hasError('required') ? 'you must enter ' + (metric.name | lowercase) + '!' : val.hasError('email') ? 'invalid email
+													address!' : val.hasError('pattern') ? 'invalid value!' : val.hasError('minlength') ? 'too short!' : '' }}
+												</mat-error>
+											</mat-form-field>
+										</ng-template>
+										<ng-template #textarea>
+											<mat-form-field floatLabel="auto">
+												<textarea matInput [matTooltip]="metric.description" matTooltipShowDelay="500" matTextareaAutosize [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
+												    #val="ngModel" [placeholder]="metric.name" name="value" [required]="metric.isRequired" [minlength]="metric._id.stringParams.minLength"
+												    [maxlength]="metric._id.stringParams.maxLength"></textarea>
+												<button mat-icon-button matSuffix *ngIf="val.value && val.value.length" (click)="onEraseClick($event, val.control)">
+													<mat-icon>cancel</mat-icon>
+												</button>
+												<mat-hint align="start">{{ metric._id.stringParams.hint }}</mat-hint>
+												<mat-hint align="end" *ngIf="metric._id.stringParams.maxLength">
+													characters left: {{ (val.value) ? metric._id.stringParams.maxLength - val.value.length : metric._id.stringParams.maxLength
+													}}
+												</mat-hint>
+												<mat-error>
+													{{ val.hasError('required') ? 'you must enter ' + (metric.name | lowercase) + '!' : val.hasError('minlength') ? 'too short!'
+													: '' }}
+												</mat-error>
+											</mat-form-field>
+										</ng-template>
+									</div>
+									<div *ngSwitchCase="'number'" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+										<!-- {{ form.value | json }} -->
+										<div class="row newL">
+											<div [hidden]="metric.isRequired" class="col-md-1 col-sm-1 col-xs-1">
+												<div class="sliderchk">
+													<mat-checkbox #chk [checked]="metric.isRequired || (!data.isEdit && ![undefined, null, ''].includes(metric._id.defaultValue)) || (data.isEdit && form.value.session._id === session._id && ![undefined, null, ''].includes(data.resource.record.results[ind - 1].value))"
+													    (change)="onSliderCheckboxClick(chk, val, form, metric, ind)">
+													</mat-checkbox>
+												</div>
+											</div>
+											<div class="col-md-{{!metric.isRequired ? '8' : '9'}} col-sm-{{!metric.isRequired ? '8' : '9'}} col-xs-{{!metric.isRequired ? '8' : '9'}}">
+												<mat-label class="{{metric.isRequired && [undefined, null, ''].includes(val.value) && val.control.touched ? 'sliderinvalid' : ''}}">
+													<strong>{{ metric.name }}{{ metric.isRequired ? ' *' : '' }}</strong>
+												</mat-label>
+												<mat-error class="pull-right" style="font-size: 70%" *ngIf="metric.isRequired && val.control.touched && [undefined, null, ''].includes(val.value)">must pick a {{ metric.name }}!</mat-error>
+												<div class="{{ !metric.required && !chk.checked ? 'slideroff' : ''}}">
+													<mat-slider style="width: 100%" #val="ngModel" [disabled]="!metric.isRequired && !chk.checked" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
+													    [min]="metric._id.numberParams.minValue || 0" [max]="metric._id.numberParams.maxValue || 100" [step]="metric._id.numberParams.step || 1"
+														[tickInterval]="metric._id.numberParams.tickInterval || 1" thumbLabel="true" name="value"
+														(change)="metric._id.numberParams.freeInput ? freeInputCtrl.control.setValue(val.value) : null">
+													</mat-slider>
+													<input *ngIf="!metric._id.numberParams.freeInput" hidden type="text" [ngModel]="val.value" name="value-validator" [required]="metric.isRequired">
+												</div>
+											</div>
+											<div class="col-md-3 col-sm-3 col-xs-3">
+												<!-- <div *ngIf="!metric._id.numberParams.freeInput; then label; else freeInput"></div> -->
+												<!-- <ng-template #label> -->
+												<div *ngIf="!metric._id.numberParams.freeInput">
+													<br>
+													<mat-label *ngIf="![undefined, null, ''].includes(val.value)" class="{{ !metric.isRequired && !chk.checked ? 'slideroff' : ''}}">
+														{{ ((metric._id.numberParams.prefix) ? (metric._id.numberParams.prefix + ' ') : '') }}
+														<strong>{{ val.value }}</strong>
+														{{((metric._id.numberParams.postfix) ? (' ' + metric._id.numberParams.postfix) : '')}}
+													</mat-label>
+												</div>
+												<!-- </ng-template> -->
+												<!-- <ng-template #freeInput> -->
+												<div [hidden]="!metric._id.numberParams.freeInput" class="{{ !metric.isRequired && !chk.checked ? 'slideroff' : ''}}">
+													<mat-form-field class="freeInput" floatLabel="never" [hideRequiredMarker]="true">
+														<span matPrefix>{{ metric._id.numberParams.prefix + ' ' }}</span>
+														<input [required]="metric.isRequired" matInput type="number" #freeInputCtrl="ngModel" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
+														    name="value" [min]="metric._id.numberParams.minValue || 0" [max]="metric._id.numberParams.maxValue || 100"
+														    placeholder="insert value.." [step]="metric._id.numberParams.step || 1" (keyup)="val.control.setValue(fixNumberInput(metric, freeInputCtrl.value)); freeInputCtrl.control.setValue(fixNumberInput(metric, freeInputCtrl.value))"
+															[disabled]="!metric.isRequired && !chk.checked" (wheel)="val.control.setValue(freeInputCtrl.value)">
+														<span matSuffix>{{ ' ' + metric._id.numberParams.postfix }}</span>
+														<button *ngIf="![undefined, null, ''].includes(freeInputCtrl.value)" mat-icon-button matSuffix (click)="onEraseClick($event, freeInputCtrl.control)">
+															<mat-icon>cancel</mat-icon>
+														</button>
+													</mat-form-field>
+												</div>
+												<!-- </ng-template> -->
+											</div>
+										</div>
+									</div>
+									<div *ngSwitchCase="'boolean'">
+										<mat-checkbox [matTooltip]="metric.description" matTooltipShowDelay="500" style="padding-left: 20px !important" color="primary"
+										    [indeterminate]="!metric.isRequired && [null,undefined,''].includes(val.value)" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
+										    #val="ngModel" name="value">{{ metric.name }}</mat-checkbox>
+										<mat-icon *ngIf="!metric.isRequired && ![null,undefined,''].includes(val.value)" (click)="onEraseClick($event, val.control)"
+										    style="padding-left: 10px; font-size: 100%">cancel</mat-icon>
+									</div>
+									<div *ngSwitchCase="'enum'">
+										<mat-form-field labelfloat="auto">
+											<mat-select [matTooltip]="metric.description" matTooltipShowDelay="500" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
+											    #val="ngModel" name="value" [placeholder]="metric.name" [multiple]="metric._id.enumParams.isMultiple" [required]="metric.isRequired">
+												<mat-option *ngIf="!metric.isRequired && !metric._id.enumParams.isMultiple">
+													select a {{ metric.name }}..
+												</mat-option>
+												<mat-option *ngFor="let opt of metric._id.enumParams.values" [value]="opt">
+													{{ opt }}
+												</mat-option>
+											</mat-select>
 											<button mat-icon-button matSuffix *ngIf="val.value && val.value.length" (click)="onEraseClick($event, val.control)">
 												<mat-icon>cancel</mat-icon>
 											</button>
-											<mat-hint align="start">{{ metric._id.stringParams.hint }}</mat-hint>
-											<mat-hint align="end" *ngIf="metric._id.stringParams.maxLength">
-												characters left: {{ (val.value) ? metric._id.stringParams.maxLength - val.value.length : metric._id.stringParams.maxLength
-												}}
-											</mat-hint>
 											<mat-error>
-												{{ val.hasError('required') ? 'you must enter ' + (metric.name | lowercase) + '!' : val.hasError('email') ? 'invalid email
-												address!' : val.hasError('pattern') ? 'invalid value!' : val.hasError('minlength') ? 'too short!' : '' }}
+												you must select {{ (!metric._id.enumParams.isMultiple ? 'a ':'') + (metric.name | lowercase) }}!
 											</mat-error>
 										</mat-form-field>
-									</ng-template>
-									<ng-template #textarea>
-										<mat-form-field floatLabel="auto">
-											<textarea matInput [matTooltip]="metric.description" matTooltipShowDelay="500" matTextareaAutosize [ngModel]="metric._id.defaultValue"
-											    #val="ngModel" [placeholder]="metric.name" name="value" [required]="metric.isRequired" [minlength]="metric._id.stringParams.minLength"
-											    [maxlength]="metric._id.stringParams.maxLength"></textarea>
-											<button mat-icon-button matSuffix *ngIf="val.value && val.value.length" (click)="onEraseClick($event, val.control)">
+									</div>
+									<div *ngSwitchCase="'date'">
+										<mat-form-field>
+											<input matInput readonly (click)="picker.open()" #pickertf="ngModel" name="value" [required]="metric.isRequired" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
+											    [min]="metric._id.dateParams.minDateOffset ? dates.offsetDate(metric._id.dateParams.minDateOffset) : metric._id.minDate"
+											    [max]="metric._id.dateParams.maxDateOffset ? dates.offsetDate(metric._id.dateParams.maxDateOffset) : metric._id.maxDate"
+											    [matDatepicker]="picker" [placeholder]="metric.name">
+											<button *ngIf="pickertf.value" mat-icon-button matSuffix (click)="onEraseClick($event, pickertf.control)">
 												<mat-icon>cancel</mat-icon>
 											</button>
-											<mat-hint align="start">{{ metric._id.stringParams.hint }}</mat-hint>
-											<mat-hint align="end" *ngIf="metric._id.stringParams.maxLength">
-												characters left: {{ (val.value) ? metric._id.stringParams.maxLength - val.value.length : metric._id.stringParams.maxLength
-												}}
-											</mat-hint>
-											<mat-error>
-												{{ val.hasError('required') ? 'you must enter ' + (metric.name | lowercase) + '!' : val.hasError('minlength') ? 'too short!'
-												: '' }}
-											</mat-error>
+											<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+											<mat-datepicker #picker></mat-datepicker>
+											<mat-error>{{ pickertf.hasError('required') ? 'you must enter a ' + (metric.name | lowercase) + '!' : 'invalid date!' }}</mat-error>
 										</mat-form-field>
-									</ng-template>
-								</div>
-								<div *ngSwitchCase="'number'">
-									<mat-label [matTooltip]="metric.description" matTooltipShowDelay="500">{{ metric.name }}</mat-label>
-									<mat-slider [ngModel]="metric._id.defaultValue" style="width: 65%" [min]="metric._id.numberParams.minValue || 0" [max]="metric._id.numberParams.maxValue || 100"
-									    [step]="metric._id.numberParams.step || 1" [tickInterval]="metric._id.numberParams.tickInterval || 1" thumbLabel="true"
-									    #val="ngModel" name="value"></mat-slider>
-									<mat-label>{{ ((metric._id.numberParams.prefix) ? (metric._id.numberParams.prefix + ' ') : '') + val.value + ((metric._id.numberParams.postfix)
-										? (' ' + metric._id.numberParams.postfix) : '') }}</mat-label>
-								</div>
-								<div *ngSwitchCase="'boolean'">
-									<mat-checkbox [matTooltip]="metric.description" matTooltipShowDelay="500" style="padding-left: 20px !important" color="primary"
-									    [indeterminate]="!metric.isRequired && [null,undefined,''].includes(val.value)" [ngModel]="metric._id.defaultValue"
-									    #val="ngModel" name="value">{{ metric.name }}</mat-checkbox>
-									<mat-icon *ngIf="!metric.isRequired && ![null,undefined,''].includes(val.value)" (click)="onEraseClick($event, val.control)"
-									    style="padding-left: 10px; font-size: 100%">cancel</mat-icon>
-								</div>
-								<div *ngSwitchCase="'enum'">
-									<mat-form-field labelfloat="auto">
-										<mat-select [matTooltip]="metric.description" matTooltipShowDelay="500" [ngModel]="metric._id.defaultValue" #val="ngModel"
-										    name="value" [placeholder]="metric.name" [multiple]="metric._id.enumParams.isMultiple" [required]="metric.isRequired">
-											<mat-option *ngIf="!metric.isRequired && !metric._id.enumParams.isMultiple">
-												select a {{ metric.name }}..
-											</mat-option>
-											<mat-option *ngFor="let opt of metric._id.enumParams.values" [value]="opt">
-												{{ opt }}
-											</mat-option>
-										</mat-select>
-										<mat-error>
-											you must select {{ (!metric._id.enumParams.isMultiple ? 'a ':'') + (metric.name | lowercase) }}!
-										</mat-error>
-									</mat-form-field>
-								</div>
-								<div *ngSwitchCase="'date'">
-									<mat-form-field>
-										<input matInput readonly (click)="picker.open()" #pickertf="ngModel" [ngModel]="metric._id.defaultValue" name="value" [required]="metric.isRequired"
-										    [min]="metric._id.dateParams.minDateOffset ? dates.offsetDate(metric._id.dateParams.minDateOffset) : metric._id.minDate"
-										    [max]="metric._id.dateParams.maxDateOffset ? dates.offsetDate(metric._id.dateParams.maxDateOffset) : metric._id.maxDate"
-										    [matDatepicker]="picker" [placeholder]="metric.name">
-										<button *ngIf="pickertf.value" mat-icon-button matSuffix (click)="onEraseClick($event, pickertf.control)">
-											<mat-icon>cancel</mat-icon>
-										</button>
-										<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-										<mat-datepicker #picker></mat-datepicker>
-										<mat-error>{{ pickertf.hasError('required') ? 'you must enter a ' + (metric.name | lowercase) + '!' : 'invalid date!' }}</mat-error>
-									</mat-form-field>
+									</div>
 								</div>
 							</div>
 						</div>

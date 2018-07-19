@@ -11,15 +11,16 @@ import {
 	OnDestroy,
 	AfterViewInit,
 	EventEmitter,
-	Output
+	Output,
+	AfterViewChecked
 } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatTabGroup, MatSelect } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA, MatTabGroup, MatSelect, MatCheckbox } from '@angular/material';
 import { ElementFormInput } from '../../../models/resource-form-input.interface';
 import { Record } from '../../../models/record.model';
 import { Session } from '../../../models/session.model';
 import { Patient } from '../../../models/patient.model';
 import { ReplaySubject, Subject } from 'rxjs';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, NgModel, NgForm } from '@angular/forms';
 import { takeUntil, take } from 'rxjs/operators';
 import { Updateable } from '../../../services/crud/crud.service';
 import { ValueTransformer } from '@angular/compiler/src/util';
@@ -31,21 +32,22 @@ import { ValueTransformer } from '@angular/compiler/src/util';
 	styleUrls: ['./record-form.component.scss']
 })
 export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
-	// sessions: Session[] = [];
+	session = this.data.isEdit ? this.data.resource.sessions.find(session => session._id === this.data.resource.record.session) : undefined;
+	patient;
 
-	@ViewChild('form') form: FormGroup;
+	// @ViewChild('form') form: FormGroup;
 	@ViewChild('tabs') tabs: MatTabGroup;
 
 	patients: Patient[] = [];
 	filteredPatients: ReplaySubject<Patient[]> = new ReplaySubject<Patient[]>(1);
 	patientFilterCtrl: FormControl = new FormControl();
 	@ViewChild('patientSelect') patientSelect: MatSelect;
+	@ViewChild('sessionSelect') sessionSelect: MatSelect;
 
 	@Output() edited: EventEmitter<Record> = new EventEmitter();
 
 	constructor(
 		private crud: RecordCrudService,
-		// private sessionCrud: SessionCrudService,
 		protected dates: DatesService,
 		protected arrays: ArraysService,
 		protected dialogRef: MatDialogRef<RecordFormComponent>,
@@ -61,21 +63,10 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 			this.filterPatients();
 		});
 
-		// this.form.valueChanges.subscribe(() => {
-		// 	console.log(this.form.value);
-		// });
-
-		// const today = new Date();
-		// this.sessionCrud.getMany<Session>(
-			// 	{ startDate: { $lte: today }, endDate: { $gte: today } },
-			// 	undefined,
-			// 	[
-				// 		{ path: 'locations._id', fields: 'patients' },
-				// 		{ path: 'groups.metrics._id', fields: 'defaultValue stringParams numberParams enumParams dateParams' }
-				// 	]
-				// ).subscribe(data => {
-					// 	this.sessions = data;
-					// });
+		if (this.data.isEdit) {
+			this.patient = this.data.resource.record.patient;
+			this.onSessionSelect(this.session);
+		}
 	}
 
 	ngAfterViewInit(): void {
@@ -97,9 +88,43 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 		}
 	}
 
-	onResetClick(form): void {
-		this.tabs.selectedIndex = 0;
-		form.resetForm();
+	onResetClick(form: NgForm): void {
+		if ((!this.session || (form.controls.session.value &&
+			form.controls.session.value._id !== this.session._id)) && this.tabs.selectedIndex !== 0) {
+			this.tabs.selectedIndex = 0;
+		}
+
+
+		if (this.session) {
+			form.resetForm({
+				session: this.session,
+				patient: this.patient
+			});
+			this.onSessionSelect(this.session);
+
+			let len = 0;
+			this.session.groups.forEach((grp, i) => {
+				grp.metrics.forEach((met, j) => {
+					const result = form.controls.results.get(`${len + j}`);
+
+					const group = result.get('group');
+					group.get('_id').setValue(grp._id);
+					group.get('name').setValue(grp.name);
+
+					const metric = result.get('metric');
+					metric.get('_id').setValue(met._id);
+					metric.get('name').setValue(met.name);
+
+					const value = result.get('value');
+					value.reset(this.data.resource.record.results[len + j].value);
+					value.updateValueAndValidity();
+				});
+
+				len += grp.metrics.length;
+			});
+		} else {
+			form.resetForm();
+		}
 	}
 
 	onCancelClick(): void {
@@ -110,6 +135,7 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 		event.stopPropagation();
 
 		control.setValue('');
+		control.markAsDirty();
 		control.updateValueAndValidity();
 	}
 
@@ -124,9 +150,24 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 					}
 				});
 			});
+
+			this.filterPatients();
+		}
+	}
+
+	onSliderCheckboxClick(checkbox: MatCheckbox, slider: NgModel, form: NgForm, metric, i: number) {
+		slider.control.setValue(!checkbox.checked ? null : this.data.isEdit && form.value.session._id === this.session._id ?
+			this.data.resource.record.results[i - 1].value : metric._id.defaultValue);
+
+		if ((!this.data.isEdit && ![undefined, null, ''].includes(slider.value)) ||
+			(this.data.isEdit && form.value.session._id === this.session._id && this.data.resource.record.results[i - 1].value !== slider.value)) {
+				slider.control.markAsDirty();
+				form.control.markAsDirty();
+		} else {
+			slider.control.markAsPristine();
 		}
 
-		this.filterPatients();
+		slider.control.updateValueAndValidity();
 	}
 
 	/**
@@ -152,7 +193,7 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	private prepareRecord(value): Record {
-		value.results = Object.keys(value.results).map(key => value.results[key]).filter(result => ![undefined, null, ''].includes(result.value));
+		value.results = Object.keys(value.results).map(key => value.results[key]);
 		value.session = value.session._id;
 		if (this.data.resource.record) {
 			value._id = this.data.resource.record._id;
@@ -199,5 +240,31 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
 	getPreviousLengths(arr, i): number {
 		return this.arrays.aggregateSubarrayLengths(arr, (grp) => grp.metrics, i);
+	}
+
+	sessionCompare(a, b): boolean {
+		if (!a || !b) {
+			return false;
+		}
+
+		const aId = a._id || a;
+		const bId = b._id || b;
+		return aId === bId;
+	}
+
+	patientCompare(a, b): boolean {
+		if (!a || !b) {
+			return false;
+		}
+
+		return a.uid === b.uid && a._id === b._id;
+	}
+
+	fixNumberInput(metric, value) {
+		return typeof value === 'undefined' ? '' : metric._id.numberParams.minValue &&
+			value < metric._id.numberParams.minValue ? metric._id.numberParams.minValue :
+			!metric._id.numberParams.minValue && value < 0 ? 0 :
+			metric._id.numberParams.maxValue && metric._id.numberParams.maxValue < value ?
+			metric._id.numberParams.maxValue : !metric._id.numberParams.maxValue && 100 < value ? 100 : value;
 	}
 }

@@ -1,3 +1,5 @@
+import { MessengerService } from './../../../services/messenger/messenger.service';
+import { Router } from '@angular/router';
 import { BrowserService } from './../../../services/browser/browser.service';
 import { AuthenticationService } from './../../../services/authentication/authentication.service';
 import { PatientCrudService } from './../../../services/crud/patient-crud.service';
@@ -43,6 +45,8 @@ export class PatientGalleryComponent implements OnInit {
 		, public auth: AuthenticationService
 		, private notification: NotificationService
 		, public browser: BrowserService
+		, private messenger: MessengerService
+		, private router: Router
 		, public dialog: MatDialog
 	) {}
 
@@ -125,6 +129,14 @@ export class PatientGalleryComponent implements OnInit {
 				this.dataSource.paginator.lastPage();
 			});
 			this.notification.openCustomSnackbar(`patient inserted successfully!`);
+		});
+	}
+
+	viewRecordsOnClick(event, patient: Patient): void {
+		event.stopPropagation();
+
+		this.router.navigateByUrl('/records').then(() => {
+			this.messenger.send(patient.uid);
 		});
 	}
 

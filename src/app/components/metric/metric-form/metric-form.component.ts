@@ -89,7 +89,6 @@ export class MetricFormComponent implements OnInit {
 	form: FormGroup;
 
 	/** used to bind both preview slider & input field */
-	sliderPrev = 0;
 
 	@Output() edited: EventEmitter < Metric > = new EventEmitter();
 
@@ -101,7 +100,6 @@ export class MetricFormComponent implements OnInit {
 		tickInterval: 1
 	}];
 
-
 	private initialDefaultValueValidators: ValidatorFn[] = [
 		NumericValidators.greaterThanEqualValidator(() => this.getControlValue('tfMinValue', 'grpNumberParams')),
 		NumericValidators.lessThanEqualValidator(() => this.getControlValue('tfMaxValue', 'grpNumberParams')),
@@ -110,9 +108,12 @@ export class MetricFormComponent implements OnInit {
 		// StringValidators.pattern(() => this.getControlValue('tfPattern', 'grpStringParams'))
 	];
 
+	sliderPrev;
+
 	groupsImmovableFunction = (item: MetricGroup) => {
 		return item.sessions > 0;
 	}
+
 
 	constructor(
 		private crud: MetricCrudService,

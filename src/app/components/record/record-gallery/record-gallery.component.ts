@@ -1,3 +1,4 @@
+import { MessengerService } from './../../../services/messenger/messenger.service';
 import { DatesService } from './../../../services/dates/dates.service';
 import { SessionCrudService } from './../../../services/crud/session-crud.service';
 import { BrowserService } from './../../../services/browser/browser.service';
@@ -47,15 +48,15 @@ export class RecordGalleryComponent implements OnInit {
 		, public auth: AuthenticationService
 		, private notification: NotificationService
 		, protected browser: BrowserService
-		// , private dates: DatesService
+		, private messenger: MessengerService
 		, public dialog: MatDialog
 	) {}
 
 	ngOnInit(): void {
 		this.crud.getMany<Record>().subscribe(data => {
 			this.dataSource.filterPredicate = (item, filter) => {
-				// return (item.name.toLowerCase().indexOf(filter.trim().toLowerCase()) > -1);
-				return true;
+				return (item.patient.uid.toLowerCase().indexOf(filter.toLowerCase()) > -1);
+				// return true;
 			};
 			this.dataSource.data.unshift(...data);
 			// this.selectableData = data.filter(metric => [undefined, null, 0].includes(metric.sessions));
@@ -74,6 +75,10 @@ export class RecordGalleryComponent implements OnInit {
 		).subscribe(data => {
 			this.sessions = data;
 			this.sessionsFetchAttempted = true;
+		});
+
+		this.messenger.subscribe(message => {
+			this.dataSource.filter = message || '';
 		});
 	}
 

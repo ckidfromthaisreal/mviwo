@@ -203,7 +203,9 @@
 									<mat-select placeholder="Default Value" formControlName="defaultValue" multiple>
 										<mat-option *ngFor="let ctrl of getxxValuesControls()" [value]="ctrl.value">{{ ctrl.value }}</mat-option>
 									</mat-select>
-									<button matSuffix mat-icon-button *ngIf="hasValue(prop.default.value)" (click)="onEraseClick($event, prop.default)"><mat-icon>cancel</mat-icon></button>
+									<button matSuffix mat-icon-button *ngIf="hasValue(prop.default.value)" (click)="onEraseClick($event, prop.default)">
+										<mat-icon>cancel</mat-icon>
+									</button>
 								</mat-form-field>
 							</ng-template>
 							<ng-template #singleDefVal>
@@ -490,7 +492,7 @@
 							<button *ngIf="hasValue(prop.default.value)" mat-icon-button matSuffix (click)="onEraseClick($event, prop.default)">
 								<mat-icon>cancel</mat-icon>
 							</button>
-							<mat-hint align="end">defaults to Minimum Value</mat-hint>
+							<!-- <mat-hint align="end">defaults to Minimum Value</mat-hint> -->
 							<mat-error>value out of bounds!</mat-error>
 						</mat-form-field>
 					</div>
@@ -544,34 +546,50 @@
 				<!-- row 5 -->
 				<div class="row newL" *ngIf="dataType.value === 'number'">
 					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-						<form ngForm>
+						<form ngForm #prevfrm="ngForm">
 							<hr>
 							<div form-group>
 								<label for="sliderPrev" class="text-muted">Preview</label>
 								<br>
-								<div class="row" *ngIf="{ maxVal: getControl('tfMaxValue', 'grpNumberParams'), minVal: getControl('tfMinValue', 'grpNumberParams'), step: getControl('tfStep', 'grpNumberParams') }; let local">
-									<div class="col-md-8 col-sm-8 col-xs-8">
-										<mat-label>{{ prop.name.value || '{METRIC_NAME}' }}</mat-label>
-										<mat-slider style="width: 100%" [(ngModel)]="sliderPrev" [min]="local.minVal.value" [max]="local.maxVal.value" [step]="local.step.value"
-										    [tickInterval]="getControlValue('tfTickInterval', 'grpNumberParams') || 1" thumbLabel="true" name="sliderPrev">
-										</mat-slider>
+								<div class="row" *ngIf="{ maxVal: getControl('tfMaxValue', 'grpNumberParams'), minVal: getControl('tfMinValue', 'grpNumberParams'), step: getControl('tfStep', 'grpNumberParams'), freeInput: getControl('cbFreeInput', 'grpNumberParams') }; let local">
+									<div *ngIf="!prop.required.value" class="col-md-1 col-sm-1 col-xs-1">
+										<div class="sliderchk">
+											<mat-checkbox #chk="ngModel" [ngModel]="false" name="chk" (change)="sliderPrev = chk.value ? sliderPrev : ''"></mat-checkbox>
+										</div>
 									</div>
-									<div class="col-md-4 col-sm-4 col-xs-4" *ngIf="{ prefix: getControl('tfPrefix', 'grpNumberParams'), postfix: getControl('tfPostfix', 'grpNumberParams') }; let pronto">
-										<div *ngIf="!getControlValue('cbFreeInput', 'grpNumberParams'); then label; else freeInput"></div>
+									<div class="col-md-{{!prop.required.value ? '8' : '9'}} col-sm-{{!prop.required.value ? '8' : '9'}} col-xs-{{!prop.required.value ? '8' : '9'}}">
+										<mat-label class="{{prop.required.value && !sliderPrev && prevfrm.controls['sliderPrev'] && prevfrm.controls['sliderPrev'].touched ? 'sliderinvalid' : ''}}"><strong>{{ prop.name.value || '{METRIC_NAME}' }}{{ prop.required.value ? ' *' : '' }}</strong></mat-label>
+										<mat-error class="pull-right" style="font-size: 70%" *ngIf="prop.required.value && prevfrm.controls['sliderPrev'] && prevfrm.controls['sliderPrev'].touched && !sliderPrev">must pick a {{ prop.name.value || '{METRIC_NAME}' }}!</mat-error>
+										<div class="{{prevfrm.value.chk === false ? 'slideroff' : ''}}" (blur)="hasValue(sliderPrev) ? prevfrm.controls['sliderPrev'].markAsValid() : prevfrm.controls['sliderPrev'].markAsInvalid()">
+											<mat-slider style="width: 100%" [(ngModel)]="sliderPrev" [min]="local.minVal.value" [max]="local.maxVal.value" [step]="local.step.value"
+											    [tickInterval]="getControlValue('tfTickInterval', 'grpNumberParams') || 1" thumbLabel="true" name="sliderPrev">
+											</mat-slider>
+											<input *ngIf="!local.freeInput.value" hidden type="text" [ngModel]="sliderPrev" name="sliderPrevHidden" [required]="prop.required.value">
+										</div>
+									</div>
+									<div class="col-md-3 col-sm-3 col-xs-3" *ngIf="{ prefix: getControl('tfPrefix', 'grpNumberParams'), postfix: getControl('tfPostfix', 'grpNumberParams') }; let pronto">
+										<div *ngIf="!local.freeInput.value; then label; else freeInput"></div>
 										<ng-template #label>
 											<br>
-											<mat-label>
-												{{ ((hasValue(pronto.prefix.value)) ? (pronto.prefix.value + ' ') : '') + sliderPrev + ((hasValue(pronto.postfix.value))
-												? (' ' + pronto.postfix.value) : '') }}
+											<mat-label *ngIf="hasValue(sliderPrev)" class="{{ prevfrm.value.chk === false ? 'slideroff' : ''}}">
+												{{ ((hasValue(pronto.prefix.value)) ? (pronto.prefix.value + ' ') : '') }}
+												<strong>{{ sliderPrev }}</strong>
+												{{((hasValue(pronto.postfix.value)) ? (' ' + pronto.postfix.value) : '')}}
 											</mat-label>
 										</ng-template>
 										<ng-template #freeInput>
-											<mat-form-field class="freeInput">
-												<span matPrefix>{{ pronto.prefix.value }} </span>
-												<input matInput type="number" [(ngModel)]="sliderPrev" name="sliderPrevInput" [min]="local.minVal.value || 0" [max]="local.maxVal.value || 100"
-												    [step]="local.step.value || 1" (keyup)="sliderPrev = fixNumberInput(sliderPrev)">
-												<span matSuffix>{{ pronto.postfix.value }}</span>
-											</mat-form-field>
+											<div class="{{ prevfrm.value.chk === false ? 'slideroff' : ''}}">
+												<mat-form-field class="freeInput" floatLabel="never" [hideRequiredMarker]="true">
+													<span matPrefix>{{ pronto.prefix.value }}</span>
+													<input [required]="prop.required.value" matInput type="number" #freeInputCtrl="ngModel" [(ngModel)]="sliderPrev" name="sliderPrevInput" [min]="local.minVal.value || 0"
+													    [max]="local.maxVal.value || 100" placeholder="insert value.." [step]="local.step.value || 1" (keyup)="sliderPrev = fixNumberInput(sliderPrev)">
+													<span matSuffix>{{ pronto.postfix.value }}</span>
+													<button *ngIf="hasValue(freeInputCtrl.value)" mat-icon-button matSuffix (click)="onEraseClick($event, freeInputCtrl.control)">
+															<mat-icon>cancel</mat-icon>
+													</button>
+													<!-- <mat-error>must enter a {{ prop.name.value || '{METRIC_NAME}' }}!</mat-error> -->
+												</mat-form-field>
+											</div>
 										</ng-template>
 									</div>
 								</div>

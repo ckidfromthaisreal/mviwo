@@ -188,7 +188,7 @@ export abstract class CrudService {
 			.set('Authorization', `Bearer ${this.auth.getToken()}`);
 
 		return this.http.patch<T>(`${this.url}/${updateable._id}`, updateable, { headers: headers }).pipe(
-			tap(e => e[0].position = updateable['position']),
+			tap(e => e[0] ? e[0].position = updateable['position'] : e['position'] = updateable['position']),
 			catchError(this.handleError)
 		);
 	}

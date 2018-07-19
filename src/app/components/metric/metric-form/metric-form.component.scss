@@ -37,3 +37,20 @@ mat-form-field {
 		overflow-y: auto;
 	}
 }
+
+.slideroff {
+	opacity: 0.25;
+	pointer-events: none;
+}
+
+.sliderchk {
+	margin-left: 20px;
+}
+
+.sliderinvalid {
+	color: #f44336;
+}
+
+.freeInput {
+	margin-top: 6px;
+}

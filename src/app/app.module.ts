@@ -1,3 +1,4 @@
+import { MessengerService } from './services/messenger/messenger.service';
 import { SessionCrudService } from './services/crud/session-crud.service';
 import { RedirectAuthGuardService } from './services/auth-guard/redirect-auth-guard.service';
 import { PipesModule } from './pipes/pipes.module';
@@ -61,6 +62,7 @@ import { StringsService } from './services/strings/strings.service';
 		},
 		DatesService,
 		LocationCrudService,
+		MessengerService,
 		MetricCrudService,
 		MetricGroupCrudService,
 		MongoloidsService,
