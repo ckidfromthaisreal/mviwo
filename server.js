@@ -2,6 +2,9 @@
  * application's server side starting point (main).
  */
 
+/** loads environment variables from local .env file. */
+// require('dotenv').load();
+
 /** server config file. */
 const config = require('./server/server.json');
 

@@ -30,6 +30,8 @@ import { HomeComponent } from './components/home/home.component';
 import { MviwoSnackbarComponent } from './components/material/mviwo-snackbar/mviwo-snackbar.component';
 import { MviwoSnackbarModule } from './components/material/mviwo-snackbar/mviwo-snackbar.module';
 import { StringsService } from './services/strings/strings.service';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
 
 
 @NgModule({
@@ -49,6 +51,8 @@ import { StringsService } from './services/strings/strings.service';
 		MviwoSnackbarModule,
 
 		PipesModule,
+
+		ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
 	],
 	providers: [
 		ArraysService,

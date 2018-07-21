@@ -16,19 +16,17 @@ const logger = require('../util/logger');
 const mongoose = require('mongoose').set('debug', config.DEBUG_MONGOOSE);
 
 /** remote db username */
-const username = 'Admin';
+const username = process.env.DBUSER;
 
 /** remote db password */
-const password = '!A2s3d4f';
+const password = process.env.DBPASSWORD;
+
+const shards = process.env.DBSHARDS;
+
+const replica = process.env.DBREPLICA;
 
 /** remote mongodb link */
-const remoteDB = `mongodb://${username}:${password}@` +
-	'clusterladak-shard-00-00-05mix.mongodb.net:27017' + ',' +
-	'clusterladak-shard-00-01-05mix.mongodb.net:27017' + ',' +
-	'clusterladak-shard-00-02-05mix.mongodb.net:27017' + '/' +
-	`${config.MONGO_NAME}?ssl=true` + '&' +
-	'replicaSet=ClusterLadak-shard-0' + '&' +
-	'authSource=admin';
+const remoteDB = `mongodb://${username}:${password}@${shards}/${config.MONGO_NAME}?ssl=true&replicaSet=${replica}&authSource=${username.toLowerCase()}&retryWrites=true`;
 
 /** local mongodb link used a fallback when remoteDB is inaccessible. */
 const localDB = `mongodb://localhost:${config.MONGO_LOCAL_PORT}/${config.MONGO_NAME}`;
@@ -86,7 +84,7 @@ connection.once('open', () => {
  * connect to database.
  */
 exports.connect = () => {
-	mongoose.connect(currentDB = config.CONNECT_TO_LOCAL ? localDB : remoteDB)
+	mongoose.connect(currentDB = process.env.NODE_ENV !== 'production' ? localDB : remoteDB)
 		.then(() => {
 			// server.start();
 		}).catch(error => {
@@ -109,7 +107,8 @@ function initUsers() {
 	}, {
 		username: 'admin',
 		email: 'admin@mviwo.com',
-		password: bcrypt.hashSync(require('../secret').superpassword || 'admin123'),
+		// password: bcrypt.hashSync(require('../secret').superpassword),
+		password: bcrypt.hashSync(process.env.SUPERPASSWORD),
 		power: 999
 	}, {
 		upsert: true
