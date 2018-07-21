@@ -71,7 +71,7 @@ app.use(bodyParser.urlencoded({
 }));
 
 /* point static path to build folder. */
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(/*path.join(__dirname, */'public'/*)*/));
 
 /* compress all responses. */
 app.use(compression());
@@ -88,7 +88,7 @@ app.get('*', (req, res) => {
 app.set('port', port);
 
 /* set application's environment. */
-app.set('env', config.ENVIRONMENT);
+app.set('env', process.env.NODE_ENV || config.ENVIRONMENT);
 
 /* set view engine for errors. */
 if (config.USE_VIEW_ENGINE) {
