@@ -71,7 +71,7 @@ app.use(bodyParser.urlencoded({
 }));
 
 /* point static path to build folder. */
-app.use(express.static(/*path.join(__dirname, */'public'/*)*/));
+app.use(express.static(path.join(__dirname, 'public')));
 
 /* compress all responses. */
 app.use(compression());
