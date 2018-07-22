@@ -85,10 +85,10 @@ app.get('*', (req, res) => {
 });
 
 /* set application's port. */
-app.set('port', port);
+app.set('port', process.env.PORT || port);
 
 /* set application's environment. */
-app.set('env', process.env.NODE_ENV || config.ENVIRONMENT);
+app.set('env', process.env.NODE_ENV);
 
 /* set view engine for errors. */
 if (config.USE_VIEW_ENGINE) {

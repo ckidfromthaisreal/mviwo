@@ -44,11 +44,11 @@ const logger = winston.createLogger({
 });
 
 /* if in production mode, "mute" console logging. */
-if (process.env.NODE_ENV !== 'production') {
-	logger.add(new winston.transports.Console({
-		level: 'info'
-	}));
-}
+// if (process.env.NODE_ENV !== 'production') {
+logger.add(new winston.transports.Console({
+	level: 'info'
+}));
+// }
 
 /**
  * log a message to console and files.
