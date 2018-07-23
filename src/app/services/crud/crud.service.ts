@@ -85,6 +85,7 @@ export abstract class CrudService {
 	getOne<T>(
 		id: string
 		, fields?: string
+		, populate?: { path: string, fields?: string }[]
 		, options?: object
 	): Observable<T> {
 		let authChk: Observable<never>;
@@ -106,9 +107,13 @@ export abstract class CrudService {
 			headers = headers.set('fields', fields);
 		}
 
+		if (populate) {
+			headers = headers.set('populate', JSON.stringify(populate));
+		}
+
 		if (options) {
 			Object.keys(options).forEach(key => {
-				if (!['Authorization', 'fields'].includes(key)) {
+				if (!['Authorization', 'filter', 'fields'].includes(key)) {
 					headers = headers.set(key, options['key']);
 				}
 			});

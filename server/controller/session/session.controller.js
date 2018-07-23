@@ -53,8 +53,6 @@ exports.getMany = async (req, res, next) => {
 
 	if (req.headers.populate) {
 		JSON.parse(req.headers.populate).forEach(pathObj => {
-			console.log(pathObj);
-
 			query.populate({
 				path: pathObj.path,
 				select: pathObj.fields
@@ -90,6 +88,15 @@ exports.getOne = async (req, res, next) => {
 
 	if (req.headers.fields) {
 		query.select(req.headers.fields);
+	}
+
+	if (req.headers.populate) {
+		JSON.parse(req.headers.populate).forEach(pathObj => {
+			query.populate({
+				path: pathObj.path,
+				select: pathObj.fields
+			});
+		});
 	}
 
 	try {

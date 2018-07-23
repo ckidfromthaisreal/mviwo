@@ -1,3 +1,5 @@
+import { DownloadService } from './../../../services/download/download.service';
+import { RecordCrudService } from './../../../services/crud/record-crud.service';
 import { DatesService } from './../../../services/dates/dates.service';
 import {
 	Component,
@@ -12,6 +14,7 @@ import { NotificationService } from '../../../services/notification/notification
 import { AuthenticationService } from '../../../services/authentication/authentication.service';
 import { SessionCrudService } from '../../../services/crud/session-crud.service';
 import { SessionFormComponent } from '../session-form/session-form.component';
+import { Record } from '../../../models/record.model';
 
 @Component({
 	// tslint:disable-next-line:component-selector
@@ -38,10 +41,12 @@ export class SessionGalleryComponent implements OnInit {
 
 	constructor(
 		protected crud: SessionCrudService,
+		private recordCrud: RecordCrudService,
 		public auth: AuthenticationService,
 		private notification: NotificationService,
 		public browser: BrowserService,
 		public dates: DatesService,
+		private download: DownloadService,
 		public dialog: MatDialog
 	) {}
 
@@ -92,6 +97,8 @@ export class SessionGalleryComponent implements OnInit {
 	}
 
 	editOnClick(event, element): void {
+		event.stopPropagation();
+
 		this.openForm(true, element, (result) => {
 			this.data[element.position - 1] = result[0];
 			this.selectableData[this.selectableData.indexOf(element)] = result[0];
@@ -101,6 +108,8 @@ export class SessionGalleryComponent implements OnInit {
 	}
 
 	deleteOneOnClick(event, element): void {
+		event.stopPropagation();
+
 		this.crud.deleteOne(element).subscribe((result) => {
 			this.selection.deselect(element);
 			for (let i = element.position; i < this.dataSource.data.length; i++) {
@@ -133,6 +142,58 @@ export class SessionGalleryComponent implements OnInit {
 			});
 			this.notification.openCustomSnackbar(`${total} session${total > 1 ? 's' : ''} deleted successfully!`);
 		});
+	}
+
+	exportJSONOnClick(event, session: Session) {
+		event.stopPropagation();
+
+		this.crud.getOne<Session>(
+			session._id,
+			undefined,
+			[
+				{ path: 'locations._id', fields: 'patients' },
+				{ path: 'groups.metrics._id', fields: 'defaultValue stringParams numberParams enumParams dateParams' }
+			]
+		).subscribe(data => {
+			this.download.asJSON(data, `session_${session._id}_${session.locations.map(loc => loc.name).join(',')}_${session.startDate}`);
+		});
+	}
+
+	exportCSVOnClick(event, session: Session) {
+		event.stopPropagation();
+
+		this.recordCrud.getMany<Record>({ session: session._id }).subscribe(data => {
+			this.download.asCSV(this.transformToCSV(session, data),
+				`records_${session._id}_${session.locations.map(loc => loc.name).join()}_${session.startDate}`);
+		});
+	}
+
+	private transformToCSV(session: Session, data: Record[]) {
+		let colNames = ['session', 'patient'];
+
+		session.groups.forEach(grp => {
+			colNames = [...colNames, ...grp.metrics.map(met => `"${grp.name}"."${met.name}"`)];
+		});
+
+		let csvData = colNames.join(', ') + '\n';
+
+		data.forEach(rec => {
+			let values: any[] = [rec.session, rec.patient.uid];
+
+			rec.results.forEach(res => {
+				const value: any = res.value;
+
+				const val = typeof res.value === 'string' ? `"${(value as string).replace(/,/g, '...').replace(/\n/g, '\t')}"` :
+					typeof res.value === 'object' && value !== null ?
+						`${value.map(item => `"${(item as string).replace(/,/g, '...')}"`).join('; ')}` : value;
+
+				values = [...values, val];
+			});
+
+			csvData = `${csvData}${values.join(', ')}\n`;
+		});
+
+		return csvData;
 	}
 
 	insertOneOnClick() {
