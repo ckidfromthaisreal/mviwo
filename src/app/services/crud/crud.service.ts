@@ -1,7 +1,6 @@
 import { NotificationService } from './../notification/notification.service';
 import { AuthenticationService } from './../authentication/authentication.service';
 import { HttpClient, HttpHeaders, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';

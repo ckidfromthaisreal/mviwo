@@ -12,7 +12,7 @@ import { map } from 'rxjs/operators';
  */
 @Injectable()
 export class AuthenticationService {
-	readonly API_URL = 'http://localhost:4200/api/user';
+	readonly API_URL = '/api/user';
 	private token: string;
 
 	constructor(private http: HttpClient, private router: Router) {
