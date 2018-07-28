@@ -14,20 +14,20 @@ export class NotificationService {
 	) {}
 
 	public openSnackbar(message?: string, action?: string, duration?: number, extraClasses?: string) {
-		this.snackbar.open(message, action, {
+		return this.snackbar.open(message, action, {
 			duration: duration || 2000,
 			panelClass: extraClasses || ['mviwo-snackbar-dark']
-		});
+		}).onAction();
 	}
 
 	public openCustomSnackbar(message?: string, action?: string, duration?: number, extraClasses?: string) {
-		this.snackbar.openFromComponent(MviwoSnackbarComponent, {
+		return this.snackbar.openFromComponent(MviwoSnackbarComponent, {
 			data: {
 				message: message,
 				action: action
 			},
 			duration: duration || 2000,
 			panelClass: extraClasses || ['mviwo-snackbar-dark'],
-		});
+		}).onAction();
 	}
 }

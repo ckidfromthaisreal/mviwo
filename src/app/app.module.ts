@@ -1,3 +1,4 @@
+import { UpdateService } from './services/update/update.service';
 import { MessengerService } from './services/messenger/messenger.service';
 import { SessionCrudService } from './services/crud/session-crud.service';
 import { RedirectAuthGuardService } from './services/auth-guard/redirect-auth-guard.service';
@@ -74,6 +75,7 @@ import { environment } from '../environments/environment';
 		PatientCrudService,
 		SessionCrudService,
 		StringsService,
+		UpdateService,
 	],
 	exports: [
 	],
