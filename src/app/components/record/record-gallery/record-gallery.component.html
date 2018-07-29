@@ -1,7 +1,7 @@
 <div class="main-content">
 	<div class="container-fluid mat-elevation-z8">
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-4">
 				<mat-form-field>
 					<input matInput placeholder="Search.." type="text" [(ngModel)]="dataSource.filter">
 					<button mat-button mat-icon-button matSuffix aria-label="Clear"
@@ -10,10 +10,8 @@
 					</button>
 				</mat-form-field>
 			</div>
-			<div class="col-md-6 text-right explorer-buttons">
-				<div *ngIf="sessionsFetchAttempted && !sessions.length">
-					<small>no current sessions! </small>
-				</div>
+			<div class="col-md-8 text-right explorer-buttons">
+				<small *ngIf="sessionsFetchAttempted && !sessions.length" style="margin-right: 30px">no current sessions! </small>
 				<button mat-raised-button color="primary" matTooltip="add session from file"
 					[disabled]="!auth.hasPermission('record', 'insertOne')"
 					(click)="fileSelect.click()">

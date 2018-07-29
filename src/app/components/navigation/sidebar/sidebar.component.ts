@@ -25,7 +25,7 @@ export const ROUTES: RouteInfo[] = [
 	{ path: '/locations', title: 'Locations', icon: 'location_on', class: '' },
 	{ path: '/sessions', title: 'Sessions', icon: 'event', class: '' },
 	{ path: '/records', title: 'Records', icon: 'how_to_vote', class: '' },
-	{ path: '/users', title: 'Users', icon: 'group', class: '' },
+	// { path: '/users', title: 'Users', icon: 'group', class: '' },
 	// { path: '/'}
 ];
 
