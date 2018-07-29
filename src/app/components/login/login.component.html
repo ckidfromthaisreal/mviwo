@@ -20,7 +20,9 @@
 				</mat-card-content>
 				<!-- <mat-card-footer> -->
 				<mat-card-actions align="end">
-					<button mat-button color="accent" type="reset" [disableRipple]="true" (click)="onFlipClick()" matTooltip="switch to registration form..">No, I'm new around here..</button>
+					<!-- <button mat-button color="accent" type="reset" [disableRipple]="true" (click)="onFlipClick()" matTooltip="switch to registration form..">No, I'm new around here..</button> -->
+					<button mat-button color="accent" type="reset" [disableRipple]="true" (click)="tokenInput.click()" matTooltip="show mviwo your token..">I have a token..</button>
+					<input type="file" #tokenInput (change)="onShowTokenClick($event.target.files[0])" [accept]="'.json'" hidden>
 					<button mat-raised-button [disabled]="!form1.valid" (click)="onLoginClick(form1.value)" color="primary" matTooltip="login">Yes, let me in!</button>
 				</mat-card-actions>
 				<!-- </mat-card-footer> -->

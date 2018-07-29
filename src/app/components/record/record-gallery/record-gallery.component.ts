@@ -1,3 +1,4 @@
+import { FileReaderService } from './../../../services/file-reader/file-reader.service';
 import { MessengerService } from './../../../services/messenger/messenger.service';
 import { DatesService } from './../../../services/dates/dates.service';
 import { SessionCrudService } from './../../../services/crud/session-crud.service';
@@ -49,6 +50,7 @@ export class RecordGalleryComponent implements OnInit {
 		, private notification: NotificationService
 		, protected browser: BrowserService
 		, private messenger: MessengerService
+		, private fileReader: FileReaderService
 		, public dialog: MatDialog
 	) {}
 
@@ -155,6 +157,24 @@ export class RecordGalleryComponent implements OnInit {
 		});
 	}
 
+	uploadSessionOnClick(file: File): void {
+		console.log(file);
+
+		this.fileReader.readJSON(file).then(data => {
+			console.log(data);
+			if (this.validSession(data)) {
+				if (!this.sessions.find(elem => elem._id === (data as Session)._id)) {
+					this.sessions = [...this.sessions, data as Session];
+				}
+				this.notification.openCustomSnackbar('session file read successfully!');
+			} else {
+				this.notification.openCustomSnackbar('invalid session file!');
+			}
+		}).catch(error => {
+			this.notification.openCustomSnackbar(error);
+		});
+	}
+
 	insertOneOnClick(): void {
 		this.openForm(false, { record: null, sessions: this.sessions }, (result) => {
 			result.position = this.data.length + 1;
@@ -215,5 +235,10 @@ export class RecordGalleryComponent implements OnInit {
 
 	selectRow(row: Record) {
 		this.selection.toggle(row);
+	}
+
+	private validSession(session: any): boolean {
+		return session && [session._id, session.startDate, session.endDate,
+			session.locations, session.groups].every(item => typeof item !== 'undefined');
 	}
 }

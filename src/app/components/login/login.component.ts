@@ -1,3 +1,4 @@
+import { FileReaderService } from './../../services/file-reader/file-reader.service';
 import { NotificationService } from './../../services/notification/notification.service';
 import { Router } from '@angular/router';
 import { AuthenticationService } from './../../services/authentication/authentication.service';
@@ -35,6 +36,7 @@ export class LoginComponent implements OnInit {
 		private renderer: Renderer2,
 		// public snackbar: MatSnackBar
 		public notification: NotificationService,
+		private fileReader: FileReaderService,
 	) {
 		if (auth.isLoggedIn()) {
 			router.navigateByUrl('/');
@@ -93,5 +95,24 @@ export class LoginComponent implements OnInit {
 		}
 
 		this.error = undefined;
+	}
+
+	onShowTokenClick(file: File): void {
+		console.log(file);
+		this.fileReader.readJSON(file).then(data => {
+			console.log(data);
+			if (!data['token']) {
+				this.notification.openCustomSnackbar('invalid token!');
+			} else {
+				this.auth.loginWithToken(data['token']).then(() => {
+					this.notification.openCustomSnackbar(`welcome back ${this.auth.getUserDetails().username}!`, 'OK!');
+					this.router.navigateByUrl('/');
+				}).catch(error => {
+					this.notification.openCustomSnackbar(error);
+				});
+			}
+		}).catch(error => {
+			this.notification.openCustomSnackbar(error);
+		});
 	}
 }

@@ -45,9 +45,9 @@ export class AuthenticationService {
 	 * redirects client to application root.
 	 */
 	public logout(): void {
+		this.router.navigateByUrl('/login');
 		this.token = '';
 		localStorage.removeItem('mviwo-token');
-		this.router.navigateByUrl('/login');
 	}
 
 	/**
@@ -93,6 +93,19 @@ export class AuthenticationService {
 
 	public login(user: LoginPayload): Observable<TokenResponse> {
 		return this.request('post', 'login', user);
+	}
+
+	public loginWithToken(token: string): Promise<TokenResponse> { // TODO: might need further validation or reduced permissions.
+		return new Promise((resolve, reject) => {
+			this.saveToken(token);
+			const user = this.getUserDetails();
+			if (!user.exp || user.exp === 0 || !user._id || !user.email || !user.username || !user.permissions) {
+				this.token = '';
+				localStorage.removeItem('mviwo-token');
+				reject('invalid token');
+			}
+			resolve({ token: token });
+		});
 	}
 
 	public register(user: RegistrationPayload): Observable<TokenResponse> {

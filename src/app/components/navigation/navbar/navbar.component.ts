@@ -1,3 +1,4 @@
+import { DownloadService } from './../../../services/download/download.service';
 import { AuthenticationService } from './../../../services/authentication/authentication.service';
 import {
 	Component,
@@ -26,6 +27,7 @@ export class NavbarComponent implements OnInit {
 		private element: ElementRef,
 		private router: Router,
 		private auth: AuthenticationService,
+		private download: DownloadService,
 	) {}
 
 	ngOnInit() {
@@ -139,5 +141,9 @@ export class NavbarComponent implements OnInit {
 
 	logout() {
 		this.auth.logout();
+	}
+
+	downloadToken(): void {
+		this.download.asJSON({ token: this.auth.getToken() }, `token_${this.auth.getUserDetails()._id}`);
 	}
 }

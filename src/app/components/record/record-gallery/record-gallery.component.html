@@ -11,20 +11,29 @@
 				</mat-form-field>
 			</div>
 			<div class="col-md-6 text-right explorer-buttons">
-				<small *ngIf="sessionsFetchAttempted && !sessions.length">no current sessions! </small>
-				<button mat-raised-button color="primary" matTooltip="create new"
-					[disabled]="!auth.hasPermission('metric', 'insertOne') || !sessions.length"
+				<div *ngIf="sessionsFetchAttempted && !sessions.length">
+					<small>no current sessions! </small>
+				</div>
+				<button mat-raised-button color="primary" matTooltip="add session from file"
+					[disabled]="!auth.hasPermission('record', 'insertOne')"
+					(click)="fileSelect.click()">
+					<mat-icon>insert_drive_file</mat-icon>
+				</button>
+				<input type="file" #fileSelect (change)="uploadSessionOnClick($event.target.files[0])" [accept]="'.json'" hidden>
+				|
+				<button mat-raised-button color="primary" matTooltip="create new record"
+					[disabled]="!auth.hasPermission('record', 'insertOne') || !sessions.length"
 					(click)="insertOneOnClick()">
 					<mat-icon>add</mat-icon>
 				</button>
 				<button mat-raised-button color="accent" matTooltip="edit"
-					[disabled]="!auth.hasPermission('metric', 'updateOne') || selection.selected.length !== 1"
+					[disabled]="!auth.hasPermission('record', 'updateOne') || selection.selected.length !== 1"
 					(click)="editOnClick($event, selection.selected[0])">
 					<mat-icon>edit</mat-icon>
 				</button>
 				<button mat-raised-button color="warn" matTooltip="delete"
 					[disabled]="selection.isEmpty() ||
-						(selection.selected.length > 1 && !auth.hasPermission('metric', 'deleteMany'))"
+						(selection.selected.length > 1 && !auth.hasPermission('record', 'deleteMany'))"
 					(click)="deleteManyOnClick()">
 						<mat-icon>delete</mat-icon> ({{ selection?.selected.length || 0 }})
 				</button>

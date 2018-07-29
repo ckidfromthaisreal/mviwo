@@ -1,3 +1,4 @@
+import { FileReaderService } from './services/file-reader/file-reader.service';
 import { UpdateService } from './services/update/update.service';
 import { MessengerService } from './services/messenger/messenger.service';
 import { SessionCrudService } from './services/crud/session-crud.service';
@@ -66,6 +67,7 @@ import { environment } from '../environments/environment';
 			useClass: GestureConfig
 		},
 		DatesService,
+		FileReaderService,
 		LocationCrudService,
 		MessengerService,
 		MetricCrudService,
