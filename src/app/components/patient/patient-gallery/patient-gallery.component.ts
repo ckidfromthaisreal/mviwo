@@ -24,7 +24,7 @@ import { faVenus, faMars } from '@fortawesome/free-solid-svg-icons';
 export class PatientGalleryComponent implements OnInit {
 	data: Patient[] = [];
 
-	displayedColumns = ['select', 'uid', 'name', 'gender', 'age', 'locations', 'action'];
+	displayedColumns = ['select', 'uid', 'regno', 'name', 'gender', 'age', 'locations', 'action'];
 	dataSource = new MatTableDataSource<Patient>(this.data);
 	selection = new SelectionModel<Patient>(true);
 
@@ -55,7 +55,10 @@ export class PatientGalleryComponent implements OnInit {
 			this.dataSource.filterPredicate = (item, filter) => {
 				return (item.uid.indexOf(filter.trim()) > -1 ||
 					item.firstName.toLowerCase().indexOf(filter.trim().toLowerCase()) > -1 ||
-					item.lastName.toLowerCase().indexOf(filter.trim().toLowerCase()) > -1
+					item.middleName && item.middleName.length && item.middleName.toLowerCase().indexOf(filter.trim().toLowerCase()) > -1 ||
+					item.lastName.toLowerCase().indexOf(filter.trim().toLowerCase()) > -1 ||
+					`${item.reg_no}`.indexOf(filter.trim().toLowerCase()) > -1 ||
+					item.locations.map(elem => elem.name.toLowerCase()).includes(filter.trim().toLowerCase())
 				);
 			};
 			this.dataSource.data.unshift(...data);

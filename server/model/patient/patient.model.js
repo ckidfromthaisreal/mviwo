@@ -72,6 +72,9 @@ const patientSchema = new mongoose.Schema({
 	job: {
 		type: String
 	},
+	reg_no: {
+		type: Number
+	},
 	// picture: {
 	// 	type: String
 	// },

@@ -114,6 +114,9 @@ export class PatientFormComponent implements OnInit {
 			'tfJob': new FormControl(
 				this.data.resource ? this.data.resource.job : ''
 			),
+			'tfRegNo': new FormControl(
+				this.data.resource ? this.data.resource.reg_no : ''
+			),
 			'xxLocations': new FormControl(
 				this.data.resource ? [...this.data.resource.locations] : []
 			)
@@ -201,6 +204,10 @@ export class PatientFormComponent implements OnInit {
 		job.reset((this.data.resource) ? this.data.resource.job : '');
 		job.updateValueAndValidity();
 
+		const regno = this.form.get('tfRegNo');
+		regno.reset((this.data.resource) ? this.data.resource.reg_no : '');
+		regno.updateValueAndValidity();
+
 		const xxLocations = this.form.get('xxLocations');
 		xxLocations.reset((this.data.resource) ? [...this.chosenLocations] : []);
 		xxLocations.updateValueAndValidity();
@@ -273,6 +280,7 @@ export class PatientFormComponent implements OnInit {
 			this.form.get('dpDateOfBirth').value,
 			this.form.get('tfPlaceOfBirth').value,
 			this.form.get('tfJob').value,
+			this.form.get('tfRegNo').value,
 			this.form.get('xxLocations').value,
 			(this.data.isEdit) ? this.data.resource.position : undefined
 		);

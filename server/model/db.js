@@ -48,6 +48,7 @@ connection.once('open', () => {
 	logger.info('DB', 'db.js:mongoose.connect', `successfully connected to: ${currentDB}`);
 	try {
 		initUsers();
+		// require('../util/csv-importer').importPatients();
 	} catch (err) {
 		logger.error('DB', 'db.js:mongoose.connect', 'failed to upsert users!');
 	}

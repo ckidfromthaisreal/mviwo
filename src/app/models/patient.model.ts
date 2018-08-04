@@ -18,6 +18,7 @@ export class Patient implements Mongoloid {
 		, public dateOfBirth?: Date
 		, public placeOfBirth?: string
 		, public job?: string
+		, public reg_no?: number
 		, public locations?: {
 			_id: string
 			, name: string
