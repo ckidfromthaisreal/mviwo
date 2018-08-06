@@ -15,23 +15,56 @@
 			<div mat-dialog-content>
 				<div class="row newL">
 					<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-						<mat-form-field>
-							<input matInput #fromInput [matDatepicker]="frompicker" placeholder="Start Date" formControlName="dpStartDate" readonly [min]="dates.now()"
-							    [max]="form.get('dpEndDate').value" (click)="frompicker.open()">
+						<mat-form-field floatLabel="auto" *ngIf="getControl('tfName'); let ctrl">
+							<input matInput type="text" placeholder="Name" formControlName="tfName" [maxLength]="rules.nameMaxLength" cdkFocusInitial>
+							<button *ngIf="hasValue(ctrl.value)" mat-icon-button matSuffix (click)="onEraseClick($event, ctrl)">
+								<mat-icon>cancel</mat-icon>
+							</button>
+							<mat-hint align="end">
+								characters left: {{ rules.nameMaxLength - ctrl.value.length }}
+							</mat-hint>
+							<mat-error>
+								{{ getNameErrorMessage() }}
+							</mat-error>
+						</mat-form-field>
+					</div>
+					<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+						<mat-form-field floatLabel="auto" *ngIf="getControl('taDescription'); let desc">
+							<textarea matInput placeholder="Description" formControlName="taDescription" matTextareaAutosize [maxLength]="rules.descriptionMaxLength"></textarea>
+							<button *ngIf="hasValue(desc.value)" mat-icon-button matSuffix (click)="onEraseClick($event, desc)">
+								<mat-icon>cancel</mat-icon>
+							</button>
+							<mat-hint align="end">
+								characters left: {{ hasValue(desc.value) ? rules.descriptionMaxLength - desc.value.length : rules.descriptionMaxLength }}
+							</mat-hint>
+						</mat-form-field>
+					</div>
+				</div>
+				<!-- row 1 -->
+				<div class="row newL">
+					<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+						<mat-form-field floatLabel="auto" *ngIf="getControl('dpStartDate'); let from">
+							<input matInput #fromInput [matDatepicker]="frompicker" required placeholder="Start Date" formControlName="dpStartDate" readonly
+							    [min]="dates.now()" [max]="form.get('dpEndDate').value" (click)="frompicker.open()">
+							<button *ngIf="hasValue(from.value)" mat-icon-button matSuffix (click)="onEraseClick($event, from)">
+								<mat-icon>cancel</mat-icon>
+							</button>
 							<mat-datepicker-toggle matSuffix [for]="frompicker"></mat-datepicker-toggle>
 							<mat-datepicker #frompicker startView="year"></mat-datepicker>
 						</mat-form-field>
 					</div>
 					<div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-						<mat-form-field>
-							<input matInput #toInput [matDatepicker]="topicker" placeholder="End Date" formControlName="dpEndDate" readonly [min]="form.get('dpStartDate').value || dates.now()"
-							    (click)="topicker.open()">
+						<mat-form-field floatLabel="auto" *ngIf="getControl('dpEndDate'); let to">
+							<input matInput #toInput [matDatepicker]="topicker" required placeholder="End Date" formControlName="dpEndDate" readonly
+							    [min]="form.get('dpStartDate').value || dates.now()" (click)="topicker.open()">
+							<button *ngIf="hasValue(to.value)" mat-icon-button matSuffix (click)="onEraseClick($event, to)">
+								<mat-icon>cancel</mat-icon>
+							</button>
 							<mat-datepicker-toggle matSuffix [for]="topicker"></mat-datepicker-toggle>
 							<mat-datepicker #topicker startView="year"></mat-datepicker>
 						</mat-form-field>
 					</div>
 				</div>
-				<!-- row 1 -->
 			</div>
 			<!-- dialog content -->
 		</mat-tab>

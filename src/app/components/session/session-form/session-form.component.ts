@@ -85,6 +85,12 @@ export class SessionFormComponent implements OnInit {
 
 	private initForm(): void {
 		this.form = new FormGroup({
+			'tfName': new FormControl(
+				this.data.resource ? this.data.resource.name : '',
+			),
+			'taDescription': new FormControl(
+				this.data.resource ? this.data.resource.description : '',
+			),
 			'dpStartDate': new FormControl(
 				this.data.resource ? this.data.resource.startDate : '',
 				Validators.required
@@ -159,6 +165,14 @@ export class SessionFormComponent implements OnInit {
 	 * reset button event. resets all controls.
 	 */
 	onResetClick(): void {
+		const name = this.form.get('tfName');
+		name.reset((this.data.resource) ? this.data.resource.name : '');
+		name.updateValueAndValidity();
+
+		const desc = this.form.get('taDescription');
+		desc.reset((this.data.resource) ? this.data.resource.description : '');
+		desc.updateValueAndValidity();
+
 		const startDate = this.form.get('dpStartDate');
 		startDate.reset((this.data.resource) ? this.data.resource.startDate : '');
 		startDate.updateValueAndValidity();
@@ -176,6 +190,13 @@ export class SessionFormComponent implements OnInit {
 		xxGroups.reset((this.data.resource) ? [...this.chosenGroups] : []);
 		xxGroups.updateValueAndValidity();
 		this.groups = [...this.initialGroups];
+	}
+
+	onEraseClick(event, control): void {
+		event.stopPropagation();
+		control.setValue('');
+		control.markAsDirty();
+		control.updateValueAndValidity();
 	}
 
 	/**
@@ -257,9 +278,31 @@ export class SessionFormComponent implements OnInit {
 			this.form.get('dpEndDate').value,
 			this.form.get('xxLocations').value,
 			this.form.get('xxGroups').value,
+			this.form.get('tfName').value,
+			this.form.get('taDescription').value,
 			(this.data.isEdit) ? this.data.resource.position : undefined
 		);
 
 		return tempSession;
+	}
+
+	getControl(controlName: string, groupName?: string): any {
+		return this.form ?
+			(groupName ?
+				this.form.get(groupName).get(controlName) :
+				this.form.get(controlName)) :
+			null;
+	}
+
+	hasValue(value): boolean {
+		return !['', null, undefined].includes(value);
+	}
+
+	getNameErrorMessage(): string {
+		const field = this.form.get('tfName');
+		return (field.hasError('required')) ?
+			'you must enter a session name!' :
+			(field.hasError('minlength')) ?
+			'too short!' : '';
 	}
 }

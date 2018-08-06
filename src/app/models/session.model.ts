@@ -1,8 +1,10 @@
 import { Mongoloid } from '../services/crud/crud.service';
-import { Location } from './location.model';
 
 export class Session implements Mongoloid {
-	public static rules = {};
+	public static rules = {
+		nameMaxLength: 50,
+		descriptionMaxLength: 300
+	};
 
 	constructor(
 		public _id: string
@@ -25,6 +27,8 @@ export class Session implements Mongoloid {
 			}[]
 			, description?: string
 		}[]
+		, public name?: string
+		, public description?: string
 		, public position?: number
 	) {}
 }

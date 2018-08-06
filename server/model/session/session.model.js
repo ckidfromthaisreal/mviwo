@@ -106,6 +106,13 @@ const metricGroupEmbeddedSchema = new mongoose.Schema({
 });
 
 const sessionSchema = new mongoose.Schema({
+	name: {
+		type: String,
+		default: 'untitled'
+	},
+	description: {
+		type: String
+	},
 	startDate: {
 		type: Date,
 		required: true

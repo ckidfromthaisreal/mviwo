@@ -26,7 +26,7 @@ export class SessionGalleryComponent implements OnInit {
 	data: Session[] = [];
 	selectableData: Session[] = [];
 
-	displayedColumns = ['select', 'date', 'locations', 'metric groups', 'createdAt', 'updatedAt', 'action'];
+	displayedColumns = ['select', 'date', 'name', 'locations', 'metric groups', 'createdAt', 'updatedAt', 'action'];
 	dataSource = new MatTableDataSource<Session>(this.data);
 	selection = new SelectionModel<Session>(true);
 
