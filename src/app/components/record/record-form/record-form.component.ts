@@ -195,6 +195,7 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 	private prepareRecord(value): Record {
 		value.results = Object.keys(value.results).map(key => value.results[key]);
 		value.session = value.session._id;
+
 		if (this.data.resource.record) {
 			value._id = this.data.resource.record._id;
 			value.position = this.data.resource.record.position;

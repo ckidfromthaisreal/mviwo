@@ -100,7 +100,7 @@ export class RecordGalleryComponent implements OnInit {
 
 	editOnClick(event, element): void {
 		this.openForm(true, { record: element, sessions: this.sessions }, (result) => {
-			this.data[element.position - 1] = result[0];
+			this.data[element.position - 1] = result;
 
 			// const ind = this.selectableData.indexOf(element);
 			// if (ind > -1) {
@@ -158,10 +158,7 @@ export class RecordGalleryComponent implements OnInit {
 	}
 
 	uploadSessionOnClick(file: File): void {
-		console.log(file);
-
 		this.fileReader.readJSON(file).then(data => {
-			console.log(data);
 			if (this.validSession(data)) {
 				if (!this.sessions.find(elem => elem._id === (data as Session)._id)) {
 					this.sessions = [...this.sessions, data as Session];
