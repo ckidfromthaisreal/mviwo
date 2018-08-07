@@ -1,8 +1,6 @@
 import { ArraysService } from './../../../services/arrays/arrays.service';
 import { DatesService } from './../../../services/dates/dates.service';
-import { Location } from './../../../models/location.model';
 import { RecordCrudService } from './../../../services/crud/record-crud.service';
-import { SessionCrudService } from './../../../services/crud/session-crud.service';
 import {
 	Component,
 	OnInit,
@@ -12,7 +10,6 @@ import {
 	AfterViewInit,
 	EventEmitter,
 	Output,
-	AfterViewChecked
 } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatTabGroup, MatSelect, MatCheckbox } from '@angular/material';
 import { ElementFormInput } from '../../../models/resource-form-input.interface';
@@ -20,10 +17,9 @@ import { Record } from '../../../models/record.model';
 import { Session } from '../../../models/session.model';
 import { Patient } from '../../../models/patient.model';
 import { ReplaySubject, Subject } from 'rxjs';
-import { FormControl, FormGroup, NgModel, NgForm } from '@angular/forms';
+import { FormControl, NgModel, NgForm } from '@angular/forms';
 import { takeUntil, take } from 'rxjs/operators';
 import { Updateable } from '../../../services/crud/crud.service';
-import { ValueTransformer } from '@angular/compiler/src/util';
 
 @Component({
 	// tslint:disable-next-line:component-selector
@@ -32,7 +28,8 @@ import { ValueTransformer } from '@angular/compiler/src/util';
 	styleUrls: ['./record-form.component.scss']
 })
 export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
-	session = this.data.isEdit ? this.data.resource.sessions.find(session => session._id === this.data.resource.record.session) : undefined;
+	// session = this.data.isEdit ? this.data.resource.sessions.find(session => session._id === this.data.resource.record.session) : undefined;
+	session;
 	patient;
 
 	// @ViewChild('form') form: FormGroup;
@@ -64,6 +61,7 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 		});
 
 		if (this.data.isEdit) {
+			this.session = this.data.resource.sessions.find(session => session._id === this.data.resource.record.session);
 			this.patient = this.data.resource.record.patient;
 			this.onSessionSelect(this.session);
 		}
@@ -267,5 +265,13 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 			!metric._id.numberParams.minValue && value < 0 ? 0 :
 			metric._id.numberParams.maxValue && metric._id.numberParams.maxValue < value ?
 			metric._id.numberParams.maxValue : !metric._id.numberParams.maxValue && 100 < value ? 100 : value;
+	}
+
+	isSessionSelectDisabled(): boolean {
+		return !this.data.resource || !this.data.resource.sessions || !this.data.resource.sessions.length;
+	}
+
+	sessionSelectOptions() {
+		return !this.data.isEdit ? this.data.resource.sessions : [this.session];
 	}
 }

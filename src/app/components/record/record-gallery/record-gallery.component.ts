@@ -27,6 +27,7 @@ export class RecordGalleryComponent implements OnInit {
 	data: Record[] = [];
 	sessions: Session[] = [];
 	// selectableData: Record[] = [];
+	moreSessions: Session[] = [];
 
 	sessionsFetchAttempted = false;
 
@@ -51,6 +52,7 @@ export class RecordGalleryComponent implements OnInit {
 		, protected browser: BrowserService
 		, private messenger: MessengerService
 		, private fileReader: FileReaderService
+		, private dates: DatesService
 		, public dialog: MatDialog
 	) {}
 
@@ -68,14 +70,16 @@ export class RecordGalleryComponent implements OnInit {
 
 		const today = new Date();
 		this.sessionCrud.getMany<Session>(
-			{ startDate: { $lte: today }, endDate: { $gte: today } },
+			// { startDate: { $lte: today }, endDate: { $gte: today } },
+			undefined,
 			undefined,
 			[
 				{ path: 'locations._id', fields: 'patients' },
 				{ path: 'groups.metrics._id', fields: 'defaultValue stringParams numberParams enumParams dateParams' }
 			]
 		).subscribe(data => {
-			this.sessions = data;
+			this.sessions = data.filter(session => this.dates.upTo(session.startDate, today) && this.dates.from(session.endDate, today));
+			this.moreSessions = data.filter(session => this.dates.isPast(session.endDate) || this.dates.isFuture(session.startDate));
 			this.sessionsFetchAttempted = true;
 		});
 
@@ -99,7 +103,11 @@ export class RecordGalleryComponent implements OnInit {
 	}
 
 	editOnClick(event, element): void {
-		this.openForm(true, { record: element, sessions: this.sessions }, (result) => {
+		const sessions = this.sessions.concat(this.moreSessions);
+
+		console.log(this.sessions, this.moreSessions, sessions);
+
+		this.openForm(true, { record: element, sessions: sessions }, (result) => {
 			this.data[element.position - 1] = result;
 
 			// const ind = this.selectableData.indexOf(element);
