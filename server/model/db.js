@@ -25,8 +25,12 @@ const shards = process.env.DBSHARDS;
 
 const replica = process.env.DBREPLICA;
 
+const retryWrites = process.env.DBRETRYWRITES;
+
+const ssl = process.env.DBSSL;
+
 /** remote mongodb link */
-const remoteDB = `mongodb://${username}:${password}@${shards}/${config.MONGO_NAME}?ssl=true&replicaSet=${replica}&authSource=${username.toLowerCase()}&retryWrites=true`;
+const remoteDB = `mongodb://${username}:${password}@${shards}/${config.MONGO_NAME}?ssl=${ssl}&replicaSet=${replica}&authSource=${username.toLowerCase()}&retryWrites=${retryWrites}`;
 
 /** local mongodb link used a fallback when remoteDB is inaccessible. */
 const localDB = `mongodb://localhost:${config.MONGO_LOCAL_PORT}/${config.MONGO_NAME}`;

@@ -125,7 +125,7 @@
 								<mat-icon>filter_none</mat-icon>
 								<span>Clone Item</span>
 							</button>
-							<button mat-menu-item (click)="deleteOneOnClick($event, element)" [disabled]="!auth.hasPermission('metric', 'deleteOne') || element.sessions">
+							<button mat-menu-item (click)="deleteOneOnClick($event, element)" [disabled]="!auth.hasPermission('metric', 'deleteOne') || element.sessions > 0">
 								<mat-icon>delete</mat-icon>
 								<span>Delete Item</span>
 							</button>

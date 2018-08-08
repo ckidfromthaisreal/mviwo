@@ -129,10 +129,7 @@
 			"record:updateMany",
 			"record:updateOne",
 			"record:deleteMany",
-			"record:deleteOne",
-			"user:getMany",
-			"user:updatePower",
-			"user:banOne"
+			"record:deleteOne"
 		]
 	}
 }

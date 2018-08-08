@@ -1,4 +1,4 @@
-@angular/cdk@6.3.0
+@angular/cdk@6.4.3
 MIT
 The MIT License
 
@@ -22,7 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-@angular/material@6.3.0
+@angular/material@6.4.3
 MIT
 The MIT License
 
@@ -46,7 +46,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-uuid@3.2.1
+uuid@3.3.2
 MIT
 The MIT License (MIT)
 
@@ -169,15 +169,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-@angular/core@6.0.6
+@angular/core@6.1.1
 MIT
 MIT
 
-@angular/platform-browser@6.0.6
+@angular/platform-browser@6.1.1
 MIT
 MIT
 
-tslib@1.9.0
+tslib@1.9.3
 Apache-2.0
 Apache License
 
@@ -235,11 +235,11 @@ If the Work includes a "NOTICE" text file as part of its distribution, then any 
 
 END OF TERMS AND CONDITIONS
 
-@angular/common@6.0.6
+@angular/common@6.1.1
 MIT
 MIT
 
-rxjs@6.2.1
+rxjs@6.2.2
 Apache-2.0
 Apache License
                          Version 2.0, January 2004
@@ -443,15 +443,15 @@ Apache License
  See the License for the specific language governing permissions and
  limitations under the License.
 
-@angular/router@6.0.6
+@angular/router@6.1.1
 MIT
 MIT
 
-@angular/animations@6.0.6
+@angular/animations@6.1.1
 MIT
 MIT
 
-@angular/forms@6.0.6
+@angular/forms@6.1.1
 MIT
 MIT
 
