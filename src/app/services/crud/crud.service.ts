@@ -28,6 +28,7 @@ export abstract class CrudService {
 		, fields?: string
 		, populate?: { path: string, fields?: string }[]
 		, options?: object
+		, storeLocally?: boolean
 	): Observable<T[]> {
 		let authChk: Observable<never>;
 		if ((authChk = this.authCheck('getMany', 'fetch many')) !== null) {
@@ -67,10 +68,13 @@ export abstract class CrudService {
 		return this.http.get<T[]>(this.url, { headers: headers })
 			.pipe(
 				catchError(this.handleError),
-				// tap(e => this.store(e)),
 				tap(e => {
 					let i = 0;
 					e.forEach(elem => elem['position'] = ++i);
+
+					if (storeLocally) {
+						this.store(e);
+					}
 				})
 			);
 	}

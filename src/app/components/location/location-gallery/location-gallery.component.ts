@@ -45,7 +45,7 @@ export class LocationGalleryComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
-		this.crud.getMany<Location>().subscribe(data => {
+		this.crud.getMany<Location>(undefined, undefined, undefined, undefined, true).subscribe(data => {
 			this.dataSource.filterPredicate = (item, filter) => {
 				return (item.name.toLowerCase().indexOf(filter.trim().toLowerCase()) > -1 ||
 					item.country.toLowerCase().indexOf(filter.trim().toLowerCase()) > -1 ||
@@ -79,6 +79,8 @@ export class LocationGalleryComponent implements OnInit {
 			this.data[element.position - 1] = result[0];
 			this.dataSource.data = this.data = [...this.data];
 			this.notification.openCustomSnackbar(`location edited successfully!`);
+
+			localStorage.setItem(`mviwo-locations`, JSON.stringify(this.data));
 		});
 	}
 
@@ -94,6 +96,8 @@ export class LocationGalleryComponent implements OnInit {
 				this.paginator.previousPage();
 			}
 			this.notification.openCustomSnackbar(`location deleted successfully!`);
+
+			localStorage.setItem(`mviwo-locations`, JSON.stringify(this.data));
 		});
 	}
 
@@ -112,6 +116,8 @@ export class LocationGalleryComponent implements OnInit {
 				}
 			});
 			this.notification.openCustomSnackbar(`${total} location${total > 1 ? 's' : ''} deleted successfully!`);
+
+			localStorage.setItem(`mviwo-locations`, JSON.stringify(this.data));
 		});
 	}
 
@@ -123,6 +129,8 @@ export class LocationGalleryComponent implements OnInit {
 				this.dataSource.paginator.lastPage();
 			});
 			this.notification.openCustomSnackbar(`location inserted successfully!`);
+
+			localStorage.setItem(`mviwo-locations`, JSON.stringify(this.data));
 		});
 	}
 

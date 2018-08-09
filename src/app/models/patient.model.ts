@@ -25,5 +25,6 @@ export class Patient implements Mongoloid {
 			, country: string
 		}[]
 		, public position?: number
+		, public offline?: boolean
 	) {}
 }

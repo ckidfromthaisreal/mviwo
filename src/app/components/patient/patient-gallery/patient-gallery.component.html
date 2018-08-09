@@ -36,6 +36,7 @@
 					<td mat-cell *matCellDef="let row">
 						<mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
 							<small> {{ row.position }}. </small>
+							<mat-icon *ngIf="row.offline" matTooltip="not available globally">portable_wifi_off</mat-icon>
 						</mat-checkbox>
 					</td>
 				</ng-container>

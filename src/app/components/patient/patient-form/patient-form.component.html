@@ -149,11 +149,19 @@
 	</mat-tab-group>
 </form>
 <div mat-dialog-actions class="modal-footer newL">
+	<div class="left-buttons">
+		<button mat-raised-button matTooltip="load patient from file" color="accent" type="button"
+			(click)="fileSelect.click()">
+			<mat-icon>insert_drive_file</mat-icon>
+		</button>
+		<input type="file" #fileSelect (change)="onLoadClick($event.target.files[0])" [accept]="'.json'" hidden>
+	</div>
+	<mat-checkbox color="primary" [(ngModel)]="saveToFile" matTooltip="when offline, remote database cannot be reached. this option saves information to file for later loading to database or record input."><small>save to file</small></mat-checkbox>
 	<button mat-raised-button color="primary" matTooltip="save changes" type="button" [disabled]="form.invalid || form.pristine"
 	    (click)="onSaveClick()">
 		<i class="fa fa-floppy-o" aria-hidden="true"></i>
 	</button>
-	<button mat-raised-button color="accent" matTooltip="undo changes" type="button" [disabled]="form.pristine" (click)="onResetClick()">
+	<button mat-raised-button color="accent" matTooltip="undo changes" type="button" [disabled]="form.pristine" (click)="onResetClick(loadedFromFile)">
 		<i class="fa fa-undo" aria-hidden="true"></i>
 	</button>
 	<button mat-raised-button matTooltip="cancel" type="button" (click)="onCancelClick()">

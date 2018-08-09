@@ -1,5 +1,11 @@
-import { BrowserService } from './../../../services/browser/browser.service';
-import { DatesService } from './../../../services/dates/dates.service';
+import { NotificationService } from './../../../services/notification/notification.service';
+import { FileReaderService } from './../../../services/file-reader/file-reader.service';
+import {
+	BrowserService
+} from './../../../services/browser/browser.service';
+import {
+	DatesService
+} from './../../../services/dates/dates.service';
 import {
 	LocationCrudService
 } from './../../../services/crud/location-crud.service';
@@ -31,10 +37,17 @@ import {
 	MAT_DIALOG_DATA,
 	MatDialogRef
 } from '@angular/material';
-import { Updateable } from '../../../services/crud/crud.service';
+import {
+	Updateable
+} from '../../../services/crud/crud.service';
 // import 'uid-safe';
-import { v4 as uuid } from 'uuid';
-import { StringsService } from '../../../services/strings/strings.service';
+import {
+	v4 as uuid
+} from 'uuid';
+import {
+	StringsService
+} from '../../../services/strings/strings.service';
+import { DownloadService } from '../../../services/download/download.service';
 
 @Component({
 	// tslint:disable-next-line:component-selector
@@ -45,8 +58,7 @@ import { StringsService } from '../../../services/strings/strings.service';
 export class PatientFormComponent implements OnInit {
 	readonly rules = Patient.rules;
 
-	genders = [
-		{
+	genders = [{
 			name: 'Male',
 			value: false
 		},
@@ -62,16 +74,22 @@ export class PatientFormComponent implements OnInit {
 
 	form: FormGroup;
 
+	saveToFile: boolean;
+	loadedFromFile: boolean;
+
 	@Output() edited: EventEmitter < Patient > = new EventEmitter();
 
 	constructor(
 		private crud: PatientCrudService,
 		private locationCrud: LocationCrudService,
 		private strings: StringsService,
+		private download: DownloadService,
+		private fileReader: FileReaderService,
+		private notification: NotificationService,
 		public dates: DatesService,
 		public browser: BrowserService,
-		public dialogRef: MatDialogRef < PatientFormComponent > ,
-		@Inject(MAT_DIALOG_DATA) public data: ElementFormInput < Patient >
+		public dialogRef: MatDialogRef<PatientFormComponent>,
+		@Inject(MAT_DIALOG_DATA) public data: ElementFormInput<Patient>
 	) {}
 
 	ngOnInit(): void {
@@ -123,18 +141,27 @@ export class PatientFormComponent implements OnInit {
 		});
 	}
 
-	private initxxLocations() {
-		if (this.data.resource) {
+	private initxxLocations(): void {
+		if (this.data.isEdit) {
 			this.chosenLocations = [...this.data.resource.locations];
 		}
 
-		this.locationCrud.getMany<Location>(undefined, 'name country')
+		const locs = JSON.parse(localStorage.getItem('mviwo-locations'));
+		if (locs) {
+			this.initLocationsData(locs);
+		}
+
+		this.locationCrud.getMany<Location>(undefined, 'name country', undefined, undefined, true)
 			.subscribe(data => {
-				const mapped = this.chosenLocations.map(item => item._id);
-				data = data.filter(item => !mapped.includes(item._id));
-				this.locations = [...data];
-				this.initialLocations = [...data];
+				this.initLocationsData(data);
 			});
+	}
+
+	private initLocationsData(data): void {
+		const mapped = this.chosenLocations.map(item => item._id);
+		const filteredData = data.filter(item => !mapped.includes(item._id));
+		this.locations = filteredData;
+		this.initialLocations = [...filteredData];
 	}
 
 	// EVENTS
@@ -144,12 +171,19 @@ export class PatientFormComponent implements OnInit {
 	 * @param value ngForm value
 	 */
 	onSaveClick(): void {
-		if (this.data.isEdit) {
+		if (this.saveToFile) {
 			const patient = this.preparePatient();
-			this.edited.emit(patient);
-			this.update(this.prepareBody(patient));
+			this.download.asJSON(patient, `patient_${patient.uid}_${patient.firstName}_${patient.lastName}_${patient.dateOfBirth}`);
+			patient.offline = true;
+			this.dialogRef.close([patient]);
 		} else {
-			this.insert(this.prepareBody());
+			if (this.data.isEdit) {
+				const patient = this.preparePatient();
+				this.edited.emit(patient);
+				this.update(this.prepareBody(patient));
+			} else {
+				this.insert(this.prepareBody());
+			}
 		}
 	}
 
@@ -163,13 +197,19 @@ export class PatientFormComponent implements OnInit {
 	/**
 	 * reset button event. resets all controls.
 	 */
-	onResetClick(): void {
+	onResetClick(dirty?: boolean): void {
 		const uidv = this.form.get('tfUid');
 		uidv.reset((this.data.resource) ? this.data.resource.uid : uidv.value);
+		if (dirty) {
+			uidv.markAsDirty();
+		}
 		uidv.updateValueAndValidity();
 
 		const fName = this.form.get('tfFirstName');
 		fName.reset((this.data.resource) ? this.data.resource.firstName : '');
+		if (dirty) {
+			fName.markAsDirty();
+		}
 		fName.updateValueAndValidity();
 
 		const mName = this.form.get('tfMiddleName');
@@ -178,6 +218,9 @@ export class PatientFormComponent implements OnInit {
 
 		const lName = this.form.get('tfLastName');
 		lName.reset((this.data.resource) ? this.data.resource.lastName : '');
+		if (dirty) {
+			lName.markAsDirty();
+		}
 		lName.updateValueAndValidity();
 
 		const fatherName = this.form.get('tfFatherName');
@@ -212,6 +255,27 @@ export class PatientFormComponent implements OnInit {
 		xxLocations.reset((this.data.resource) ? [...this.chosenLocations] : []);
 		xxLocations.updateValueAndValidity();
 		this.locations = [...this.initialLocations];
+	}
+
+	onLoadClick(file: File): void {
+		this.fileReader.readJSON(file).then(data => {
+			if (this.validPatient(data)) {
+				this.loadedFromFile = true;
+				this.data.resource = data as Patient;
+				this.chosenLocations = [...this.data.resource.locations];
+				this.initLocationsData(JSON.parse(localStorage.getItem('mviwo-locations')));
+				this.onResetClick(true);
+				this.notification.openCustomSnackbar('patient file read successfully!');
+			} else {
+				this.notification.openCustomSnackbar('invalid patient file!');
+			}
+		}).catch(error => {
+			this.notification.openCustomSnackbar(error);
+		});
+	}
+
+	private validPatient(data): boolean {
+		return data.uid && data.firstName && data.lastName && [false, true].includes(data.isFemale);
 	}
 
 	/**
