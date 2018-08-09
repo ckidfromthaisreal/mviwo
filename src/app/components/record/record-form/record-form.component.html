@@ -17,7 +17,7 @@
 					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 						<mat-form-field>
 							<mat-select [compareWith]="sessionCompare" #sessionSelect [ngModel]="session" name="session" placeholder="Session" required
-								[disabled]="isSessionSelectDisabled()" (selectionChange)="onSessionSelect(form.value.session)">
+							    [disabled]="isSessionSelectDisabled()" (selectionChange)="onSessionSelect(form.value.session)">
 								<mat-option *ngFor="let session of sessionSelectOptions()" [value]="{ _id: session._id, locations: session.locations, groups: session.groups }">
 									{{ session.name }}, {{ session.startDate | date }} - {{ session.endDate | date }} @ {{ renderLocations(session) }}
 								</mat-option>
@@ -27,13 +27,13 @@
 					</div>
 				</div>
 				<div class="row newL">
-					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+					<div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
 						<mat-form-field>
 							<mat-select [compareWith]="patientCompare" #patientSelect [ngModel]="patient" name="patient" placeholder="Patient" [disabled]="!form.value.session || !patients.length"
-								required>
+							    required>
 								<div *ngIf="form.value.session">
 									<ngx-mat-select-search [formControl]="patientFilterCtrl" placeholderLabel="Search patient.." noEntriesFoundLabel="No patients found"
-										[clearSearchInput]="true">
+									    [clearSearchInput]="true">
 										<mat-icon ngxMatSelectSearchClear>cancel</mat-icon>
 									</ngx-mat-select-search>
 									<mat-option *ngFor="let patient of filteredPatients | async" [value]="{ _id: patient._id, uid: patient.uid }">
@@ -51,6 +51,13 @@
 							<mat-error>must select a patient!</mat-error>
 						</mat-form-field>
 					</div>
+					<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+						<button [disabled]="!form.value.session" mat-raised-button color="accent" matTooltip="load patient from file" (click)="fileSelectPatient.click()"
+						    type="button">
+							<mat-icon>insert_drive_file</mat-icon>
+						</button>
+						<input type="file" #fileSelectPatient (change)="onPatientLoadClick($event.target.files[0])" [accept]="'.json'" hidden>
+					</div>
 				</div>
 			</div>
 		</mat-tab>
@@ -60,7 +67,7 @@
 		</ng-template>
 		<ng-template #tabs>
 			<mat-tab *ngFor="let group of form.value.session.groups; let i = index" [label]="group.name" [matTooltip]="group.description"
-				matTooltipShowDelay="500" class="mviwo-unselectable" ngModelGroup="results">
+			    matTooltipShowDelay="500" class="mviwo-unselectable" ngModelGroup="results">
 				<div mat-dialog-content>
 					<!-- <div  *ngFor="let metric of group.metrics; let j = index" ngModelGroup="{{ i }}.{{ j }}"> -->
 					<div *ngFor="let j of arrays.getEvenIndexes(group.metrics)" [ngClass]="group.metrics[j].dataType !== 'number' && (!group.metrics[j + 1] || group.metrics[j + 1].dataType !== 'number') ? 'row newL' : ''">
@@ -85,8 +92,8 @@
 											<ng-template #inputfield>
 												<mat-form-field floatLabel="auto">
 													<input matInput [matTooltip]="metric.description" matTooltipShowDelay="500" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
-														#val="ngModel" name="value" type="text" [placeholder]="metric.name" [required]="metric.isRequired" [minlength]="metric._id.stringParams.minLength"
-														[maxlength]="metric._id.stringParams.maxLength" [email]="metric._id.stringParams.isEmail" [pattern]="(metric._id.stringParams.isEmail) ? '' : metric._id.stringParams.pattern">
+													    #val="ngModel" name="value" type="text" [placeholder]="metric.name" [required]="metric.isRequired" [minlength]="metric._id.stringParams.minLength"
+													    [maxlength]="metric._id.stringParams.maxLength" [email]="metric._id.stringParams.isEmail" [pattern]="(metric._id.stringParams.isEmail) ? '' : metric._id.stringParams.pattern">
 													<button mat-icon-button matSuffix *ngIf="val.value && val.value.length" (click)="onEraseClick($event, val.control)">
 														<mat-icon>cancel</mat-icon>
 													</button>
@@ -104,8 +111,8 @@
 											<ng-template #textarea>
 												<mat-form-field floatLabel="auto">
 													<textarea matInput [matTooltip]="metric.description" matTooltipShowDelay="500" matTextareaAutosize [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
-														#val="ngModel" [placeholder]="metric.name" name="value" [required]="metric.isRequired" [minlength]="metric._id.stringParams.minLength"
-														[maxlength]="metric._id.stringParams.maxLength"></textarea>
+													    #val="ngModel" [placeholder]="metric.name" name="value" [required]="metric.isRequired" [minlength]="metric._id.stringParams.minLength"
+													    [maxlength]="metric._id.stringParams.maxLength"></textarea>
 													<button mat-icon-button matSuffix *ngIf="val.value && val.value.length" (click)="onEraseClick($event, val.control)">
 														<mat-icon>cancel</mat-icon>
 													</button>
@@ -127,7 +134,7 @@
 												<div [hidden]="metric.isRequired" class="col-md-1 col-sm-1 col-xs-1">
 													<div class="sliderchk">
 														<mat-checkbox #chk [checked]="metric.isRequired || (!data.isEdit && ![undefined, null, ''].includes(metric._id.defaultValue)) || (data.isEdit && form.value.session._id === session._id && ![undefined, null, ''].includes(data.resource.record.results[ind - 1].value))"
-															(change)="onSliderCheckboxClick(chk, val, form, metric, ind)">
+														    (change)="onSliderCheckboxClick(chk, val, form, metric, ind)">
 														</mat-checkbox>
 													</div>
 												</div>
@@ -138,9 +145,8 @@
 													<mat-error class="pull-right" style="font-size: 70%" *ngIf="metric.isRequired && val.control.touched && [undefined, null, ''].includes(val.value)">must pick a {{ metric.name }}!</mat-error>
 													<div class="{{ !metric.required && !chk.checked ? 'slideroff' : ''}}">
 														<mat-slider style="width: 100%" #val="ngModel" [disabled]="!metric.isRequired && !chk.checked" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
-															[min]="metric._id.numberParams.minValue || 0" [max]="metric._id.numberParams.maxValue || 100" [step]="metric._id.numberParams.step || 1"
-															[tickInterval]="metric._id.numberParams.tickInterval || 1" thumbLabel="true" name="value"
-															(change)="metric._id.numberParams.freeInput ? freeInputCtrl.control.setValue(val.value) : null">
+														    [min]="metric._id.numberParams.minValue || 0" [max]="metric._id.numberParams.maxValue || 100" [step]="metric._id.numberParams.step || 1"
+														    [tickInterval]="metric._id.numberParams.tickInterval || 1" thumbLabel="true" name="value" (change)="metric._id.numberParams.freeInput ? freeInputCtrl.control.setValue(val.value) : null">
 														</mat-slider>
 														<input *ngIf="!metric._id.numberParams.freeInput" hidden type="text" [ngModel]="val.value" name="value-validator" [required]="metric.isRequired">
 													</div>
@@ -162,9 +168,9 @@
 														<mat-form-field class="freeInput" floatLabel="never" [hideRequiredMarker]="true">
 															<span matPrefix>{{ metric._id.numberParams.prefix + ' ' }}</span>
 															<input [required]="metric.isRequired" matInput type="number" #freeInputCtrl="ngModel" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
-																name="value" [min]="metric._id.numberParams.minValue || 0" [max]="metric._id.numberParams.maxValue || 100"
-																placeholder="insert value.." [step]="metric._id.numberParams.step || 1" (keyup)="val.control.setValue(fixNumberInput(metric, freeInputCtrl.value)); freeInputCtrl.control.setValue(fixNumberInput(metric, freeInputCtrl.value))"
-																[disabled]="!metric.isRequired && !chk.checked" (wheel)="val.control.setValue(freeInputCtrl.value)">
+															    name="value" [min]="metric._id.numberParams.minValue || 0" [max]="metric._id.numberParams.maxValue || 100"
+															    placeholder="insert value.." [step]="metric._id.numberParams.step || 1" (keyup)="val.control.setValue(fixNumberInput(metric, freeInputCtrl.value)); freeInputCtrl.control.setValue(fixNumberInput(metric, freeInputCtrl.value))"
+															    [disabled]="!metric.isRequired && !chk.checked" (wheel)="val.control.setValue(freeInputCtrl.value)">
 															<span matSuffix>{{ ' ' + metric._id.numberParams.postfix }}</span>
 															<button *ngIf="![undefined, null, ''].includes(freeInputCtrl.value)" mat-icon-button matSuffix (click)="onEraseClick($event, freeInputCtrl.control)">
 																<mat-icon>cancel</mat-icon>
@@ -177,15 +183,15 @@
 										</div>
 										<div *ngSwitchCase="'boolean'">
 											<mat-checkbox [matTooltip]="metric.description" matTooltipShowDelay="500" style="padding-left: 20px !important" color="primary"
-												[indeterminate]="!metric.isRequired && [null,undefined,''].includes(val.value)" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
-												#val="ngModel" name="value">{{ metric.name }}</mat-checkbox>
+											    [indeterminate]="!metric.isRequired && [null,undefined,''].includes(val.value)" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
+											    #val="ngModel" name="value">{{ metric.name }}</mat-checkbox>
 											<mat-icon *ngIf="!metric.isRequired && ![null,undefined,''].includes(val.value)" (click)="onEraseClick($event, val.control)"
-												style="padding-left: 10px; font-size: 100%">cancel</mat-icon>
+											    style="padding-left: 10px; font-size: 100%">cancel</mat-icon>
 										</div>
 										<div *ngSwitchCase="'enum'">
 											<mat-form-field labelfloat="auto">
 												<mat-select [matTooltip]="metric.description" matTooltipShowDelay="500" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
-													#val="ngModel" name="value" [placeholder]="metric.name" [multiple]="metric._id.enumParams.isMultiple" [required]="metric.isRequired">
+												    #val="ngModel" name="value" [placeholder]="metric.name" [multiple]="metric._id.enumParams.isMultiple" [required]="metric.isRequired">
 													<mat-option *ngIf="!metric.isRequired && !metric._id.enumParams.isMultiple">
 														select a {{ metric.name }}..
 													</mat-option>
@@ -204,9 +210,9 @@
 										<div *ngSwitchCase="'date'">
 											<mat-form-field>
 												<input matInput readonly (click)="picker.open()" #pickertf="ngModel" name="value" [required]="metric.isRequired" [ngModel]="data.isEdit && form.value.session._id === session._id ? data.resource.record.results[ind - 1].value : metric._id.defaultValue"
-													[min]="metric._id.dateParams.minDateOffset ? dates.offsetDate(metric._id.dateParams.minDateOffset) : metric._id.minDate"
-													[max]="metric._id.dateParams.maxDateOffset ? dates.offsetDate(metric._id.dateParams.maxDateOffset) : metric._id.maxDate"
-													[matDatepicker]="picker" [placeholder]="metric.name">
+												    [min]="metric._id.dateParams.minDateOffset ? dates.offsetDate(metric._id.dateParams.minDateOffset) : metric._id.minDate"
+												    [max]="metric._id.dateParams.maxDateOffset ? dates.offsetDate(metric._id.dateParams.maxDateOffset) : metric._id.maxDate"
+												    [matDatepicker]="picker" [placeholder]="metric.name">
 												<button *ngIf="pickertf.value" mat-icon-button matSuffix (click)="onEraseClick($event, pickertf.control)">
 													<mat-icon>cancel</mat-icon>
 												</button>
@@ -226,11 +232,20 @@
 	</mat-tab-group>
 </form>
 <div mat-dialog-actions class="modal-footer newL">
+	<div class="left-buttons">
+		<button mat-raised-button matTooltip="load record from file" color="accent" type="button" (click)="fileSelect.click()">
+			<mat-icon>insert_drive_file</mat-icon>
+		</button>
+		<input type="file" #fileSelect (change)="onRecordLoadClick($event.target.files[0], form)" [accept]="'.json'" hidden>
+	</div>
+	<mat-checkbox color="primary" [(ngModel)]="saveToFile" matTooltip="when offline, remote database cannot be reached. this option saves information to file for later loading to database.">
+		<small>save to file</small>
+	</mat-checkbox>
 	<button mat-raised-button color="primary" matTooltip="save changes" type="button" [disabled]="form.invalid || form.pristine"
 	    (click)="onSaveClick(form.value)">
 		<i class="fa fa-floppy-o" aria-hidden="true"></i>
 	</button>
-	<button mat-raised-button color="accent" matTooltip="undo changes" type="button" (click)="onResetClick(form)" [disabled]="form.pristine">
+	<button mat-raised-button color="accent" matTooltip="undo changes" type="button" (click)="onResetClick(form, loadedFromFile)" [disabled]="form.pristine">
 		<i class="fa fa-undo" aria-hidden="true"></i>
 	</button>
 	<button mat-raised-button matTooltip="cancel" type="button" (click)="onCancelClick()">

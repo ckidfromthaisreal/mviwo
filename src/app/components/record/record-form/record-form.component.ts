@@ -1,3 +1,6 @@
+import { NotificationService } from './../../../services/notification/notification.service';
+import { DownloadService } from './../../../services/download/download.service';
+import { FileReaderService } from './../../../services/file-reader/file-reader.service';
 import { ArraysService } from './../../../services/arrays/arrays.service';
 import { DatesService } from './../../../services/dates/dates.service';
 import { RecordCrudService } from './../../../services/crud/record-crud.service';
@@ -41,10 +44,16 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 	@ViewChild('patientSelect') patientSelect: MatSelect;
 	@ViewChild('sessionSelect') sessionSelect: MatSelect;
 
+	saveToFile: boolean;
+	loadedFromFile: boolean;
+
 	@Output() edited: EventEmitter<Record> = new EventEmitter();
 
 	constructor(
 		private crud: RecordCrudService,
+		private fileReader: FileReaderService,
+		private download: DownloadService,
+		private notification: NotificationService,
 		protected dates: DatesService,
 		protected arrays: ArraysService,
 		protected dialogRef: MatDialogRef<RecordFormComponent>,
@@ -77,21 +86,27 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 	}
 
 	onSaveClick(value: any): void {
-		if (this.data.isEdit) {
+		if (this.saveToFile) {
 			const record = this.prepareRecord(value);
-			this.edited.emit(record);
-			this.update(record);
+			this.download.asJSON(record, `record_of_patient_${record.patient.uid}_in_session_${record.session}_${this.dates.now()}`);
+			record.offline = true;
+			this.dialogRef.close(record);
 		} else {
-			this.insert(this.prepareRecord(value));
+			if (this.data.isEdit) {
+				const record = this.prepareRecord(value);
+				this.edited.emit(record);
+				this.update(record);
+			} else {
+				this.insert(this.prepareRecord(value));
+			}
 		}
 	}
 
-	onResetClick(form: NgForm): void {
+	onResetClick(form: NgForm, dirty?: boolean): void {
 		if ((!this.session || (form.controls.session.value &&
 			form.controls.session.value._id !== this.session._id)) && this.tabs.selectedIndex !== 0) {
 			this.tabs.selectedIndex = 0;
 		}
-
 
 		if (this.session) {
 			form.resetForm({
@@ -115,6 +130,11 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 
 					const value = result.get('value');
 					value.reset(this.data.resource.record.results[len + j].value);
+
+					if (dirty) {
+						value.markAsDirty();
+					}
+
 					value.updateValueAndValidity();
 				});
 
@@ -137,6 +157,49 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 		control.updateValueAndValidity();
 	}
 
+	onPatientLoadClick(file: File): void {
+		this.fileReader.readJSON(file).then(data => {
+			if (this.validPatient(data)) {
+				this.patients = [...this.patients, data as Patient];
+				this.filteredPatients.next(this.patients.slice());
+				this.filterPatients();
+				this.notification.openCustomSnackbar('patient file read successfully!');
+				setTimeout(this.patientSelect._selectionModel.select(this.patientSelect.options.last), 200);
+			} else {
+				this.notification.openCustomSnackbar('invalid patient file!');
+			}
+		}).catch(error => {
+			this.notification.openCustomSnackbar(error);
+		});
+	}
+
+	private validPatient(data): boolean {
+		return data.uid && data.firstName && data.lastName && [false, true].includes(data.isFemale);
+	}
+
+	onRecordLoadClick(file: File, form): void {
+		this.fileReader.readJSON(file).then(data => {
+			if (this.validRecord(data)) {
+				this.data.resource.record = data as Record;
+				this.session = this.data.resource.sessions.find(session => session._id === this.data.resource.record.session);
+				this.patient = this.data.resource.record.patient;
+				this.onResetClick(form, true);
+				this.onSessionSelect(this.session);
+				this.setInitialPatient();
+				this.loadedFromFile = true;
+				this.notification.openCustomSnackbar('record file read successfully!');
+			} else {
+				this.notification.openCustomSnackbar('invalid record file!');
+			}
+		}).catch(error => {
+			this.notification.openCustomSnackbar(error);
+		});
+	}
+
+	private validRecord(data): boolean {
+		return data.session && data.patient && data.patient.uid && data.results;
+	}
+
 	onSessionSelect(session: Session) {
 		this.patients = [];
 
@@ -148,6 +211,10 @@ export class RecordFormComponent implements OnInit, AfterViewInit, OnDestroy {
 					}
 				});
 			});
+
+			if (this.patient && !this.patients.find(pat => pat.uid === this.patient.uid)) {
+				this.patients.push(this.patient);
+			}
 
 			this.filterPatients();
 		}

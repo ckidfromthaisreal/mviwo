@@ -30,5 +30,6 @@ export class Record implements Mongoloid {
 			, username: string
 		}
 		, public position?: number
+		, public offline?: boolean
 	) {}
 }
